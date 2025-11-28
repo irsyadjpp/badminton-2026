@@ -55,9 +55,9 @@ export function Header() {
   const navItems = () => (
     <>
       <SheetClose asChild><NavLink href="/" onClick={closeSheet}>Beranda</NavLink></SheetClose>
-      <SheetClose asChild><NavLink href="/about" onClick={closeSheet}>Tentang BCC</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="/about" onClick={closeSheet}>Tentang</NavLink></SheetClose>
       <SheetClose asChild><NavLink href="/technical-handbook.pdf" isExternal onClick={closeSheet}>Regulasi</NavLink></SheetClose>
-      <SheetClose asChild><NavLink href="/partners" onClick={closeSheet}>Mitra Kami</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="/partners" onClick={closeSheet}>Mitra</NavLink></SheetClose>
       <SheetClose asChild><a href="#contact" onClick={closeSheetAndScroll} className="font-medium text-foreground/80 hover:text-primary transition-colors text-2xl md:text-sm">Kontak</a></SheetClose>
     </>
   );
@@ -73,9 +73,9 @@ export function Header() {
 
         <nav className="hidden md:flex items-center gap-6">
            <NavLink href="/">Beranda</NavLink>
-           <NavLink href="/about">Tentang BCC</NavLink>
+           <NavLink href="/about">Tentang</NavLink>
            <NavLink href="/technical-handbook.pdf" isExternal>Regulasi</NavLink>
-           <NavLink href="/partners">Mitra Kami</NavLink>
+           <NavLink href="/partners">Mitra</NavLink>
            <a href="#contact" onClick={handleScroll} className="font-medium text-foreground/80 hover:text-primary transition-colors text-sm">Kontak</a>
         </nav>
 
@@ -87,7 +87,7 @@ export function Header() {
           </Button>
            <Button asChild>
             <Link href="https://ayo.co.id/register" target="_blank" rel="noopener noreferrer">
-              Daftar Tim
+              Daftar
             </Link>
           </Button>
           <div className="flex items-center md:hidden">
@@ -104,7 +104,7 @@ export function Header() {
                    <div className="flex flex-col gap-4 w-full pt-4 border-t border-border">
                      <Button asChild className="w-full">
                         <Link href="https://ayo.co.id/register" target="_blank" rel="noopener noreferrer">
-                          Daftar Tim
+                          Daftar
                         </Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">

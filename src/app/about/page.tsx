@@ -27,7 +27,7 @@ export default function AboutPage() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-black font-headline text-foreground">Tentang BCC 2026</h1>
+          <h1 className="text-5xl font-black font-headline text-foreground">Tentang BCC</h1>
           <p className="mt-4 text-xl text-muted-foreground max-w-3xl mx-auto">
             Visi, Misi, dan Keunikan Bandung Community Championship 2026.
           </p>
