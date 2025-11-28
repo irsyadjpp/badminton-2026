@@ -12,7 +12,7 @@ export function HeroSection() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-stadium');
 
   return (
-    <section className="relative h-[90vh] min-h-[600px] w-full flex items-center justify-center text-white overflow-hidden">
+    <section className="relative h-[110vh] min-h-[750px] w-full flex items-center justify-center text-white overflow-hidden">
       {heroImage && (
         <Image
           src={heroImage.imageUrl}
@@ -24,7 +24,7 @@ export function HeroSection() {
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-background via-black/80 to-black/60" />
-      <div className="relative z-10 container mx-auto px-4 text-center">
+      <div className="relative z-10 container mx-auto px-4 text-center mt-[-10vh]">
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-headline uppercase tracking-tighter mb-4 animate-fade-in-down bg-clip-text text-transparent bg-gradient-to-r from-primary via-red-400 to-white">
           Bandung Community Championship 2026
         </h1>
@@ -40,7 +40,7 @@ export function HeroSection() {
           </Button>
         </div>
 
-        <div className="absolute bottom-[-250px] left-1/2 -translate-x-1/2 w-[90%] max-w-4xl">
+        <div className="absolute bottom-[-200px] left-1/2 -translate-x-1/2 w-[90%] max-w-4xl">
             <Card className="bg-background/50 backdrop-blur-xl border-t-2 border-primary/50 shadow-2xl shadow-primary/10">
                 <CardContent className="p-4 md:p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-foreground">
