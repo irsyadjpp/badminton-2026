@@ -28,7 +28,7 @@ export function HeroSection() {
         
         <div className="relative z-10 container mx-auto px-4 text-left">
           <div className="max-w-xl">
-            <h1 className="text-4xl md:text-[64px] leading-tight font-black font-headline uppercase tracking-tighter mb-4 text-foreground animate-fade-in-down">
+            <h1 className="text-4xl md:text-[64px] leading-tight font-bold font-headline uppercase tracking-tighter mb-4 text-foreground animate-fade-in-down">
               Bandung Community Championship 2026
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mb-8 font-body animate-fade-in-up">
