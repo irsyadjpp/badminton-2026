@@ -5,6 +5,12 @@
       "description": "Crowded basketball stadium during a match",
       "imageUrl": "https://images.unsplash.com/photo-1723807690858-8d0d75497980?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzdGFkaXVtJTIwYmFza2V0YmFsbHxlbnwwfHx8fDE3NjQzMDI2OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "stadium basketball"
+    },
+    {
+      "id": "slider-phone-mockup",
+      "description": "Phone showing a basketball app interface",
+      "imageUrl": "https://images.unsplash.com/photo-1637595948176-fc170695581e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwaG9uZSUyMGJhc2tldGJhbGx8ZW58MHx8fHwxNzY0MzExNTU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "phone basketball"
     }
   ]
 }
