@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Dribbble, Menu, X } from 'lucide-react';
+import { Dribbble, Menu, BookText, Info, Users, Calendar, Handshake, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
 const NavLink = ({ href, children, onClick, isExternal = false }: { href: string; children: React.ReactNode; onClick?: () => void; isExternal?: boolean }) => {
   const commonProps = {
     onClick: onClick,
-    className: "font-medium text-foreground/80 hover:text-primary transition-all duration-300 px-4 py-2 rounded-full hover:bg-secondary",
+    className: "font-medium text-foreground/80 hover:text-primary transition-all duration-300 px-3 py-2 rounded-md hover:bg-secondary text-sm",
   };
 
   const linkContent = <span className="text-2xl md:text-sm">{children}</span>;
@@ -47,38 +47,39 @@ export function Header() {
     setIsOpen(false);
   };
 
-
   const navItems = (closeSheet: () => void) => (
     <>
-      <SheetClose asChild>
-        <NavLink href="/" onClick={closeSheet}>Home</NavLink>
-      </SheetClose>
-      <SheetClose asChild>
-        <NavLink href="https://ayo.co.id/" isExternal onClick={closeSheet}>Jadwal</NavLink>
-      </SheetClose>
-      <SheetClose asChild>
-         <a href="#contact" onClick={closeSheetAndScroll} className="font-medium text-foreground/80 hover:text-primary transition-all duration-300 px-4 py-2 rounded-full hover:bg-secondary text-2xl md:text-sm">Kontak</a>
-      </SheetClose>
+      <SheetClose asChild><NavLink href="/" onClick={closeSheet}>Beranda</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="/about" onClick={closeSheet}>Tentang BCC</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="/technical-handbook.pdf" isExternal onClick={closeSheet}>Regulasi</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="https://ayo.co.id/register" isExternal onClick={closeSheet}>Daftar Tim</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="https://ayo.co.id/" isExternal onClick={closeSheet}>Bagan & Jadwal</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="/partners" onClick={closeSheet}>Mitra Kami</NavLink></SheetClose>
+      <SheetClose asChild><a href="#contact" onClick={closeSheetAndScroll} className="font-medium text-foreground/80 hover:text-primary transition-all duration-300 px-3 py-2 rounded-md hover:bg-secondary text-2xl md:text-sm">Kontak</a></SheetClose>
     </>
   );
   
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/90 backdrop-blur-lg">
       <div className="container flex h-16 items-center">
-        <div className="flex-1 flex justify-start">
+        <div className="mr-auto flex items-center">
             <Link href="/" className="flex items-center gap-2">
-            <Dribbble className="h-7 w-7 text-primary animate-pulse" />
+            <Dribbble className="h-7 w-7 text-primary" />
             <span className="font-bold font-headline text-xl tracking-tighter">BCC 2026</span>
             </Link>
         </div>
 
-        <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
-           <NavLink href="/" onClick={() => setIsOpen(false)}>Home</NavLink>
-           <NavLink href="https://ayo.co.id/" isExternal onClick={() => setIsOpen(false)}>Jadwal</NavLink>
-           <a href="#contact" onClick={handleScroll} className="font-medium text-foreground/80 hover:text-primary transition-all duration-300 px-4 py-2 rounded-full hover:bg-secondary text-sm">Kontak</a>
+        <nav className="hidden md:flex items-center gap-1">
+           <NavLink href="/">Beranda</NavLink>
+           <NavLink href="/about">Tentang BCC</NavLink>
+           <NavLink href="/technical-handbook.pdf" isExternal>Regulasi</NavLink>
+           <NavLink href="https://ayo.co.id/register" isExternal>Daftar Tim</NavLink>
+           <NavLink href="https://ayo.co.id/" isExternal>Bagan & Jadwal</NavLink>
+           <NavLink href="/partners">Mitra Kami</NavLink>
+           <a href="#contact" onClick={handleScroll} className="font-medium text-foreground/80 hover:text-primary transition-all duration-300 px-3 py-2 rounded-md hover:bg-secondary text-sm">Kontak</a>
         </nav>
 
-        <div className="flex-1 flex justify-end md:hidden">
+        <div className="ml-auto flex items-center md:hidden">
            <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -86,8 +87,8 @@ export function Header() {
                 <span className="sr-only">Open Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-background/95">
-              <div className="flex flex-col items-center justify-center h-full space-y-8">
+            <SheetContent side="right" className="bg-background/95 w-[280px]">
+              <div className="flex flex-col items-start justify-center h-full space-y-6 p-6">
                 {navItems(() => setIsOpen(false))}
               </div>
             </SheetContent>

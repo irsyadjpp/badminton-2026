@@ -18,7 +18,7 @@ export function Footer() {
               <li className="flex items-center justify-center md:justify-start">
                 <Phone className="w-4 h-4 mr-2 text-primary/70" />
                 <a href="tel:+6281234567890" className="hover:text-primary transition-colors">
-                  +62 812-3456-7890
+                  +62 812-3456-7890 (WhatsApp)
                 </a>
               </li>
             </ul>
@@ -29,7 +29,7 @@ export function Footer() {
                <li className="flex items-center justify-center md:justify-start">
                 <BookOpen className="w-4 h-4 mr-2 text-primary/70" />
                 <a href="/technical-handbook.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                  Technical Handbook
+                  Buku Panduan Teknis
                 </a>
               </li>
             </ul>
