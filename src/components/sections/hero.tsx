@@ -40,7 +40,7 @@ export function HeroSection() {
           </Button>
         </div>
 
-        <div className="absolute bottom-[-150px] left-1/2 -translate-x-1/2 w-[90%] max-w-4xl">
+        <div className="absolute bottom-[-250px] left-1/2 -translate-x-1/2 w-[90%] max-w-4xl">
             <Card className="bg-background/50 backdrop-blur-xl border-t-2 border-primary/50 shadow-2xl shadow-primary/10">
                 <CardContent className="p-4 md:p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-foreground">
