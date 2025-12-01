@@ -4,6 +4,7 @@ import { HeroSection } from '@/components/sections/hero';
 import { SponsorsSection } from '@/components/sections/sponsors';
 import { ValuePropositionSection } from '@/components/sections/value-props';
 import { CategoriesSection } from '@/components/sections/categories';
+import { LevelingGuideSection } from '@/components/sections/leveling-guide';
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <main className="flex-grow">
         <HeroSection />
         <ValuePropositionSection />
+        <LevelingGuideSection />
         <CategoriesSection />
         <SponsorsSection />
       </main>
