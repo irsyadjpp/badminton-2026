@@ -33,7 +33,7 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
       </div>
       
-      <div className="relative z-10 h-[75vh] flex items-center">
+      <div className="relative z-10 flex min-h-[90vh] items-center pt-20 md:min-h-[75vh] md:pt-0">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
              {/* Badge Kecil */}
@@ -91,14 +91,14 @@ export function HeroSection() {
                      </div>
                     <div>
                         <h3 className="font-headline text-sm font-semibold text-gray-400 uppercase tracking-widest">Kick-off Pendaftaran</h3>
-                        <p className="text-white font-bold">1 Maret 2026</p>
+                        <p className="text-white font-bold">1 Januari 2026</p>
                     </div>
                 </div>
                 {/* Garis Pemisah Visual */}
                 <div className="hidden md:block w-px h-12 bg-white/10"></div>
                 
                 <div className="flex-grow flex justify-center md:justify-end text-white">
-                    <Countdown targetDate="2026-03-01" />
+                    <Countdown targetDate="2026-01-01" />
                 </div>
               </div>
         </div>
