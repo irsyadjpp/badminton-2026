@@ -93,4 +93,9 @@ export const registrationFormSchema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Belum ada pemain yang didaftarkan ke kategori manapun.",
-      
+      path: ["players"],
+    });
+  }
+});
+
+export type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
