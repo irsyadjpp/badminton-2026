@@ -12,16 +12,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Upload, AlertTriangle, Info } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Plus, Trash2, Info, AlertTriangle, CheckCircle2, Instagram } from "lucide-react";
+import { useState, useEffect } from "react";
+import confetti from 'canvas-confetti';
+import Link from "next/link";
 
 export default function RegistrationPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedTeamName, setSubmittedTeamName] = useState("");
 
-  // Inisialisasi Form dengan default 10 pemain kosong
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationFormSchema),
     defaultValues: {
@@ -47,22 +49,122 @@ export default function RegistrationPage() {
     control: form.control,
   });
 
+  // Efek Confetti saat Sukses
+  useEffect(() => {
+    if (isSuccess) {
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+      const interval: any = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+      }, 250);
+    }
+  }, [isSuccess]);
+
   async function onSubmit(data: RegistrationFormValues) {
     setIsSubmitting(true);
     
-    // Simulasi Upload & Submit
-    console.log("Form Data:", data);
+    // Simulasi Pengiriman Data
+    console.log("Form Data Submitted:", data);
     
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulasi delay
+    // Simulasi delay server
+    await new Promise((resolve) => setTimeout(resolve, 2000)); 
 
     setIsSubmitting(false);
-    toast({
-      title: "Pendaftaran Berhasil Dikirim!",
-      description: "Silakan cek email manajer untuk konfirmasi selanjutnya.",
-    });
-    // Di sini Anda bisa redirect ke halaman sukses atau reset form
+    setSubmittedTeamName(data.teamName); // Simpan nama tim untuk pesan sukses
+    setIsSuccess(true); // Tampilkan halaman sukses
+    
+    // Scroll ke atas agar user melihat pesan
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // --- TAMPILAN SUKSES (SETELAH SUBMIT) ---
+  if (isSuccess) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Header />
+        <main className="flex-grow flex items-center justify-center py-16 px-4 bg-secondary/10">
+          <Card className="max-w-2xl w-full shadow-2xl border-t-8 border-t-green-500 animate-in fade-in zoom-in duration-500">
+            <CardContent className="pt-10 pb-10 px-8 text-center space-y-8">
+              
+              <div className="mx-auto bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                <CheckCircle2 className="w-12 h-12 text-green-600" />
+              </div>
+
+              <div>
+                <h1 className="text-3xl font-black font-headline text-green-700 mb-2">
+                  Terima Kasih telah mendaftar di BCC 2026!
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  Data tim <span className="font-bold text-foreground">{submittedTeamName}</span> telah kami terima.
+                </p>
+              </div>
+
+              <div className="bg-secondary/30 rounded-xl p-6 text-left space-y-4 border border-border">
+                <h3 className="font-bold text-lg text-primary border-b pb-2 mb-4">Langkah Selanjutnya:</h3>
+                
+                <div className="flex gap-4">
+                  <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm font-bold text-primary">1</div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Verifikasi Keuangan</h4>
+                    <p className="text-sm text-muted-foreground">Bendahara kami akan mengecek bukti transfer Anda dalam waktu <strong>1x24 jam</strong>.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm font-bold text-primary">2</div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Verifikasi TPF</h4>
+                    <p className="text-sm text-muted-foreground">Tim Pencari Fakta akan menonton video pemain Anda. Hasil verifikasi level akan dikirimkan via WhatsApp/Email ke Manajer Tim dalam <strong>3-7 hari kerja</strong>.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm font-bold text-primary">3</div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Join Grup</h4>
+                    <p className="text-sm text-muted-foreground">Jika pembayaran lunas & data valid, nomor WhatsApp Manajer akan diundang ke <strong>WAG Official Captain BCC 2026</strong>.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4">
+                <Button asChild variant="outline" className="gap-2">
+                  <Link href="https://instagram.com/bccbandung.id" target="_blank">
+                    <Instagram className="w-4 h-4" />
+                    Pantau update di @bccbandung.id
+                  </Link>
+                </Button>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Salam Sportivitas,<br/>
+                  <strong>Panitia BCC 2026</strong>
+                </p>
+              </div>
+
+              <Button onClick={() => window.location.reload()} variant="ghost" className="text-muted-foreground">
+                Kembali ke Halaman Utama
+              </Button>
+
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // --- TAMPILAN FORMULIR ---
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -70,7 +172,6 @@ export default function RegistrationPage() {
       <main className="flex-grow py-12 px-4 md:px-8 bg-secondary/10">
         <div className="max-w-4xl mx-auto space-y-8">
           
-          {/* HEADER FORM */}
           <div className="text-center space-y-4 mb-10">
             <h1 className="text-3xl md:text-4xl font-black font-headline text-primary">REGISTRASI TIM - BCC 2026</h1>
             <Card className="bg-blue-50 border-blue-200 text-left">
@@ -417,7 +518,6 @@ export default function RegistrationPage() {
                     />
                   ))}
                   
-                  {/* Menampilkan error jika checkbox belum dicentang saat submit */}
                   {Object.keys(form.formState.errors).filter(k => k.startsWith('agreement')).length > 0 && (
                      <p className="text-destructive text-sm font-medium">Anda wajib menyetujui semua pernyataan di atas.</p>
                   )}
@@ -425,7 +525,6 @@ export default function RegistrationPage() {
                 </CardContent>
               </Card>
 
-              {/* SUBMIT BUTTON */}
               <div className="flex justify-end pt-6">
                 <Button type="submit" size="lg" className="w-full md:w-auto text-lg px-8 py-6" disabled={isSubmitting}>
                   {isSubmitting ? (
