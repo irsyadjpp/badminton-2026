@@ -29,8 +29,8 @@ export function Footer() {
               </li>
                  <li className="flex items-center justify-center md:justify-start">
                 <Mail className="w-4 h-4 mr-2 text-primary/70" />
-                <a href="mailto:info@managementbcc.com" className="hover:text-primary transition-colors">
-                  info@managementbcc.com
+                <a href="mailto:admin@managementbcc.com" className="hover:text-primary transition-colors">
+                  admin@managementbcc.com
                 </a>
               </li>
               <li className="flex items-center justify-center md:justify-start">
