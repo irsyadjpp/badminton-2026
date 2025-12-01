@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 // Kategori yang tersedia
@@ -87,14 +88,9 @@ export const registrationFormSchema = z.object({
     }
   });
 
-  const totalParticipation = data.players.reduce((sum, p) => sum + p.participation.length, 0);
+  const totalParticipation = Object.values(counts).reduce((sum, p) => sum + p.length, 0);
   if (totalParticipation === 0 && data.players.length > 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Belum ada pemain yang didaftarkan ke kategori manapun.",
-      path: ["players"]
-    });
-  }
-});
-
-export type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
+      
