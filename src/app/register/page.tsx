@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import confetti from 'canvas-confetti';
 import Link from "next/link";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CourtLines } from "@/components/ui/court-lines";
 
 export default function RegistrationPage() {
   const { toast } = useToast();
@@ -59,7 +60,7 @@ export default function RegistrationPage() {
     if (isSuccess) {
       const duration = 3 * 1000;
       const animationEnd = Date.now() + duration;
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
 
       const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
@@ -95,12 +96,13 @@ export default function RegistrationPage() {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <Header />
-        <main className="flex-grow flex items-center justify-center py-16 px-4 bg-secondary/10">
-          <Card className="max-w-2xl w-full shadow-2xl border-t-8 border-t-green-500 animate-in fade-in zoom-in duration-500">
+        <main className="flex-grow flex items-center justify-center py-16 px-4 bg-secondary/30 relative overflow-hidden">
+          <CourtLines />
+          <Card className="max-w-2xl w-full shadow-2xl border-t-8 border-t-green-500 animate-in fade-in zoom-in-95 duration-700 relative z-10">
             <CardContent className="pt-10 pb-10 px-8 text-center space-y-8">
               
-              <div className="mx-auto bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <CheckCircle2 className="w-12 h-12 text-green-600" />
+              <div className="mx-auto bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-sm ring-4 ring-green-500/20">
+                <CheckCircle2 className="w-12 h-12 text-green-600 animate-in zoom-in-50 delay-300 duration-500" />
               </div>
 
               <div>
@@ -169,12 +171,13 @@ export default function RegistrationPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       
-      <main className="flex-grow py-12 px-4 md:px-8 bg-secondary/10">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <main className="flex-grow py-12 px-4 md:px-8 bg-gradient-to-b from-secondary/10 to-secondary/40 relative">
+        <CourtLines />
+        <div className="max-w-4xl mx-auto space-y-8 relative z-10">
           
           <div className="text-center space-y-4 mb-10">
             <h1 className="text-3xl md:text-4xl font-black font-headline text-primary">REGISTRASI TIM - BCC 2026</h1>
-            <Card className="bg-blue-50 border-blue-200 text-left">
+            <Card className="bg-blue-50/80 backdrop-blur-sm border-blue-200 text-left">
               <CardContent className="p-6 text-sm text-blue-900 space-y-2">
                 <p className="font-bold text-lg mb-2 flex items-center gap-2">
                   <Info className="w-5 h-5" /> Penting Dibaca:
@@ -193,7 +196,7 @@ export default function RegistrationPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               
               {/* BAGIAN 1: IDENTITAS TIM */}
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader className="bg-primary/5 border-b">
                   <CardTitle className="text-xl font-headline text-primary">BAGIAN 1: IDENTITAS TIM</CardTitle>
                   <CardDescription>Informasi umum mengenai tim dan manajer.</CardDescription>
@@ -226,7 +229,7 @@ export default function RegistrationPage() {
                             className="flex flex-col md:flex-row gap-4"
                           >
                             {["Beregu PUTRA", "Beregu PUTRI", "Beregu CAMPURAN"].map((item) => (
-                              <FormItem key={item} className="flex items-center space-x-3 space-y-0 border p-4 rounded-md cursor-pointer hover:bg-secondary">
+                              <FormItem key={item} className="flex items-center space-x-3 space-y-0 border p-4 rounded-md cursor-pointer hover:bg-secondary/50 bg-card">
                                 <FormControl>
                                   <RadioGroupItem value={item} />
                                 </FormControl>
@@ -309,7 +312,7 @@ export default function RegistrationPage() {
               </Card>
 
               {/* BAGIAN 2: DATA PEMAIN */}
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader className="bg-primary/5 border-b">
                   <CardTitle className="text-xl font-headline text-primary">BAGIAN 2: DATA PEMAIN (ROSTER)</CardTitle>
                   <CardDescription>
@@ -319,7 +322,7 @@ export default function RegistrationPage() {
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                   {fields.map((field, index) => (
-                    <Collapsible key={field.id} defaultOpen={index < 3} className="border rounded-xl bg-card shadow-sm transition-all has-[[data-state=open]]:bg-secondary/10">
+                    <Collapsible key={field.id} defaultOpen={index < 3} className="border rounded-xl bg-card/80 shadow-sm transition-all has-[[data-state=open]]:bg-secondary/20">
                       <div className="flex items-center justify-between p-4">
                         <CollapsibleTrigger className="flex items-center gap-3 text-left w-full">
                           <ChevronsUpDown className="h-5 w-5 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
@@ -430,7 +433,7 @@ export default function RegistrationPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full border-dashed border-2 py-8 text-muted-foreground hover:text-primary hover:border-primary"
+                      className="w-full border-dashed border-2 py-8 text-muted-foreground hover:text-primary hover:border-primary bg-transparent"
                       onClick={() => append({ 
                         fullName: "", nik: "", motherName: "", ayoId: "", level: undefined as any, videoUrl: "" 
                       })}
@@ -442,12 +445,12 @@ export default function RegistrationPage() {
               </Card>
 
               {/* BAGIAN 3: PEMBAYARAN */}
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader className="bg-primary/5 border-b">
                   <CardTitle className="text-xl font-headline text-primary">BAGIAN 3: ADMINISTRASI & PEMBAYARAN</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
-                  <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                  <div className="bg-yellow-100/80 border border-yellow-200 p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-4">
                          <h4 className="font-bold text-yellow-900">Total Pembayaran</h4>
                          <div className="text-right">
@@ -478,7 +481,6 @@ export default function RegistrationPage() {
                             onChange={(event) => {
                               onChange(event.target.files);
                             }}
-                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                           />
                         </FormControl>
                         <FormDescription>Format: JPG/PNG/PDF. Max 5MB.</FormDescription>
@@ -490,7 +492,7 @@ export default function RegistrationPage() {
               </Card>
 
               {/* BAGIAN 4: PERNYATAAN LEGAL */}
-              <Card>
+              <Card className="bg-card/80 backdrop-blur-sm">
                 <CardHeader className="bg-primary/5 border-b">
                   <CardTitle className="text-xl font-headline text-primary">BAGIAN 4: PERNYATAAN LEGAL</CardTitle>
                   <CardDescription>Harap baca dan centang semua poin di bawah ini.</CardDescription>
@@ -507,7 +509,7 @@ export default function RegistrationPage() {
                       control={form.control}
                       name={item.id as any}
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm hover:bg-secondary/50">
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm hover:bg-secondary/50 bg-card">
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
@@ -529,7 +531,7 @@ export default function RegistrationPage() {
               </Card>
 
               <div className="flex justify-end pt-6">
-                <Button type="submit" size="lg" className="w-full md:w-auto text-lg px-8 py-6" disabled={isSubmitting}>
+                <Button type="submit" size="lg" className="w-full md:w-auto text-lg px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-1 transform" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
