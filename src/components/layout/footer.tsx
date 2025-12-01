@@ -1,4 +1,4 @@
-import { Mail, Phone, BookOpen, ArrowRight } from 'lucide-react';
+import { Mail, Phone, BookOpen, ArrowRight, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 
@@ -26,6 +26,12 @@ export function Footer() {
                 <a href="/technical-handbook.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                   Buku Panduan Teknis
                 </a>
+              </li>
+              <li className="flex items-center justify-center md:justify-start">
+                <HelpCircle className="w-4 h-4 mr-2 text-primary/70" />
+                <Link href="/faq" className="hover:text-primary transition-colors">
+                  Pertanyaan Umum (FAQ)
+                </Link>
               </li>
                  <li className="flex items-center justify-center md:justify-start">
                 <Mail className="w-4 h-4 mr-2 text-primary/70" />
