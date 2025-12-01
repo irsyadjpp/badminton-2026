@@ -48,7 +48,7 @@ export function Header() {
         <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
                 <Image src="/images/logo.png" alt="BCC 2026 Logo" width={28} height={28} />
-                <span className="font-semibold font-headline text-xl tracking-tighter">BCC 2026</span>
+                <span className="font-semibold font-headline text-xl tracking-tighter whitespace-nowrap">BCC 2026</span>
             </Link>
         </div>
 
