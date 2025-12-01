@@ -24,10 +24,6 @@ export function Header() {
   const navItems = () => (
     <>
       <SheetClose asChild><NavLink href="/" onClick={closeSheet}>Beranda</NavLink></SheetClose>
-      <SheetClose asChild><NavLink href="/#schedule" onClick={closeSheet}>Jadwal</NavLink></SheetClose>
-      <SheetClose asChild><NavLink href="/#levels" onClick={closeSheet}>Syarat Level</NavLink></SheetClose>
-      <SheetClose asChild><NavLink href="/#registration" onClick={closeSheet}>Cara Daftar</NavLink></SheetClose>
-      <SheetClose asChild><NavLink href="/#venue" onClick={closeSheet}>Lokasi</NavLink></SheetClose>
       <SheetClose asChild><NavLink href="/contact" onClick={closeSheet}>Kontak</NavLink></SheetClose>
     </>
   );
@@ -45,10 +41,6 @@ export function Header() {
 
           <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6">
               <NavLink href="/">Beranda</NavLink>
-              <NavLink href="/#schedule">Jadwal</NavLink>
-              <NavLink href="/#levels">Syarat Level</NavLink>
-              <NavLink href="/#registration">Cara Daftar</NavLink>
-              <NavLink href="/#venue">Lokasi</NavLink>
               <NavLink href="/contact">Kontak</NavLink>
           </nav>
 
