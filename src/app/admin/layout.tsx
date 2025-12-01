@@ -69,6 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
     { name: "Manajemen Tim", href: "/admin/teams", icon: Users },
     { name: "Input Skor (Live)", href: "/admin/matches", icon: Trophy },
+    { name: "Area Wasit", href: "/admin/referee", icon: Trophy },
     { name: "Data Pengunjung", href: "/admin/visitors", icon: Users },
     { name: "Undian Doorprize", href: "/admin/raffle", icon: Trophy },
     { name: "Laporan Sponsor", href: "/admin/analytics", icon: BarChart3 },
@@ -84,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {menus.map((menu) => {
-            const isActive = pathname === menu.href;
+            const isActive = pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin');
             return (
               <Link 
                 key={menu.href} 
