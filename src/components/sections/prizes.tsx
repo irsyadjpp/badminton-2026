@@ -33,7 +33,7 @@ export function PrizesSection() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-background relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-secondary relative overflow-hidden">
       {/* Background decoration */}
       <CourtLines /> 
 
@@ -52,7 +52,7 @@ export function PrizesSection() {
                 Rp 42.000.000<span className="text-3xl align-top text-foreground/40 ml-1">+</span>
              </span>
              <p className="text-sm text-muted-foreground mt-4 max-w-lg mx-auto">
-                *Jumlah hadiah bersifat dinamis dan berpotensi bertambah sesuai dengan dukungan sponsor yang masuk.
+                *Jumlah hadiah bersifat dinamis.
              </p>
           </div>
         </div>
