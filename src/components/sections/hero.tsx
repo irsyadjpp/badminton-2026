@@ -58,8 +58,8 @@ export function HeroSection() {
                 <div className="flex flex-col sm:flex-row items-center justify-center md:justify-center gap-4 p-4 rounded-lg">
                      <CalendarClock className="h-7 w-7 text-primary-foreground/80" />
                     <div className="text-center sm:text-left">
-                        <h3 className="font-headline text-sm font-semibold text-primary-foreground/80 uppercase tracking-widest">Kick-off</h3>
-                        <Countdown targetDate="2026-06-13" />
+                        <h3 className="font-headline text-sm font-semibold text-primary-foreground/80 uppercase tracking-widest">Pendaftaran Dibuka</h3>
+                        <Countdown targetDate="2026-01-01" />
                     </div>
                 </div>
               </div>
