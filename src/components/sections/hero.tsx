@@ -9,31 +9,36 @@ import { Countdown } from '@/components/countdown';
 export function HeroSection() {
   
   return (
-    <section className="relative bg-background text-foreground overflow-hidden">
-      {/* BACKGROUND IMAGE DENGAN EFEK ZOOM (Nuansa Tegang/Fokus) */}
+    // PERUBAHAN 1: Ubah bg-background (putih) menjadi bg-black (hitam)
+    <section className="relative bg-black text-white overflow-hidden">
+      
+      {/* BACKGROUND IMAGE DENGAN EFEK ZOOM */}
       <div className="absolute inset-0 z-0">
-        <div className="relative h-full w-full animate-zoom-slow"> {/* Animasi Zoom */}
+        <div className="relative h-full w-full animate-zoom-slow">
             <Image
             src="/images/gor-koni.jpg"
             alt="GOR KONI Bandung"
             fill
             priority
-            className="object-cover opacity-60" // Sedikit gelap agar teks menonjol
+            // PERUBAHAN 2: Opacity dikurangi agar lebih 'dark' dan teks lebih pop-up
+            className="object-cover opacity-50" 
             />
         </div>
-        {/* Overlay Gradient (Nuansa Hangat di bawah, Tegang di atas) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/60" />
         
-        {/* Efek Partikel/Debu Stadion (Opsional - menambah detail) */}
+        {/* PERUBAHAN 3: Hapus warna putih (from-background). Ganti dengan gradasi Hitam Pekat */}
+        {/* Ini membuat efek "Vignette" stadion yang dramatis */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/40" />
+        
+        {/* Efek Partikel/Debu Stadion (Opsional) */}
         <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
       </div>
       
       <div className="relative z-10 h-[75vh] flex items-center">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-             {/* Badge Kecil (Animasi Fade In) */}
+             {/* Badge Kecil */}
              <div className="flex flex-wrap gap-2 mb-6 animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
-                <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-md shadow-[0_0_15px_rgba(210,35,42,0.5)]"> {/* Efek Glow Merah */}
+                <span className="inline-flex items-center rounded-full border border-primary/50 bg-primary/20 px-3 py-1 text-sm font-medium text-white backdrop-blur-md shadow-[0_0_15px_rgba(210,35,42,0.5)]">
                     🏆 Perebutkan Piala Bergilir Juara Umum
                 </span>
                 <span className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-md">
@@ -41,18 +46,18 @@ export function HeroSection() {
                 </span>
             </div>
 
-            <p className="text-lg md:text-xl text-black font-bold mb-2 font-body tracking-widest uppercase animate-fade-in-up">
+            <p className="text-lg md:text-xl text-primary font-bold mb-2 font-body tracking-widest uppercase animate-fade-in-up">
               Bandung Community Championship 2026
             </p>
             
-            {/* Judul Besar (Tipografi Tegas) */}
+            {/* Judul Besar */}
             <h1 className="text-5xl md:text-[80px] leading-[0.9] font-black font-headline text-white mb-6 animate-fade-in-up tracking-tighter drop-shadow-2xl">
               INTEGRITAS.<br/>
               SOLIDARITAS.<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">SPORTIVITAS.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-600">KEJAYAAN.</span>
             </h1>
             
-            <p className="text-lg md:text-2xl text-black max-w-2xl mb-10 font-body animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.3s' }}>
+            <p className="text-lg md:text-2xl text-gray-300 max-w-2xl mb-10 font-body animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.3s' }}>
               Turnamen bulutangkis antar komunitas terbesar di Bandung. <br/>
               <span className="text-white font-semibold">13 Juni - 5 Juli 2026 | GOR KONI Bandung</span>
             </p>
@@ -76,8 +81,8 @@ export function HeroSection() {
         </div>
       </div>
       
-      {/* Widget Countdown (Bagian Bawah - Nuansa Hangat/Info) */}
-      <div className="relative z-20 bg-background/50 backdrop-blur-md border-t border-white/10">
+      {/* Widget Countdown (Bagian Bawah) */}
+      <div className="relative z-20 bg-black/80 backdrop-blur-md border-t border-white/10">
         <div className="container mx-auto px-4 py-6">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
@@ -85,14 +90,14 @@ export function HeroSection() {
                         <CalendarClock className="h-8 w-8 text-primary" />
                      </div>
                     <div>
-                        <h3 className="font-headline text-sm font-semibold text-muted-foreground uppercase tracking-widest">Kick-off Pendaftaran</h3>
-                        <p className="text-foreground font-bold">1 Maret 2026</p>
+                        <h3 className="font-headline text-sm font-semibold text-gray-400 uppercase tracking-widest">Kick-off Pendaftaran</h3>
+                        <p className="text-white font-bold">1 Maret 2026</p>
                     </div>
                 </div>
                 {/* Garis Pemisah Visual */}
                 <div className="hidden md:block w-px h-12 bg-white/10"></div>
                 
-                <div className="flex-grow flex justify-center md:justify-end">
+                <div className="flex-grow flex justify-center md:justify-end text-white">
                     <Countdown targetDate="2026-03-01" />
                 </div>
               </div>
