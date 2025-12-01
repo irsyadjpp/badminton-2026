@@ -22,7 +22,7 @@ export function HeroSection() {
             />
         </div>
         {/* Overlay Gradient (Nuansa Hangat di bawah, Tegang di atas) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/60" />
         
         {/* Efek Partikel/Debu Stadion (Opsional - menambah detail) */}
         <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
