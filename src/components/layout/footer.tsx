@@ -17,8 +17,8 @@ export function Footer() {
               </li>
               <li className="flex items-center justify-center md:justify-start">
                 <Phone className="w-4 h-4 mr-2 text-primary/70" />
-                <a href="tel:+6281234567890" className="hover:text-primary transition-colors">
-                  +62 812-3456-7890 (WhatsApp)
+                <a href="tel:+6285693738869" className="hover:text-primary transition-colors">
+                  +62 856-9373-8869 (WhatsApp)
                 </a>
               </li>
             </ul>
