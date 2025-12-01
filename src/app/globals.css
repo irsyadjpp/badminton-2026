@@ -83,3 +83,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Efek Spotlight: Saat parent di-hover, semua child meredup kecuali yang di-hover */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.hover-spotlight:hover > .card-item {
+  opacity: 0.4;
+  transform: scale(0.98);
+}
+
+.hover-spotlight > .card-item:hover {
+  opacity: 1;
+  transform: scale(1.02);
+  box-shadow: 0 20px 40px -15px rgba(210, 35, 42, 0.3); /* Glow merah BCC */
+  border-color: hsl(var(--primary));
+  z-index: 10;
+}
+
+.card-item {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}

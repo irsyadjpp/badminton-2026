@@ -55,7 +55,7 @@ const categories = [
 
 export function CategoriesSection() {
   return (
-    <section className="bg-background py-16 md:py-24 relative overflow-hidden">
+    <section className="bg-secondary py-16 md:py-24 relative overflow-hidden">
        {/* Elemen Dekoratif Background */}
        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-10 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -73,11 +73,11 @@ export function CategoriesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 hover-spotlight">
           {categories.map((category) => (
             <Card 
                 key={category.id} 
-                className={`group relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-card ${category.borderHover}`}
+                className={`group card-item relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-card ${category.borderHover}`}
             >
               {/* Ikon Latar Belakang Pudar */}
               <div className={`absolute -top-6 -right-6 p-4 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 group-hover:opacity-10`}>

@@ -2,6 +2,7 @@
 
 import { Trophy, Medal, Crown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CourtLines } from "@/components/ui/court-lines";
 
 export function PrizesSection() {
   const prizePool = [
@@ -33,11 +34,8 @@ export function PrizesSection() {
 
   return (
     <section className="py-16 md:py-24 bg-background relative overflow-hidden">
-      {/* Background decoration (Efek cahaya di latar belakang) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl opacity-60"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl opacity-60"></div>
-      </div>
+      {/* Background decoration */}
+      <CourtLines /> 
 
       <div className="container mx-auto px-4 relative z-10">
         
