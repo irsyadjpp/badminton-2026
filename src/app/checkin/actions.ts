@@ -1,14 +1,14 @@
 'use server';
 
 import { z } from 'zod';
+import { cookies } from 'next/headers';
 
-// Skema Validasi
+// --- SCHEMA & HELPER ---
 const formSchema = z.object({
   name: z.string().min(2, "Nama wajib diisi"),
   whatsapp: z.string().min(10, "Nomor WA tidak valid"),
 });
 
-// Fungsi Helper Acak Kode Voucher
 function generateVoucherCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let result = 'BCC-';
@@ -18,85 +18,138 @@ function generateVoucherCode() {
   return result;
 }
 
-// SIMULASI CHECK-IN
+// --- MOCK DATABASE (Simulasi Data Server) ---
+// Anggap ini adalah data yang ada di Firebase Anda
+const MOCK_DATABASE = [
+  { whatsapp: "08123456789", voucher: "BCC-LAMA", visitorId: "visitor-1" },
+  { whatsapp: "08111111111", voucher: "BCC-TEST", visitorId: "visitor-2" },
+];
+
+// --- ACTION 1: CHECK-IN ---
 export async function submitCheckin(prevState: any, formData: FormData) {
-  const name = formData.get('name') as string;
-  const whatsapp = formData.get('whatsapp') as string;
+  const cookieStore = cookies();
+  const existingSession = cookieStore.get('bcc_event_session');
 
-  // 1. Validasi Input
-  const validation = formSchema.safeParse({ name, whatsapp });
-  
-  // Simulasi Delay Jaringan (1 detik)
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  if (!validation.success) {
-    return { success: false, message: "Data tidak valid. Periksa nama & WA." };
+  // LAPIS 1: Cek Cookie (Device Fingerprint)
+  if (existingSession) {
+    try {
+      const sessionData = JSON.parse(existingSession.value);
+      return {
+        success: true,
+        voucherCode: sessionData.voucherCode,
+        visitorId: sessionData.visitorId,
+        isExisting: true, 
+        message: "Device ini sudah terdaftar!"
+      };
+    } catch (e) {}
   }
 
-  // 2. Simulasi Logika Database
-  // Anggap saja user dengan nomor "08123456789" sudah pernah check-in
-  if (whatsapp === "08123456789") {
-    return { 
-      success: true, 
-      voucherCode: "BCC-LAMA", 
-      visitorId: "mock-visitor-id-123",
+  // Validasi Input
+  const name = formData.get('name') as string;
+  const whatsapp = formData.get('whatsapp') as string;
+  
+  const validation = formSchema.safeParse({ name, whatsapp });
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulasi Delay
+
+  if (!validation.success) {
+    return { success: false, message: "Data tidak valid." };
+  }
+
+  // LAPIS 2: Cek Mock Database (Nomor WA Unik)
+  const existingUser = MOCK_DATABASE.find(user => user.whatsapp === whatsapp);
+
+  if (existingUser) {
+    // Jika nomor sudah ada, kembalikan voucher lama & set cookie lagi
+    const sessionData = JSON.stringify({
+        voucherCode: existingUser.voucher,
+        visitorId: existingUser.visitorId,
+        timestamp: Date.now()
+    });
+    
+    cookieStore.set('bcc_event_session', sessionData, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+    });
+
+    return {
+      success: true,
+      voucherCode: existingUser.voucher,
+      visitorId: existingUser.visitorId,
       isExisting: true,
-      message: "Selamat datang kembali!" 
+      message: "Nomor ini sudah terdaftar sebelumnya!"
     };
   }
 
-  // 3. User Baru (Sukses)
+  // LOLOS SEMUA CEK -> USER BARU
   const newVoucher = generateVoucherCode();
+  const visitorId = `visitor-${Date.now()}`;
+  
+  // Simpan session baru
+  const sessionData = JSON.stringify({
+    voucherCode: newVoucher,
+    visitorId: visitorId,
+    timestamp: Date.now()
+  });
+
+  cookieStore.set('bcc_event_session', sessionData, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7,
+    path: '/',
+  });
   
   return { 
     success: true, 
     voucherCode: newVoucher,
-    visitorId: `visitor-${Date.now()}`, // ID simulasi
-    isExisting: false,
+    visitorId: visitorId,
+    isExisting: false, // Confetti akan meledak
     message: "Check-in Berhasil!" 
   };
 }
 
-// SIMULASI VOTING
+// --- ACTION 2: VOTING TIM ---
 export async function submitVote(visitorId: string, teamName: string) {
-  // Simulasi Delay
+  const cookieStore = cookies();
+  if (!cookieStore.has('bcc_event_session')) {
+     return { success: false, message: "Silakan check-in terlebih dahulu" };
+  }
   await new Promise((resolve) => setTimeout(resolve, 800));
-  
   console.log(`[MOCK DB] Visitor ${visitorId} voted for ${teamName}`);
-  
   return { success: true };
 }
 
-
-// --- TAMBAHAN BARU ---
-
-// 1. Simulasi Data Booth Sponsor
+// --- ACTION 3: KUNJUNGAN BOOTH ---
 const SPONSORS = [
-  { id: 'bjb', name: 'Bank BJB', icon: '🏦' },
-  { id: 'yonex', name: 'Yonex', icon: '🏸' },
-  { id: 'pocari', name: 'Pocari Sweat', icon: '💧' },
-  { id: 'kopi', name: 'Kopi Kenangan', icon: '☕' },
+  { id: 'bjb', name: 'Bank BJB' },
+  { id: 'yonex', name: 'Yonex' },
+  { id: 'pocari', name: 'Pocari Sweat' },
+  { id: 'kopi', name: 'Kopi Kenangan' },
 ];
 
-// 2. Action: Visit Booth (Scan QR Tenant)
 export async function visitBooth(visitorId: string, boothId: string) {
-  await new Promise((resolve) => setTimeout(resolve, 500)); // Simulasi delay
+  const cookieStore = cookies();
+  if (!cookieStore.has('bcc_event_session')) {
+     return { success: false, message: "Scan Invalid" };
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 500)); 
 
   const sponsor = SPONSORS.find(s => s.id === boothId);
   if (!sponsor) return { success: false, message: "Booth tidak valid" };
 
-  // Di real app, simpan ke database: collection('visits').add(...)
   return { 
     success: true, 
     sponsorName: sponsor.name,
-    message: `Berhasil check-in di ${sponsor.name}!`,
-    totalStamps: Math.floor(Math.random() * 3) + 1 // Simulasi: user punya 1-3 stamp
+    message: `Stamp ${sponsor.name} Berhasil!`,
+    totalStamps: 1 
   };
 }
 
-// 3. Action: Get Leaderboard (Klasemen Dukungan)
+// --- ACTION 4: LEADERBOARD ---
 export async function getLeaderboard() {
-  // Di real app, gunakan query aggregation: count()
+  // Simulasi data real-time
   return [
     { team: "PB Djarum", votes: 1250, percent: 45 },
     { team: "Jaya Raya", votes: 980, percent: 35 },

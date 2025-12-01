@@ -10,7 +10,6 @@ export function LeaderboardWidget() {
   const [data, setData] = useState<{ team: string, votes: number, percent: number }[]>([]);
 
   useEffect(() => {
-    // Load initial data
     getLeaderboard().then(setData);
   }, []);
 
@@ -35,9 +34,6 @@ export function LeaderboardWidget() {
             </div>
           </div>
         ))}
-        <p className="text-xs text-center text-muted-foreground pt-2">
-          *Update real-time dari voting penonton di GOR
-        </p>
       </CardContent>
     </Card>
   );

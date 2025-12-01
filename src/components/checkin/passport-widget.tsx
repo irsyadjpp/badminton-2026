@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { QrCode, CheckCircle, Gift } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { visitBooth } from '@/app/checkin/actions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,12 +14,10 @@ const BOOTHS = [
 ];
 
 export function PassportWidget({ visitorId }: { visitorId: string }) {
-  // Simulasi state stamps (di real app, ini dari database)
   const [stamps, setStamps] = useState<string[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Fungsi simulasi scan (di real app, ini dipicu oleh URL /booth/[id])
   const handleSimulateScan = async (boothId: string) => {
     setLoading(boothId);
     const result = await visitBooth(visitorId, boothId);
@@ -28,9 +25,8 @@ export function PassportWidget({ visitorId }: { visitorId: string }) {
     if (result.success) {
       setStamps(prev => [...prev, boothId]);
       toast({
-        title: "Stamp Didapatkan! 🎉",
+        title: "Stamp Berhasil! 🎉",
         description: result.message,
-        className: "bg-green-500 text-white border-none"
       });
     }
     setLoading(null);
@@ -81,7 +77,7 @@ export function PassportWidget({ visitorId }: { visitorId: string }) {
             <Gift className="w-8 h-8 text-yellow-600" />
             <div className="text-xs">
               <strong>Misi Selesai!</strong> <br/>
-              Selamat! Peluang doorprise Anda kini dikalikan 3!
+              Peluang doorprise Anda kini dikalikan 3!
             </div>
           </div>
         )}
