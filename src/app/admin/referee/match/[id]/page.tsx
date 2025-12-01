@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Minus, Plus, RefreshCw, Trophy, AlertTriangle, 
-  ArrowLeftRight, MonitorPlay, AlertCircle
+  Minus, Plus, RefreshCw, MonitorPlay, 
+  ArrowLeftRight, AlertTriangle, MapPin
 } from "lucide-react";
 import {
   Dialog,
@@ -14,8 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
-  DialogFooter
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,15 +23,15 @@ export default function MatchControlPage({ params }: { params: { id: string } })
   const { toast } = useToast();
 
   // --- CONFIGURATION ---
-  const [mode, setMode] = useState<MatchMode>('GROUP'); // Default Grup
+  const [mode, setMode] = useState<MatchMode>('GROUP');
   
   // --- GAME STATE ---
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [setA, setSetA] = useState(0);
   const [setB, setSetB] = useState(0);
-  const [gameSet, setGameSet] = useState(1); // Set saat ini (1, 2, 3)
-  const [server, setServer] = useState<'A' | 'B'>('A'); // Giliran servis
+  const [gameSet, setGameSet] = useState(1);
+  const [server, setServer] = useState<'A' | 'B'>('A'); 
   const [isFinished, setIsFinished] = useState(false);
   
   // --- HISTORY & LOGISTICS ---
@@ -44,7 +42,6 @@ export default function MatchControlPage({ params }: { params: { id: string } })
   const [time, setTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   
-  // Timer Effect
   useEffect(() => {
     let interval: any;
     if (isTimerRunning) {
@@ -61,12 +58,16 @@ export default function MatchControlPage({ params }: { params: { id: string } })
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // --- CORE SCORING LOGIC (HANDBOOK RULES) ---
+  // --- LOGIKA POSISI SERVIS (Genap=Kanan, Ganjil=Kiri) ---
+  const getServicePosition = (score: number) => {
+      return score % 2 === 0 ? "KANAN (Genap)" : "KIRI (Ganjil)";
+  };
+
+  // --- CORE SCORING LOGIC ---
   const checkGameStatus = (newA: number, newB: number) => {
     let message = "";
     
     if (mode === 'GROUP') {
-        // RULES GRUP: 1x30, Pindah di 15, Max 30 (Sudden Death)
         if (newA === 15 && newB < 15) message = "INTERVAL: PINDAH TEMPAT (SKOR 15)";
         else if (newB === 15 && newA < 15) message = "INTERVAL: PINDAH TEMPAT (SKOR 15)";
         
@@ -81,40 +82,29 @@ export default function MatchControlPage({ params }: { params: { id: string } })
         }
     } 
     else if (mode === 'KNOCKOUT') {
-        // RULES GUGUR: 3x15, Setting sampai 20, Rubber Game Interval di 8
         const maxScore = 20;
         const winPoint = 15;
         
-        // Interval Rubber Set
         if (gameSet === 3) {
             if ((newA === 8 && newB < 8) || (newB === 8 && newA < 8)) {
                 message = "INTERVAL RUBBER GAME: PINDAH TEMPAT (SKOR 8)";
-                setIsTimerRunning(false); // Auto stop timer
+                setIsTimerRunning(false);
             }
         }
 
-        // Deuce Logic
         const isDeuce = newA >= 14 && newB >= 14;
         
         if (isDeuce) {
-            if (Math.abs(newA - newB) >= 2) {
-                // Win by 2 points
-                return handleSetWin(newA > newB ? 'A' : 'B');
-            }
-            if (newA === maxScore || newB === maxScore) {
-                // Max limit reached
-                return handleSetWin(newA === maxScore ? 'A' : 'B');
-            }
+            if (Math.abs(newA - newB) >= 2) return handleSetWin(newA > newB ? 'A' : 'B');
+            if (newA === maxScore || newB === maxScore) return handleSetWin(newA === maxScore ? 'A' : 'B');
             message = "SETTING / JUS";
         } else {
             if (newA >= winPoint) return handleSetWin('A');
             if (newB >= winPoint) return handleSetWin('B');
-            
             if (newA === winPoint - 1) message = "GAME POINT A";
             if (newB === winPoint - 1) message = "GAME POINT B";
         }
     }
-
     return message;
   };
 
@@ -122,30 +112,17 @@ export default function MatchControlPage({ params }: { params: { id: string } })
       if (winner === 'A') {
           const newSetScore = setA + 1;
           setSetA(newSetScore);
-          if (newSetScore === 2) {
-              setIsFinished(true);
-              setIsTimerRunning(false);
-              return "MATCH WON BY TIM A!";
-          }
+          if (newSetScore === 2) { setIsFinished(true); setIsTimerRunning(false); return "MATCH WON BY TIM A!"; }
       } else {
           const newSetScore = setB + 1;
           setSetB(newSetScore);
-          if (newSetScore === 2) {
-              setIsFinished(true);
-              setIsTimerRunning(false);
-              return "MATCH WON BY TIM B!";
-          }
+          if (newSetScore === 2) { setIsFinished(true); setIsTimerRunning(false); return "MATCH WON BY TIM B!"; }
       }
 
-      // Prepare next set
       setTimeout(() => {
           if (confirm(`Set ${gameSet} Selesai. Pemenang: Tim ${winner}. Lanjut Set ${gameSet + 1}?`)) {
               setGameSet(g => g + 1);
-              setScoreA(0);
-              setScoreB(0);
-              setHistory([]);
-              setTime(0);
-              setIsTimerRunning(true); // Start interval timer manually usually, but here reset
+              setScoreA(0); setScoreB(0); setHistory([]); setTime(0); setIsTimerRunning(true);
           }
       }, 500);
       
@@ -156,15 +133,13 @@ export default function MatchControlPage({ params }: { params: { id: string } })
     if (isFinished) return;
 
     if (type === 'ADD') {
-        // Save history for undo
         setHistory([...history, { a: scoreA, b: scoreB, server }]);
-
         const newA = team === 'A' ? scoreA + 1 : scoreA;
         const newB = team === 'B' ? scoreB + 1 : scoreB;
 
         setScoreA(newA);
         setScoreB(newB);
-        setServer(team); // Winner serves
+        setServer(team); // Pemenang reli menjadi server
 
         const statusMsg = checkGameStatus(newA, newB);
         if (statusMsg) {
@@ -176,7 +151,6 @@ export default function MatchControlPage({ params }: { params: { id: string } })
             });
         }
     } else {
-        // UNDO Logic
         if (history.length > 0) {
             const lastState = history[history.length - 1];
             setScoreA(lastState.a);
@@ -187,42 +161,37 @@ export default function MatchControlPage({ params }: { params: { id: string } })
     }
   };
 
-  // --- RENDER ---
   return (
-    <div className="min-h-screen bg-black text-white p-4 flex flex-col font-sans">
+    <div className="min-h-screen bg-black text-white p-2 md:p-4 flex flex-col font-sans">
       
-      {/* HEADER INFO */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 bg-zinc-900 p-3 rounded-lg gap-4 border border-zinc-800">
-        <div className="flex items-center gap-4 w-full md:w-auto">
-             <div className="text-left">
-                <div className="text-xs text-zinc-500 font-mono">MATCH ID: {params.id}</div>
-                <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg text-primary">MD Intermediate</span>
-                    <Badge variant="outline" className="border-zinc-600 text-zinc-300">
-                        {mode === 'GROUP' ? 'FASE GRUP (1x30)' : 'FASE GUGUR (3x15)'}
-                    </Badge>
-                </div>
-             </div>
+        <div className="text-left w-full md:w-auto">
+            <div className="text-xs text-zinc-500 font-mono">MATCH ID: {params.id}</div>
+            <div className="flex items-center gap-2">
+                <span className="font-bold text-lg text-primary">MD Intermediate</span>
+                <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-[10px]">
+                    {mode === 'GROUP' ? '1x30' : '3x15'}
+                </Badge>
+            </div>
         </div>
 
         <div className="flex items-center gap-2">
-             {/* Mode Switcher (Hanya aktif jika skor 0-0) */}
              {scoreA === 0 && scoreB === 0 && gameSet === 1 && (
                  <Select value={mode} onValueChange={(val: MatchMode) => setMode(val)}>
-                    <SelectTrigger className="w-[140px] bg-zinc-800 border-zinc-700 h-9 text-xs">
+                    <SelectTrigger className="w-[100px] bg-zinc-800 border-zinc-700 h-9 text-xs">
                         <SelectValue placeholder="Mode" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="GROUP">Grup (1x30)</SelectItem>
-                        <SelectItem value="KNOCKOUT">Gugur (3x15)</SelectItem>
+                        <SelectItem value="GROUP">Grup</SelectItem>
+                        <SelectItem value="KNOCKOUT">Gugur</SelectItem>
                     </SelectContent>
                  </Select>
              )}
              
-             {/* Game Info */}
              <div className="flex items-center gap-3 bg-zinc-950 px-3 py-1.5 rounded-md border border-zinc-800">
                 <div className="text-center">
-                    <div className="text-[10px] text-zinc-500 uppercase">Shuttle</div>
+                    <div className="text-[10px] text-zinc-500 uppercase">Kok</div>
                     <div className="font-mono font-bold text-sm flex items-center gap-1">
                         {shuttles}
                         <button onClick={() => setShuttles(s => s+1)} className="text-green-500 hover:text-green-400 ml-1">+</button>
@@ -230,7 +199,7 @@ export default function MatchControlPage({ params }: { params: { id: string } })
                 </div>
                 <div className="w-px h-6 bg-zinc-800"></div>
                 <div className="text-center cursor-pointer" onClick={() => setIsTimerRunning(!isTimerRunning)}>
-                    <div className="text-[10px] text-zinc-500 uppercase">Timer</div>
+                    <div className="text-[10px] text-zinc-500 uppercase">Waktu</div>
                     <div className={`font-mono font-bold text-lg leading-none ${isTimerRunning ? 'text-green-400' : 'text-red-400'}`}>
                         {formatTime(time)}
                     </div>
@@ -239,137 +208,127 @@ export default function MatchControlPage({ params }: { params: { id: string } })
         </div>
       </div>
 
-      {/* SCOREBOARD AREA */}
+      {/* SCOREBOARD */}
       <div className="flex-grow grid grid-cols-2 gap-2 md:gap-6">
         
         {/* TIM A (KIRI) */}
-        <div className={`relative rounded-2xl p-4 flex flex-col justify-between border-4 transition-all duration-300 ${server === 'A' ? 'border-yellow-500 bg-zinc-800 shadow-[0_0_30px_rgba(234,179,8,0.1)]' : 'border-transparent bg-zinc-900 opacity-90'}`}>
+        <div className={`relative rounded-2xl p-3 md:p-6 flex flex-col justify-between border-4 transition-all duration-300 ${server === 'A' ? 'border-yellow-500 bg-zinc-800 shadow-[0_0_30px_rgba(234,179,8,0.15)]' : 'border-transparent bg-zinc-900 opacity-80'}`}>
+            
+            {/* INDIKATOR SERVIS */}
             {server === 'A' && (
-                <div className="absolute top-0 right-0 bg-yellow-500 text-black px-3 py-1 text-xs font-black rounded-bl-xl rounded-tr-lg animate-pulse">
-                    SERVICE
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black px-6 py-1 text-sm font-black rounded-full shadow-lg animate-pulse z-10 whitespace-nowrap flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    SERVIS: {getServicePosition(scoreA)}
                 </div>
             )}
             
-            <div className="mt-2">
+            <div className="mt-4 text-center md:text-left">
                 <h2 className="text-xl md:text-4xl font-black truncate text-white leading-tight">PB Djarum</h2>
-                <p className="text-zinc-400 text-xs md:text-sm truncate">Kevin S. / Marcus G.</p>
-                {mode === 'KNOCKOUT' && <div className="text-yellow-500 font-black text-4xl md:text-6xl mt-4">{setA}</div>}
+                {mode === 'KNOCKOUT' && <div className="text-yellow-500 font-black text-2xl md:text-5xl mt-2">SET {setA}</div>}
             </div>
 
-            <div className="flex-grow flex items-center justify-center py-4">
-                <div className="text-[120px] md:text-[200px] leading-none font-black font-mono select-none tracking-tighter text-white">
+            <div className="flex-grow flex flex-col items-center justify-center py-4">
+                <div className="text-[100px] md:text-[220px] leading-none font-black font-mono select-none tracking-tighter text-white">
                     {scoreA}
+                </div>
+                {/* Posisi Visual */}
+                <div className="flex gap-8 mt-4 text-zinc-600 font-mono text-sm md:text-lg">
+                    <span className={scoreA % 2 !== 0 ? "text-white font-bold" : ""}>KIRI</span>
+                    <span className={scoreA % 2 === 0 ? "text-white font-bold" : ""}>KANAN</span>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-auto">
-                 <Button 
-                    className="h-16 md:h-24 bg-zinc-800 hover:bg-zinc-700 text-zinc-500 border-2 border-zinc-700 rounded-xl" 
-                    onClick={() => handlePoint('A', 'MIN')}
-                    disabled={isFinished}
-                 >
-                    <Minus className="w-8 h-8" />
+                 <Button className="h-16 md:h-24 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-xl" onClick={() => handlePoint('A', 'MIN')} disabled={isFinished}>
+                    <Minus className="w-8 h-8 text-zinc-500" />
                  </Button>
-                 <Button 
-                    className="h-16 md:h-24 bg-blue-600 hover:bg-blue-500 text-white shadow-[0_5px_0_rgb(29,78,216)] active:shadow-none active:translate-y-1 transition-all rounded-xl" 
-                    onClick={() => handlePoint('A', 'ADD')}
-                    disabled={isFinished}
-                 >
+                 <Button className="h-16 md:h-24 bg-blue-600 hover:bg-blue-500 text-white shadow-[0_5px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none rounded-xl" onClick={() => handlePoint('A', 'ADD')} disabled={isFinished}>
                     <Plus className="w-12 h-12" />
                  </Button>
             </div>
         </div>
 
         {/* TIM B (KANAN) */}
-        <div className={`relative rounded-2xl p-4 flex flex-col justify-between border-4 transition-all duration-300 ${server === 'B' ? 'border-yellow-500 bg-zinc-800 shadow-[0_0_30px_rgba(234,179,8,0.1)]' : 'border-transparent bg-zinc-900 opacity-90'}`}>
+        <div className={`relative rounded-2xl p-3 md:p-6 flex flex-col justify-between border-4 transition-all duration-300 ${server === 'B' ? 'border-yellow-500 bg-zinc-800 shadow-[0_0_30px_rgba(234,179,8,0.15)]' : 'border-transparent bg-zinc-900 opacity-80'}`}>
+            
+            {/* INDIKATOR SERVIS */}
             {server === 'B' && (
-                <div className="absolute top-0 right-0 bg-yellow-500 text-black px-3 py-1 text-xs font-black rounded-bl-xl rounded-tr-lg animate-pulse">
-                    SERVICE
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black px-6 py-1 text-sm font-black rounded-full shadow-lg animate-pulse z-10 whitespace-nowrap flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    SERVIS: {getServicePosition(scoreB)}
                 </div>
             )}
             
-            <div className="mt-2 text-right">
+            <div className="mt-4 text-center md:text-right">
                 <h2 className="text-xl md:text-4xl font-black truncate text-white leading-tight">PB Jaya</h2>
-                <p className="text-zinc-400 text-xs md:text-sm truncate">Hendra S. / Ahsan M.</p>
-                {mode === 'KNOCKOUT' && <div className="text-yellow-500 font-black text-4xl md:text-6xl mt-4">{setB}</div>}
+                {mode === 'KNOCKOUT' && <div className="text-yellow-500 font-black text-2xl md:text-5xl mt-2">SET {setB}</div>}
             </div>
 
-            <div className="flex-grow flex items-center justify-center py-4">
-                <div className="text-[120px] md:text-[200px] leading-none font-black font-mono select-none tracking-tighter text-white">
+            <div className="flex-grow flex flex-col items-center justify-center py-4">
+                <div className="text-[100px] md:text-[220px] leading-none font-black font-mono select-none tracking-tighter text-white">
                     {scoreB}
+                </div>
+                {/* Posisi Visual */}
+                <div className="flex gap-8 mt-4 text-zinc-600 font-mono text-sm md:text-lg">
+                    <span className={scoreB % 2 !== 0 ? "text-white font-bold" : ""}>KIRI</span>
+                    <span className={scoreB % 2 === 0 ? "text-white font-bold" : ""}>KANAN</span>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-auto">
-                 <Button 
-                    className="h-16 md:h-24 bg-zinc-800 hover:bg-zinc-700 text-zinc-500 border-2 border-zinc-700 rounded-xl" 
-                    onClick={() => handlePoint('B', 'MIN')}
-                    disabled={isFinished}
-                 >
-                    <Minus className="w-8 h-8" />
+                 <Button className="h-16 md:h-24 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-xl" onClick={() => handlePoint('B', 'MIN')} disabled={isFinished}>
+                    <Minus className="w-8 h-8 text-zinc-500" />
                  </Button>
-                 <Button 
-                    className="h-16 md:h-24 bg-red-600 hover:bg-red-500 text-white shadow-[0_5px_0_rgb(185,28,28)] active:shadow-none active:translate-y-1 transition-all rounded-xl" 
-                    onClick={() => handlePoint('B', 'ADD')}
-                    disabled={isFinished}
-                 >
+                 <Button className="h-16 md:h-24 bg-red-600 hover:bg-red-500 text-white shadow-[0_5px_0_rgb(185,28,28)] active:translate-y-1 active:shadow-none rounded-xl" onClick={() => handlePoint('B', 'ADD')} disabled={isFinished}>
                     <Plus className="w-12 h-12" />
                  </Button>
             </div>
         </div>
       </div>
 
-      {/* CONTROL BAR (BAWAH) */}
-      <div className="mt-4 grid grid-cols-4 gap-2 md:gap-4">
+      {/* CONTROL BAR */}
+      <div className="mt-4 grid grid-cols-4 gap-2">
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="secondary" className="h-14 flex flex-col gap-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white">
-                    <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                    <span className="text-[10px] md:text-xs uppercase font-bold">Sanksi</span>
+                <Button variant="secondary" className="h-14 flex flex-col gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span className="text-[10px] font-bold uppercase">Sanksi</span>
                 </Button>
             </DialogTrigger>
             <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
                 <DialogHeader><DialogTitle>Kartu & Hukuman</DialogTitle></DialogHeader>
                 <div className="grid grid-cols-2 gap-4">
-                    <Button className="bg-yellow-500 text-black hover:bg-yellow-400 h-16 font-bold text-lg">KUNING</Button>
-                    <Button className="bg-red-600 text-white hover:bg-red-500 h-16 font-bold text-lg">MERAH (+1 Poin)</Button>
-                    <Button className="bg-black text-white border border-zinc-600 h-16 col-span-2 font-bold">HITAM (Diskualifikasi)</Button>
+                    <Button className="bg-yellow-500 text-black hover:bg-yellow-400 h-16 font-bold">KARTU KUNING</Button>
+                    <Button className="bg-red-600 text-white hover:bg-red-500 h-16 font-bold">KARTU MERAH (+1)</Button>
+                    <Button className="bg-black border border-zinc-600 h-14 col-span-2 font-bold">KARTU HITAM (WO)</Button>
                 </div>
             </DialogContent>
         </Dialog>
 
-        <Button 
-            variant="secondary" 
-            className="h-14 flex flex-col gap-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white" 
-            onClick={() => setServer(server === 'A' ? 'B' : 'A')}
-        >
+        <Button variant="secondary" className="h-14 flex flex-col gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white" onClick={() => setServer(server === 'A' ? 'B' : 'A')}>
             <ArrowLeftRight className="w-5 h-5" />
-            <span className="text-[10px] md:text-xs uppercase font-bold">Service Over</span>
+            <span className="text-[10px] font-bold uppercase">Pindah Bola</span>
         </Button>
         
-        <Button 
-            variant="secondary" 
-            className="h-14 flex flex-col gap-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white" 
-            onClick={() => {
-                 // Tukar skor & set visual
-                 const tempScore = scoreA; setScoreA(scoreB); setScoreB(tempScore);
-                 const tempSet = setA; setSetA(setB); setSetB(tempSet);
-                 setServer(server === 'A' ? 'B' : 'A');
-                 toast({ title: "Tempat Ditukar", description: "Posisi skor telah ditukar." });
-            }}
-        >
+        <Button variant="secondary" className="h-14 flex flex-col gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white" onClick={() => {
+             const tempScore = scoreA; setScoreA(scoreB); setScoreB(tempScore);
+             const tempSet = setA; setSetA(setB); setSetB(tempSet);
+             setServer(server === 'A' ? 'B' : 'A');
+             toast({ title: "Posisi Ditukar", description: "Skor dan posisi lapangan telah ditukar." });
+        }}>
             <RefreshCw className="w-5 h-5" />
-            <span className="text-[10px] md:text-xs uppercase font-bold">Swap Court</span>
+            <span className="text-[10px] font-bold uppercase">Pindah Tempat</span>
         </Button>
 
         {isFinished ? (
              <Button className="h-14 flex flex-col gap-1 bg-green-600 hover:bg-green-500" onClick={() => window.location.href = '/admin/referee'}>
                 <MonitorPlay className="w-5 h-5" />
-                <span className="text-[10px] md:text-xs uppercase font-bold">Selesai</span>
+                <span className="text-[10px] font-bold uppercase">Selesai</span>
              </Button>
         ) : (
-             <div className="h-14 flex items-center justify-center bg-zinc-950 rounded border border-zinc-800 text-zinc-600 font-mono text-xs text-center px-2">
-                 SET {gameSet} <br/> IN PROGRESS
+             <div className="h-14 flex flex-col items-center justify-center bg-zinc-950 rounded border border-zinc-800 text-zinc-500 text-[10px] font-bold uppercase">
+                 <span>SET {gameSet}</span>
+                 <span className="text-green-500 animate-pulse">LIVE</span>
              </div>
         )}
       </div>
@@ -377,4 +336,3 @@ export default function MatchControlPage({ params }: { params: { id: string } })
     </div>
   );
 }
-    
