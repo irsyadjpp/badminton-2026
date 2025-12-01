@@ -9,8 +9,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Calculator, Save, AlertTriangle } from "lucide-react";
+import { Calculator, Save, AlertTriangle, BookOpen } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
+import { RUBRIC_GUIDELINES } from '@/lib/tpf-data';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 // INDIKATOR UTAMA (Skor 1-5) [cite: 25]
 const TECHNICAL_RUBRICS = [
@@ -115,9 +124,47 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: any) {
 
                     {/* KOLOM KANAN: FORM PENILAIAN */}
                     <div className="w-1/2 flex flex-col bg-background">
-                        <DialogHeader className="px-6 py-4 border-b">
-                            <DialogTitle>Audit Teknis: {player?.name}</DialogTitle>
-                            <DialogDescription>Klaim Awal: <span className="font-bold text-foreground">{player?.claim}</span></DialogDescription>
+                        <DialogHeader className="px-6 py-4 border-b flex flex-row items-center justify-between">
+                            <div>
+                                <DialogTitle>Audit Teknis: {player?.name}</DialogTitle>
+                                <DialogDescription>Klaim Awal: <span className="font-bold text-foreground">{player?.claim}</span></DialogDescription>
+                            </div>
+                            
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" size="sm" className="gap-2">
+                                        <BookOpen className="w-4 h-4" />
+                                        Panduan Rubrik
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+                                    <SheetHeader className="mb-6">
+                                        <SheetTitle>Panduan Skoring Teknis</SheetTitle>
+                                        <SheetDescription>
+                                            Gunakan panduan ini untuk menentukan skor 1-5 secara objektif.
+                                        </SheetDescription>
+                                    </SheetHeader>
+                                    
+                                    <div className="space-y-8">
+                                        {RUBRIC_GUIDELINES.map((rubric) => (
+                                            <div key={rubric.id} className="space-y-3">
+                                                <h4 className="font-bold text-primary border-b pb-1">{rubric.title}</h4>
+                                                <ul className="space-y-3">
+                                                    {rubric.scores.map((s) => (
+                                                        <li key={s.score} className="text-sm grid grid-cols-[20px_1fr] gap-2">
+                                                            <span className={`font-bold ${s.score <= 2 ? 'text-red-500' : s.score === 3 ? 'text-yellow-600' : 'text-green-600'}`}>
+                                                                {s.score}
+                                                            </span>
+                                                            <span className="text-muted-foreground">{s.desc}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+
                         </DialogHeader>
 
                         <ScrollArea className="flex-1 px-6 py-4">
