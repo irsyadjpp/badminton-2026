@@ -43,7 +43,7 @@ export default function ManagerLoginPage() {
             description: "Halo! Selamat datang di BCC Manager.",
             className: "bg-green-600 text-white border-none"
         });
-        
+        setIsGoogleLoading(false); // Stop loading on success
         router.push('/manager/dashboard');
     } else {
         toast({ title: "Login Gagal", description: "Tidak dapat membuat sesi Google.", variant: "destructive" });
