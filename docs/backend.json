@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's public profile.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        }
+      }
+    },
+    "Protest": {
+      "title": "Protest Submission",
+      "description": "Represents a formal protest submitted by a team manager.",
+      "type": "object",
+      "properties": {
+        "managerName": { "type": "string" },
+        "teamName": { "type": "string" },
+        "managerWhatsapp": { "type": "string" },
+        "category": { "type": "string", "enum": ["Putra", "Putri", "Campuran"] },
+        "incidentTime": { "type": "string" },
+        "courtNumber": { "type": "string" },
+        "partaiNumber": { "type": "number" },
+        "opponentTeam": { "type": "string" },
+        "opponentPlayer": { "type": "string" },
+        "violationType": { "type": "array", "items": { "type": "string" } },
+        "youtubeUrl": { "type": "string" },
+        "videoUrl": { "type": "string", "format": "uri" },
+        "additionalEvidence": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "ACCEPTED", "REJECTED"], "default": "PENDING" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "decisionNotes": { "type": "string" }
+      },
+      "required": ["managerName", "teamName", "category", "incidentTime", "courtNumber", "partaiNumber", "opponentTeam", "opponentPlayer", "violationType", "status", "createdAt"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "email-password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores public user profile information."
+    },
+    "/protests/{protestId}": {
+        "schema": { "$ref": "#/entities/Protest" },
+        "description": "Stores all protest submissions from team managers."
+    }
+  }
+}
