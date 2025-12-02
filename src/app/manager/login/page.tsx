@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginManager, loginManagerGoogle } from "../actions";
-import { Loader2, ArrowRight, Mail } from "lucide-react";
+import { loginManager } from "../actions";
+import { Loader2, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -31,23 +31,21 @@ export default function ManagerLoginPage() {
     }
   };
 
-  // Handler untuk Login Google
-  const handleGoogleLogin = async () => {
+  // Handler untuk Login Google (Simulasi Langsung)
+  const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    // Panggil Server Action Simulasi
-    const result = await loginManagerGoogle();
     
-    if (result.success) {
-        toast({ 
-            title: "Google Login Berhasil", 
-            description: "Halo! Selamat datang di BCC Manager.",
-            className: "bg-green-600 text-white border-none"
-        });
+    // Tampilkan pesan sukses
+    toast({ 
+        title: "Google Login Berhasil", 
+        description: "Mengalihkan ke dasbor Anda...",
+        className: "bg-green-600 text-white border-none"
+    });
+
+    // Langsung arahkan ke dashboard setelah delay singkat untuk simulasi
+    setTimeout(() => {
         router.push('/manager/dashboard');
-    } else {
-        toast({ title: "Login Gagal", description: "Tidak dapat membuat sesi Google.", variant: "destructive" });
-        setIsGoogleLoading(false);
-    }
+    }, 1000); 
   };
 
   return (
