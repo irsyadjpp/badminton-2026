@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getManagerSession, logoutManager } from './actions';
+import { getManagerSession, logoutManager } from '../actions';
 import Link from 'next/link';
 import { LayoutDashboard, Users, LogOut, Settings, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
