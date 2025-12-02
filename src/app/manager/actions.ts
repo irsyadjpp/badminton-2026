@@ -90,3 +90,29 @@ export async function getManagerSession() {
     return null;
   }
 }
+
+export async function loginManagerGoogle() {
+  // 1. Simulasi Delay Network
+  await new Promise(r => setTimeout(r, 1500));
+
+  // 2. Simulasi Data dari Google
+  const mockGoogleUser = {
+    email: "manager.google@gmail.com",
+    name: "Budi Google (Manager)",
+    picture: "https://github.com/shadcn.png", // Placeholder avatar
+    role: 'manager',
+    isLoggedIn: true,
+    provider: 'google'
+  };
+
+  // 3. Set Session Cookie
+  const cookieStore = cookies();
+  cookieStore.set('bcc_manager_session', JSON.stringify(mockGoogleUser), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7, // 1 Minggu
+    path: '/',
+  });
+
+  return { success: true };
+}
