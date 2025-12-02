@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Info, Users, AlertCircle, CheckCircle2, Receipt, Wallet, Save, QrCode, CreditCard } from "lucide-react";
+import { Loader2, Plus, Trash2, Info, Users, AlertCircle, CheckCircle2, Receipt, Wallet, Save, QrCode, CreditCard, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import confetti from 'canvas-confetti';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 const STORAGE_KEY = "bcc_registration_draft";
 
@@ -68,7 +69,7 @@ export default function RegistrationPage() {
   const handleSaveDraft = () => {
     const currentValues = form.getValues();
     // Hapus file transferProof dari draft karena File object tidak bisa disimpan di localStorage
-    const { transferProof, ...dataToSave } = currentValues; 
+    const { transferProof, waiverProof, ...dataToSave } = currentValues; 
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     toast({
@@ -333,77 +334,119 @@ export default function RegistrationPage() {
                 </CardContent>
             </Card>
 
-                <Card>
-                <CardHeader className="bg-primary/5 border-b pb-4"><CardTitle className="text-lg text-primary font-bold">3. Pembayaran</CardTitle></CardHeader>
-                <CardContent className="p-6 space-y-4">
-                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md mb-6">
-                        <p className="text-sm text-blue-800 mb-1">
-                            Total Tagihan Anda: <strong>Rp {potentialBill.toLocaleString('id-ID')}</strong>
-                        </p>
-                        <p className="text-xs text-blue-600">
-                            ({stats.totalSlots} slot pemain x Rp 100.000)
-                        </p>
-                    </div>
-                    
-                    <Tabs defaultValue="transfer" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-4">
-                            <TabsTrigger value="transfer">Transfer Bank</TabsTrigger>
-                            <TabsTrigger value="qris">QRIS</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="transfer" className="space-y-4 p-4 border rounded-lg bg-secondary/10">
-                            <div className="flex items-center gap-3 mb-2">
-                                <CreditCard className="w-6 h-6 text-primary" />
-                                <div>
-                                    <p className="font-bold text-sm">Bank BJB</p>
-                                    <p className="text-xs text-muted-foreground">Transfer Manual / Mobile Banking</p>
-                                </div>
-                            </div>
-                            <div className="space-y-1 text-sm">
-                                <p>No. Rekening: <span className="font-mono font-bold text-lg select-all">0123-4567-8900</span></p>
-                                <p>Atas Nama: <strong>Panitia BCC 2026</strong></p>
-                                <p className="text-xs text-muted-foreground mt-2">*Mohon tambahkan 3 digit terakhir nomor HP Manajer pada nominal transfer.</p>
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="qris" className="space-y-4 p-4 border rounded-lg bg-secondary/10 text-center">
-                            <div className="flex flex-col items-center gap-3">
-                                <QrCode className="w-12 h-12 text-primary" />
-                                <div>
-                                    <p className="font-bold text-sm">QRIS Bank BJB</p>
-                                    <p className="text-xs text-muted-foreground">Scan menggunakan aplikasi e-wallet / banking apa saja</p>
-                                </div>
-                                <div className="w-48 h-48 bg-white border rounded-lg flex items-center justify-center">
-                                    <span className="text-muted-foreground text-xs">QR Code Image Placeholder</span>
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-2">*Pastikan nama merchant adalah <strong>"BCC 2026 - Registrasi"</strong></p>
-                            </div>
-                        </TabsContent>
-                    </Tabs>
+            <Card>
+              <CardHeader className="bg-primary/5 border-b pb-4">
+                <CardTitle className="text-lg text-primary font-bold">3. Administrasi & Pembayaran</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                
+                {/* --- WAIVER OF LIABILITY (BARU) --- */}
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-md">
+                    <p className="font-bold text-red-800 mb-2 flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5" /> Dokumen Legal Wajib
+                    </p>
+                    <p className="text-sm text-red-700 mb-3">
+                        Pendaftaran baru dianggap sah jika Waiver sudah ditandatangani dan bermaterai Rp 10.000.
+                    </p>
+                    <Button asChild size="sm" variant="outline" className="bg-white border-red-200 text-red-600 hover:bg-red-100">
+                        <Link href="/manager/documents/waiver" target="_blank">
+                            <Download className="w-4 h-4 mr-2" /> Unduh Template Waiver
+                        </Link>
+                    </Button>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="waiverProof" // Field Baru
+                  render={({ field: { value, onChange, ...fieldProps } }) => (
+                    <FormItem>
+                      <FormLabel>Upload Waiver Final (Tandatangan & Materai)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...fieldProps}
+                          type="file"
+                          accept="image/*, application/pdf"
+                          onChange={(event) => {
+                            onChange(event.target.files);
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>Format: JPG/PNG/PDF. Max 5MB.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* --- END WAIVER UPLOAD --- */}
 
-                    <FormField control={form.control} name="transferProof" render={({ field: { value, onChange, ...fieldProps } }) => (
-                        <FormItem>
-                            <FormLabel>Upload Bukti Transfer / Screenshot QRIS</FormLabel>
-                            <FormControl><Input {...fieldProps} type="file" accept="image/*,application/pdf" onChange={(e) => onChange(e.target.files)} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                    
-                    <div className="space-y-2 pt-4 border-t">
-                        {[
-                            { id: "agreementValidData", label: "Data Valid & Benar" },
-                            { id: "agreementWaiver", label: "Setuju Waiver Liability (Asuransi)" },
-                            { id: "agreementTpf", label: "Terima Keputusan Mutlak TPF" },
-                            { id: "agreementRules", label: "Paham Peraturan BCC 2026" }
-                        ].map((item) => (
-                            <FormField key={item.id} control={form.control} name={item.id as any} render={({ field }) => (
-                                <FormItem className="flex gap-2 items-center space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="font-normal text-sm">{item.label}</FormLabel></FormItem>
-                            )} />
-                        ))}
-                        {(form.formState.errors.agreementValidData || form.formState.errors.agreementWaiver || form.formState.errors.agreementTpf || form.formState.errors.agreementRules) && (
-                                <p className="text-sm font-medium text-destructive">Anda harus menyetujui semua pernyataan legal.</p>
-                        )}
-                    </div>
-                </CardContent>
-                </Card>
+                {/* Pembayaran (Sama seperti sebelumnya) */}
+                 <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md mb-6">
+                    <p className="text-sm text-blue-800 mb-1">
+                        Total Tagihan Anda: <strong>Rp {potentialBill.toLocaleString('id-ID')}</strong>
+                    </p>
+                    <p className="text-xs text-blue-600">
+                        ({stats.totalSlots} slot pemain x Rp 100.000)
+                    </p>
+                </div>
+                
+                <Tabs defaultValue="transfer" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="transfer">Transfer Bank</TabsTrigger>
+                        <TabsTrigger value="qris">QRIS</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="transfer" className="space-y-4 p-4 border rounded-lg bg-secondary/10">
+                        <div className="flex items-center gap-3 mb-2">
+                            <CreditCard className="w-6 h-6 text-primary" />
+                            <div>
+                                <p className="font-bold text-sm">Bank BJB</p>
+                                <p className="text-xs text-muted-foreground">Transfer Manual / Mobile Banking</p>
+                            </div>
+                        </div>
+                        <div className="space-y-1 text-sm">
+                            <p>No. Rekening: <span className="font-mono font-bold text-lg select-all">0123-4567-8900</span></p>
+                            <p>Atas Nama: <strong>Panitia BCC 2026</strong></p>
+                            <p className="text-xs text-muted-foreground mt-2">*Mohon tambahkan 3 digit terakhir nomor HP Manajer pada nominal transfer.</p>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="qris" className="space-y-4 p-4 border rounded-lg bg-secondary/10 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                            <QrCode className="w-12 h-12 text-primary" />
+                            <div>
+                                <p className="font-bold text-sm">QRIS Bank BJB</p>
+                                <p className="text-xs text-muted-foreground">Scan menggunakan aplikasi e-wallet / banking apa saja</p>
+                            </div>
+                            <div className="w-48 h-48 bg-white border rounded-lg flex items-center justify-center">
+                                <span className="text-muted-foreground text-xs">QR Code Image Placeholder</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">*Pastikan nama merchant adalah <strong>"BCC 2026 - Registrasi"</strong></p>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+
+                <FormField control={form.control} name="transferProof" render={({ field: { value, onChange, ...fieldProps } }) => (
+                    <FormItem>
+                        <FormLabel>Upload Bukti Transfer / Screenshot QRIS</FormLabel>
+                        <FormControl><Input {...fieldProps} type="file" accept="image/*,application/pdf" onChange={(e) => onChange(e.target.files)} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                
+                <div className="space-y-2 pt-4 border-t">
+                    {[
+                        { id: "agreementValidData", label: "Data Valid & Benar" },
+                        { id: "agreementWaiver", label: "Setuju Waiver Liability (Asuransi)" },
+                        { id: "agreementTpf", label: "Terima Keputusan Mutlak TPF" },
+                        { id: "agreementRules", label: "Paham Peraturan BCC 2026" }
+                    ].map((item) => (
+                        <FormField key={item.id} control={form.control} name={item.id as any} render={({ field }) => (
+                            <FormItem className="flex gap-2 items-center space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="font-normal text-sm">{item.label}</FormLabel></FormItem>
+                        )} />
+                    ))}
+                    {(form.formState.errors.agreementValidData || form.formState.errors.agreementWaiver || form.formState.errors.agreementTpf || form.formState.errors.agreementRules) && (
+                            <p className="text-sm font-medium text-destructive">Anda harus menyetujui semua pernyataan legal.</p>
+                    )}
+                </div>
+              </CardContent>
+            </Card>
 
                 <div className="block lg:hidden sticky bottom-4 z-50">
                 <Button type="submit" size="lg" className="w-full shadow-xl border-2 border-white" disabled={isSubmitting}>

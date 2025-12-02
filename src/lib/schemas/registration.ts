@@ -46,10 +46,19 @@ export const registrationFormSchema = z.object({
       (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
       "Format .jpg, .png, atau .pdf"
     ),
-  agreementValidData: z.literal(true, { errorMap: () => ({ message: "Persetujuan diperlukan" }) }),
-  agreementWaiver: z.literal(true, { errorMap: () => ({ message: "Persetujuan diperlukan" }) }),
-  agreementTpf: z.literal(true, { errorMap: () => ({ message: "Persetujuan diperlukan" }) }),
-  agreementRules: z.literal(true, { errorMap: () => ({ message: "Persetujuan diperlukan" }) }),
+
+  waiverProof: z.any()
+    .refine((files) => files?.length == 1, "Wajib mengunggah Formulir Waiver yang sudah ditandatangani dan bermaterai.")
+    .refine((files) => files?.[0]?.size <= 5000000, `Ukuran file Waiver maksimal 5MB.`)
+    .refine(
+      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
+      "Format file Waiver harus .jpg, .png, atau .pdf"
+    ),
+    
+  agreementValidData: z.literal(true, { errorMap: () => ({ message: "Persetujuan data wajib dicentang" }) }),
+  agreementWaiver: z.literal(true, { errorMap: () => ({ message: "Persetujuan Waiver wajib dicentang" }) }),
+  agreementTpf: z.literal(true, { errorMap: () => ({ message: "Persetujuan TPF wajib dicentang" }) }),
+  agreementRules: z.literal(true, { errorMap: () => ({ message: "Persetujuan aturan wajib dicentang" }) }),
 })
 .superRefine((data, ctx) => {
   // VALIDASI KUOTA DINAMIS

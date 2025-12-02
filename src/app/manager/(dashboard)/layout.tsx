@@ -5,7 +5,7 @@ import { redirect, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Users, LogOut, Settings, CheckCircle, 
-  Download, Menu, Home
+  Download, Menu, Home, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logoutManager } from '../actions';
@@ -27,6 +27,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
     { name: "Registrasi Tim", href: "/manager/register-team", icon: Users },
     { name: "Status & Verifikasi", href: "/manager/status", icon: CheckCircle },
     { name: "Dokumen & Unduh", href: "/manager/downloads", icon: Download },
+    { name: "Cetak Waiver", href: "/manager/documents/waiver", icon: FileText, isExternal: true },
     { name: "Pengaturan Akun", href: "/manager/settings", icon: Settings },
   ];
   
@@ -54,6 +55,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
               <Link 
                 key={menu.href} 
                 href={menu.href}
+                target={menu.isExternal ? "_blank" : undefined}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group',
                   isActive 
@@ -98,6 +100,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
                               <Link 
                                 key={menu.href} 
                                 href={menu.href}
+                                target={menu.isExternal ? "_blank" : undefined}
                                 className={cn(
                                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                                   isActive 
