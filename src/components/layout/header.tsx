@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, UserShield } from 'lucide-react';
+import { Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
@@ -54,7 +54,7 @@ export function Header() {
             <div className="hidden md:flex items-center gap-2">
               <Button asChild variant="ghost">
                 <Link href="/admin">
-                  <UserShield className="w-4 h-4 mr-2" />
+                  <Shield className="w-4 h-4 mr-2" />
                   Admin
                 </Link>
               </Button>
