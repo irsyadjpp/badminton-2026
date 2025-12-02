@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
+
 export const protestFormSchema = z.object({
   managerName: z.string().min(2, "Nama manajer wajib diisi"),
   teamName: z.string().min(2, "Nama tim pelapor wajib diisi"),
@@ -16,7 +19,15 @@ export const protestFormSchema = z.object({
   // Jenis Pelanggaran (Minimal 1 dipilih)
   violationType: z.array(z.string()).min(1, "Wajib memilih minimal satu jenis pelanggaran"),
 
-  // Keterangan Tambahan
+  // Bukti Tambahan
+  youtubeUrl: z.string().url("URL YouTube tidak valid.").optional().or(z.literal('')),
+  videoFile: z.any()
+    .optional()
+    .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Ukuran video maksimal 100MB.`)
+    .refine(
+      (files) => !files || files.length === 0 || ACCEPTED_VIDEO_TYPES.includes(files?.[0]?.type),
+      "Format video harus .mp4, .webm, atau .mov"
+    ),
   additionalEvidence: z.string().optional(),
 
   // Pernyataan Uang Jaminan

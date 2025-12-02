@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { AlertCircle, FileText, Send, Loader2, Info } from 'lucide-react';
+import { AlertCircle, FileText, Send, Loader2, Info, Youtube, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -43,6 +43,8 @@ export default function ProtestSubmissionPage() {
       opponentTeam: "",
       opponentPlayer: "",
       violationType: [],
+      youtubeUrl: "",
+      videoFile: undefined,
       additionalEvidence: "",
       depositAgreement: false,
     },
@@ -156,12 +158,41 @@ export default function ProtestSubmissionPage() {
                     </FormItem>
                 )} />
                 
+                <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Youtube className="w-5 h-5 text-red-600" /> Link Video YouTube (Opsional)</Label>
+                    <FormField control={form.control} name="youtubeUrl" render={({ field }) => (<FormItem className="!mt-0"><FormControl><Input placeholder="https://www.youtube.com/watch?v=..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+
+                <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t"></div>
+                    <span className="flex-shrink mx-4 text-xs text-muted-foreground">ATAU</span>
+                    <div className="flex-grow border-t"></div>
+                </div>
+
+                <FormField control={form.control} name="videoFile" render={({ field: { value, onChange, ...fieldProps } }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2"><Video className="w-5 h-5 text-blue-600" /> Upload File Video (Opsional, Max 100MB)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...fieldProps}
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={(event) => {
+                          onChange(event.target.files);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
                 <FormField control={form.control} name="additionalEvidence" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Bukti & Keterangan Tambahan</FormLabel>
+                    <FormItem className='pt-4 border-t'>
+                        <FormLabel>Keterangan Tambahan</FormLabel>
                         <FormControl><Textarea placeholder="Jelaskan secara spesifik gerakan atau fakta yang menjadi dasar protes..." rows={5} {...field} /></FormControl>
                     </FormItem>
                 )} />
+
                 </CardContent>
             </Card>
 
