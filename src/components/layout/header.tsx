@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu } from 'lucide-react';
+import { Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
@@ -50,6 +51,11 @@ export function Header() {
 
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-2">
+              <Button asChild variant="outline">
+                <Link href="/admin">
+                  <Shield className="mr-2 h-4 w-4" /> Admin
+                </Link>
+              </Button>
               <Button asChild>
                 <Link href="/manager/login">
                   Manager Area
@@ -72,6 +78,11 @@ export function Header() {
                           <Link href="/manager/login" onClick={closeSheet}>
                             Manager Area
                           </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="w-full">
+                        <Link href="/admin" onClick={closeSheet}>
+                          <Shield className="mr-2 h-4 w-4" /> Admin Login
+                        </Link>
                       </Button>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import { Mail, Phone, BookOpen, ArrowRight, HelpCircle, Shield } from 'lucide-react';
+import { Mail, Phone, BookOpen, ArrowRight, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 
@@ -16,11 +16,6 @@ export function Footer() {
                  <Button asChild>
                     <Link href="/contact">
                       Hubungi Kami <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href="/admin">
-                      <Shield className="mr-2 h-4 w-4" /> Admin Login
                     </Link>
                   </Button>
              </div>
