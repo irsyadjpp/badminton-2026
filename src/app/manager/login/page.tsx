@@ -18,11 +18,15 @@ export default function ManagerLoginPage() {
       setLoadingMessage("Memverifikasi sesi...");
       
       // 2. Panggil Server Action untuk mengatur Cookie (Simulasi Login Berhasil)
-      await loginManagerGoogle();
+      const result = await loginManagerGoogle();
       
-      // 3. Redirect ke Dashboard
-      setLoadingMessage("Sesi Berhasil. Mengalihkan...");
-      router.push('/manager/dashboard');
+      // 3. Redirect ke Dashboard jika berhasil
+      if (result.success) {
+        setLoadingMessage("Sesi Berhasil. Mengalihkan...");
+        router.push('/manager/dashboard');
+      } else {
+        setLoadingMessage("Gagal membuat sesi otomatis.");
+      }
     };
 
     autoLogin();
