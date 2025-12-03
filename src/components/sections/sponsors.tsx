@@ -14,7 +14,7 @@ export function SponsorsSection() {
                 {/* --- TAMBAHAN: INSTITUTIONAL SUPPORT --- */}
                 <div className="mb-16">
                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">
-                        Didukung & Direkomendasikan Oleh
+                        Didukung Oleh
                     </h3>
                     <div className="flex justify-center items-center gap-8 opacity-90 hover:opacity-100 transition-opacity">
                          <div className="flex flex-col items-center gap-2">
