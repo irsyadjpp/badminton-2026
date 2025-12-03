@@ -16,18 +16,8 @@ import { Loader2, Plus, Trash2, Info, Users, AlertCircle, CheckCircle2, Receipt,
 import { useState, useEffect } from "react";
 import confetti from 'canvas-confetti';
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { WaiverDialog } from "@/components/manager/waiver-dialog";
-
-// --- PETA HARGA BARU ---
-const COST_PER_LEVEL: Record<string, number> = {
-  Beginner: 150000,
-  Intermediate: 150000,
-  Advance: 200000,
-  undefined: 0, // Fallback jika level belum dipilih
-};
-// -----------------------
 
 
 const STORAGE_KEY = "bcc_registration_draft";
@@ -83,7 +73,7 @@ export default function RegistrationPage() {
   const handleSaveDraft = () => {
     const currentValues = form.getValues();
     // Hapus file transferProof dari draft karena File object tidak bisa disimpan di localStorage
-    const { transferProof, waiverProof, ...dataToSave } = currentValues; 
+    const { waiverProof, ...dataToSave } = currentValues; 
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     toast({
@@ -121,19 +111,8 @@ export default function RegistrationPage() {
     totalSlots: 0
   };
 
-  // --- LOGIC PERHITUNGAN BIAYA DINAMIS ---
-  let totalBillEstimate = 0;
 
   watchedPlayers?.forEach(p => {
-    // 1. Ambil harga per pemain berdasarkan level deklarasi
-    const costPerPlayer = COST_PER_LEVEL[p.level as keyof typeof COST_PER_LEVEL] || 0;
-    
-    // 2. Hitung jumlah kategori yang diikuti pemain ini (slots)
-    const slotsTaken = p.participation?.length || 0;
-
-    // 3. Tambahkan ke total bill estimate
-    totalBillEstimate += costPerPlayer * slotsTaken;
-
     // 4. Update stats (kuota)
     if (p.participation && p.participation.length > 0) {
         p.participation.forEach((cat: any) => {
@@ -145,8 +124,6 @@ export default function RegistrationPage() {
     }
   });
 
-  const potentialBill = totalBillEstimate;
-  // --- END LOGIC ---
 
   useEffect(() => {
     if (isSuccess) {
@@ -175,20 +152,23 @@ export default function RegistrationPage() {
                 <div>
                     <h1 className="text-3xl font-black text-green-700">Pendaftaran Komunitas Berhasil!</h1>
                     <p className="text-muted-foreground">
-                        Terima kasih <span className="font-bold text-foreground">{submittedData?.communityName}</span>.
+                        Terima kasih <span className="font-bold text-foreground">{submittedData?.communityName}</span>. Data Anda sedang kami proses.
                     </p>
                 </div>
                 <div className="bg-white border rounded-lg p-4 text-left grid grid-cols-1 gap-2">
                      <div className="flex justify-between border-b pb-2">
-                        <span className="text-muted-foreground">Total Slot Terdaftar:</span>
-                        <span className="font-bold">{stats.totalSlots} Slot</span>
+                        <span className="text-muted-foreground">Total Pemain Terdaftar:</span>
+                        <span className="font-bold">{submittedData?.players.length} Pemain</span>
                     </div>
                      <div className="flex justify-between pt-2 text-lg text-primary">
-                        <span className="font-bold">Estimasi Biaya:</span>
-                        <span className="font-black">Rp {potentialBill.toLocaleString('id-ID')}</span>
+                        <span className="font-bold">Status:</span>
+                        <span className="font-black">Menunggu Verifikasi TPF</span>
                     </div>
                 </div>
-                <Button onClick={() => window.location.reload()} variant="outline">Daftar Lagi</Button>
+                <p className="text-sm text-muted-foreground">
+                    Informasi mengenai total biaya dan metode pembayaran akan diinfokan melalui WhatsApp Manajer setelah semua pemain lolos verifikasi TPF.
+                </p>
+                <Button onClick={() => window.location.reload()} variant="outline">Daftarkan Tim Lain</Button>
              </CardContent>
           </Card>
         </main>
@@ -209,7 +189,7 @@ export default function RegistrationPage() {
               <div className="space-y-2">
               <h1 className="text-3xl font-black font-headline text-primary">Formulir Pendaftaran Tim</h1>
               <p className="text-muted-foreground">
-                  Biaya dihitung per level pemain: Beginner/Intermediate <strong className="font-bold">Rp 150rb</strong>, Advance <strong className="font-bold">Rp 200rb</strong>.
+                  Lengkapi data komunitas dan pemain. Pembayaran akan diinformasikan setelah TPF selesai memverifikasi level.
               </p>
               </div>
 
@@ -286,9 +266,9 @@ export default function RegistrationPage() {
                                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl><SelectTrigger><SelectValue placeholder="Pilih" /></SelectTrigger></FormControl>
                                   <SelectContent>
-                                      <SelectItem value="Beginner">Beginner (Rp 150.000)</SelectItem>
-                                      <SelectItem value="Intermediate">Intermediate (Rp 150.000)</SelectItem>
-                                      <SelectItem value="Advance">Advance (Rp 200.000)</SelectItem>
+                                      <SelectItem value="Beginner">Beginner</SelectItem>
+                                      <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                      <SelectItem value="Advance">Advance</SelectItem>
                                   </SelectContent>
                                   </Select>
                                   <FormMessage />
@@ -380,7 +360,7 @@ export default function RegistrationPage() {
 
               <Card>
                 <CardHeader className="bg-primary/5 border-b pb-4">
-                  <CardTitle className="text-lg text-primary font-bold">3. Administrasi & Pembayaran</CardTitle>
+                  <CardTitle className="text-lg text-primary font-bold">3. Administrasi & Persetujuan</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
                   
@@ -419,56 +399,6 @@ export default function RegistrationPage() {
                       </FormItem>
                     )}
                   />
-
-                   <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-md mb-4">
-                        <p className="text-sm text-yellow-800">
-                            <strong className="font-bold">PERHATIAN: Biaya di bawah ini adalah <strong className="font-bold">ESTIMASI AWAL</strong>.</strong> <br/>
-                            Biaya Final akan disesuaikan setelah TPF mengesahkan level pemain Anda.
-                        </p>
-                    </div>
-
-                  
-                  <Tabs defaultValue="transfer" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2 mb-4">
-                          <TabsTrigger value="transfer">Transfer Bank</TabsTrigger>
-                          <TabsTrigger value="qris">QRIS</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="transfer" className="space-y-4 p-4 border rounded-lg bg-secondary/10">
-                          <div className="flex items-center gap-3 mb-2">
-                              <CreditCard className="w-6 h-6 text-primary" />
-                              <div>
-                                  <p className="font-bold text-sm">Bank BJB</p>
-                                  <p className="text-xs text-muted-foreground">Transfer Manual / Mobile Banking</p>
-                              </div>
-                          </div>
-                          <div className="space-y-1 text-sm">
-                              <p>No. Rekening: <span className="font-mono font-bold text-lg select-all">0123-4567-8900</span></p>
-                              <p>Atas Nama: <strong>Panitia BCC 2026</strong></p>
-                              <p className="text-xs text-muted-foreground mt-2">*Mohon tambahkan 3 digit terakhir nomor HP Manajer pada nominal transfer.</p>
-                          </div>
-                      </TabsContent>
-                      <TabsContent value="qris" className="space-y-4 p-4 border rounded-lg bg-secondary/10 text-center">
-                          <div className="flex flex-col items-center gap-3">
-                              <QrCode className="w-12 h-12 text-primary" />
-                              <div>
-                                  <p className="font-bold text-sm">QRIS Bank BJB</p>
-                                  <p className="text-xs text-muted-foreground">Scan menggunakan aplikasi e-wallet / banking apa saja</p>
-                              </div>
-                              <div className="w-48 h-48 bg-white border rounded-lg flex items-center justify-center">
-                                  <span className="text-muted-foreground text-xs">QR Code Image Placeholder</span>
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-2">*Pastikan nama merchant adalah <strong>"BCC 2026 - Registrasi"</strong></p>
-                          </div>
-                      </TabsContent>
-                  </Tabs>
-
-                  <FormField control={form.control} name="transferProof" render={({ field: { value, onChange, ...fieldProps } }) => (
-                      <FormItem>
-                          <FormLabel>Upload Bukti Transfer / Screenshot QRIS</FormLabel>
-                          <FormControl><Input {...fieldProps} type="file" accept="image/*,application/pdf" onChange={(e) => onChange(e.target.files)} /></FormControl>
-                          <FormMessage />
-                      </FormItem>
-                  )} />
                   
                   <div className="space-y-2 pt-4 border-t">
                       {[
@@ -527,7 +457,7 @@ export default function RegistrationPage() {
 
                   <div className="block lg:hidden sticky bottom-4 z-50">
                   <Button type="submit" size="lg" className="w-full shadow-xl border-2 border-white" disabled={isSubmitting}>
-                      {isSubmitting ? "Mengirim..." : `BAYAR Rp ${potentialBill.toLocaleString('id-ID')}`}
+                      {isSubmitting ? "Mengirim..." : `Kirim Pendaftaran`}
                   </Button>
                   </div>
 
@@ -571,11 +501,9 @@ export default function RegistrationPage() {
                   </CardContent>
                   <CardFooter className="flex-col items-start pt-4 border-t gap-3">
                       <div className="w-full flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Estimasi Tagihan</span>
-                          <span className="text-xl font-black text-primary">Rp {potentialBill.toLocaleString('id-ID')}</span>
+                          <span className="text-sm text-muted-foreground">Status Pembayaran</span>
+                          <span className="text-lg font-bold text-primary">Menunggu Hasil TPF</span>
                       </div>
-                      
-                       <p className="text-xs text-yellow-600 text-right w-full font-semibold">*Biaya final setelah TPF</p>
                       
                       <div className="grid grid-cols-2 gap-2 w-full mt-2">
                           <Button 
@@ -592,7 +520,7 @@ export default function RegistrationPage() {
                               className="w-full font-bold shadow-md" 
                               disabled={isSubmitting}
                           >
-                              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "KIRIM"}
+                              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Kirim"}
                           </Button>
                       </div>
                   </CardFooter>

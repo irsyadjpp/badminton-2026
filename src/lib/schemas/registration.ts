@@ -39,13 +39,6 @@ export const registrationFormSchema = z.object({
   basecamp: z.string().min(2, "Basecamp mabar wajib diisi"),
   instagram: z.string().optional(),
   players: z.array(playerSchema),
-  transferProof: z.any()
-    .refine((files) => files?.length == 1, "Bukti transfer wajib diupload")
-    .refine((files) => files?.[0]?.size <= 5000000, `Maksimal 5MB.`)
-    .refine(
-      (files) => ['image/jpeg', 'image/png', 'application/pdf'].includes(files?.[0]?.type),
-      "Format .jpg, .png, atau .pdf"
-    ),
 
   waiverProof: z.any()
     .refine((files) => files?.length == 1, "Wajib mengunggah Formulir Waiver yang sudah ditandatangani dan bermaterai.")
