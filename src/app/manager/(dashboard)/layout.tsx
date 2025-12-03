@@ -48,7 +48,6 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
         title: "DOKUMEN",
         items: [
             { name: "Dokumen & Unduh", href: "/manager/downloads", icon: Download },
-            { name: "Cetak Waiver", href: "/manager/documents/waiver", icon: FileText, isExternal: true },
         ]
     },
     {
@@ -73,7 +72,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
                  <Link 
                     key={menu.href} 
                     href={menu.href}
-                    target={menu.isExternal ? "_blank" : undefined}
+                    target={(menu as any).isExternal ? "_blank" : undefined}
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group',
                       isActive 
