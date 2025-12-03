@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,7 +15,6 @@ interface WaiverDialogProps {
 }
 
 export function WaiverDialog({ open, onOpenChange, onAccept }: WaiverDialogProps) {
-    // State yang mengontrol apakah user sudah mencapai bawah
     const [scrolledToBottom, setScrolledToBottom] = useState(false);
     const [dateString, setDateString] = useState(''); 
 
@@ -25,16 +25,13 @@ export function WaiverDialog({ open, onOpenChange, onAccept }: WaiverDialogProps
         setDateString(formattedDate);
     }, []);
 
-    // --- LOGIKA UTAMA SCROLL CHECK ---
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const target = e.currentTarget;
-        // Cek jika jarak scroll dari bawah kurang dari 10px
         const isBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 10;
         if (isBottom && !scrolledToBottom) {
-            setScrolledToBottom(true); // Set TRUE setelah mencapai bawah
+            setScrolledToBottom(true); 
         }
     };
-    // ---------------------------------
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -49,7 +46,6 @@ export function WaiverDialog({ open, onOpenChange, onAccept }: WaiverDialogProps
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* --- Konten Legal Waiver (DENGAN onScrollCapture) --- */}
                 <ScrollArea 
                     className="flex-1 pr-6 py-4 border rounded-lg bg-gray-50 font-serif text-sm" 
                     onScrollCapture={handleScroll}
@@ -59,7 +55,7 @@ export function WaiverDialog({ open, onOpenChange, onAccept }: WaiverDialogProps
                         
                         <p>
                             Saya yang bertanda tangan di bawah ini, selaku Manajer Tim, mewakili seluruh anggota tim yang terdaftar dalam 
-                            **Bandung Community Championship (BCC) 2026**:
+                            <strong>Bandung Community Championship (BCC) 2026</strong>:
                         </p>
                         
                         <Separator className='my-4'/>
@@ -75,10 +71,10 @@ export function WaiverDialog({ open, onOpenChange, onAccept }: WaiverDialogProps
                                 <strong>PELEPASAN TUNTUTAN (RELEASE):</strong> Saya melepaskan dan membebaskan Panitia Pelaksana BCC 2026, Sponsor (Ayo Indonesia, Bank BJB, dll), Pemilik Venue (GOR KONI), dan pihak terkait lainnya dari segala bentuk tanggung jawab hukum, tuntutan ganti rugi, atau klaim apapun apabila terjadi kecelakaan, cedera, atau kematian yang menimpa saya selama rangkaian acara berlangsung.
                             </li>
                             <li>
-                                <strong>TINDAKAN MEDIS:</strong> Saya mengizinkan Tim Medis Panitia untuk memberikan pertolongan pertama (First Aid) jika terjadi keadaan darurat. Saya memahami bahwa biaya pengobatan lanjutan (Rumah Sakit/Operasi) adalah **tanggung jawab saya pribadi** atau asuransi/BPJS pribadi saya.
+                                <strong>TINDAKAN MEDIS:</strong> Saya mengizinkan Tim Medis Panitia untuk memberikan pertolongan pertama (First Aid) jika terjadi keadaan darurat. Saya memahami bahwa biaya pengobatan lanjutan (Rumah Sakit/Operasi) adalah <strong class="font-bold">tanggung jawab saya pribadi</strong> atau asuransi/BPJS pribadi saya.
                             </li>
                             <li>
-                                <strong>KEPATUHAN REGULASI (INTEGRITAS):</strong> Saya bersedia mematuhi seluruh peraturan pertandingan dan menerima keputusan TPF terkait verifikasi level. Saya menerima sanksi **DISKUALIFIKASI** tanpa pengembalian uang pendaftaran jika terbukti manipulasi data (Sandbagging).
+                                <strong>KEPATUHAN REGULASI (INTEGRITAS):</strong> Saya bersedia mematuhi seluruh peraturan pertandingan dan menerima keputusan TPF terkait verifikasi level. Saya menerima sanksi <strong class="font-bold">DISKUALIFIKASI</strong> tanpa pengembalian uang pendaftaran jika terbukti manipulasi data (Sandbagging).
                             </li>
                             <li>
                                 <strong>HAK PUBLIKASI:</strong> Saya memberikan izin kepada Panitia dan Sponsor untuk mendokumentasikan dan menggunakan foto/video aktivitas saya selama turnamen untuk keperluan promosi tanpa menuntut royalti.
@@ -88,20 +84,17 @@ export function WaiverDialog({ open, onOpenChange, onAccept }: WaiverDialogProps
                         <Separator className='my-4'/>
 
                         <p className='text-sm text-right'>
-                            Bandung, <strong className='font-bold'>{dateString}</strong>
+                            Bandung, <strong class='font-bold'>{dateString}</strong>
                         </p>
                     </div>
                 </ScrollArea>
-                {/* --- END Konten Legal Waiver --- */}
 
                 <DialogFooter className="pt-4 border-t">
                     <div className="flex justify-between items-center w-full">
-                        {/* Status Notifikasi Scroll */}
                         <p className={`text-sm flex items-center gap-2 ${scrolledToBottom ? 'text-green-600' : 'text-red-600'}`}>
                            {scrolledToBottom ? <CheckCircle2 className='w-5 h-5 text-green-600'/> : 'Scroll ke bawah untuk mengaktifkan tombol.'}
                         </p>
                         
-                        {/* TOMBOL PERSETUJUAN DENGAN DISABLED LOCK */}
                         <Button 
                             onClick={onAccept} 
                             disabled={!scrolledToBottom}

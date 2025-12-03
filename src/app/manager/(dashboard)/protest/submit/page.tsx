@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -92,7 +93,7 @@ export default function ProtestSubmissionPage() {
                     
                     <div className="bg-white p-3 rounded-md text-sm border border-red-100">
                         <p className="font-bold">Transfer Bank Jaminan (Opsional sebelum setor tunai):</p>
-                        <p className="font-mono text-base">Bank BJB: <span className='font-bold'>0123-4567-8900</span> a.n Panitia BCC 2026</p>
+                        <p className="font-mono text-base">Bank BJB: <span class='font-bold'>0123-4567-8900</span> a.n Panitia BCC 2026</p>
                     </div>
 
                     <p className="text-xs font-semibold text-red-700">
@@ -257,7 +258,7 @@ export default function ProtestSubmissionPage() {
                                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                             <FormLabel className="font-normal cursor-pointer leading-snug text-sm text-red-800">
-                                Saya memahami dan menyetujui penyerahan **UANG JAMINAN PROTES Rp 500.000,-** secara tunai. Uang akan hangus jika protes ditolak, dan dikembalikan 100% jika diterima.
+                                Saya memahami dan menyetujui penyerahan <strong class="font-bold">UANG JAMINAN PROTES Rp 500.000,-</strong> secara tunai. Uang akan hangus jika protes ditolak, dan dikembalikan 100% jika diterima.
                             </FormLabel>
                         </FormItem>
                     )} />
@@ -300,7 +301,7 @@ export default function ProtestSubmissionPage() {
                         </li>
                          <li>
                             <span className="font-bold">Serahkan Berkas Fisik:</span>
-                            Bawa formulir cetak yang sudah ditandatangani & bermaterai, beserta uang jaminan tunai <strong>Rp 500.000</strong> ke Meja Panitia.
+                            Bawa formulir cetak yang sudah ditandatangani dan bermaterai, beserta uang jaminan tunai <strong class="font-bold">Rp 500.000</strong> ke Meja Panitia.
                         </li>
                          <li>
                             <span className="font-bold">Tunggu Keputusan:</span>
