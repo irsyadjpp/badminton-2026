@@ -14,7 +14,6 @@ import { LocationSection } from '@/components/sections/location';
 import { CategoriesSection } from '@/components/sections/categories';
 import { PrizesSection } from '@/components/sections/prizes';
 import { SponsorsSection } from '@/components/sections/sponsors';
-import { MobilitySection } from '@/components/sections/mobility';
 
 export default function Home() {
   return (
@@ -54,8 +53,6 @@ export default function Home() {
           <LocationSection />
         </div>
         
-        {/* 9. Mobilitas: Info Gojek/Grab */}
-        <MobilitySection />
       </main>
 
       <Footer />

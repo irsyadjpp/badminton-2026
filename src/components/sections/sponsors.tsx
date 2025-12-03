@@ -11,7 +11,6 @@ export function SponsorsSection() {
         <section id="calling-for-sponsors" className="py-16 md:py-24 bg-secondary">
             <div className="container mx-auto px-4 text-center">
                 
-                {/* --- TAMBAHAN: INSTITUTIONAL SUPPORT --- */}
                 <div className="mb-16">
                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">
                         Didukung Oleh
@@ -19,7 +18,6 @@ export function SponsorsSection() {
                     <div className="flex justify-center items-center gap-8 opacity-90 hover:opacity-100 transition-opacity">
                          <div className="flex flex-col items-center gap-2">
                             <div className="relative w-24 h-24">
-                                {/* Placeholder Logo PBSI */}
                                 <Image 
                                     src="/images/logo-pbsi.png" 
                                     alt="Logo PBSI Kota Bandung" 
@@ -31,7 +29,6 @@ export function SponsorsSection() {
                          </div>
                     </div>
                 </div>
-                {/* --------------------------------------- */}
 
                 <h2 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
                     Jadilah Bagian dari Sejarah
