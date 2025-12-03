@@ -27,7 +27,7 @@ export function LocationSection() {
             {/* Bagian Kanan: Map Embed */}
             <div className="w-full md:w-2/3 h-64 md:h-96 bg-muted relative">
                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.835376082724!2d107.6397223!3d-6.9102778!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e7b99c000001%3A0x1234567890abcdef!2sGor%20Koni%20Bandung!5e0!3m2!1sen!2sid!4v1234567890" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.835376082724!2d107.63972231530936!3d-6.91027779500735!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e7b99c000001%3A0x1234567890abcdef!2sGor%20Koni%20Bandung!5e0!3m2!1sen!2sid!4v1624500000000"
                     width="100%" 
                     height="100%" 
                     style={{border:0}} 
@@ -36,12 +36,6 @@ export function LocationSection() {
                     referrerPolicy="no-referrer-when-downgrade"
                     className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-500"
                 ></iframe>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="relative animate-bounce">
-                        <MapPin className="w-12 h-12 text-primary drop-shadow-lg" />
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-black/30 rounded-full blur-sm" />
-                    </div>
-                </div>
             </div>
         </div>
       </div>
