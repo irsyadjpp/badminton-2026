@@ -175,7 +175,7 @@ export default function RegistrationPage() {
                 <div>
                     <h1 className="text-3xl font-black text-green-700">Pendaftaran Komunitas Berhasil!</h1>
                     <p className="text-muted-foreground">
-                        Terima kasih <span class="font-bold text-foreground">{submittedData?.communityName}</span>.
+                        Terima kasih <span className="font-bold text-foreground">{submittedData?.communityName}</span>.
                     </p>
                 </div>
                 <div className="bg-white border rounded-lg p-4 text-left grid grid-cols-1 gap-2">
@@ -209,7 +209,7 @@ export default function RegistrationPage() {
               <div className="space-y-2">
               <h1 className="text-3xl font-black font-headline text-primary">Formulir Pendaftaran Tim</h1>
               <p className="text-muted-foreground">
-                  Biaya dihitung per level pemain: Beginner/Intermediate <strong class="font-bold">Rp 150rb</strong>, Advance <strong class="font-bold">Rp 200rb</strong>.
+                  Biaya dihitung per level pemain: Beginner/Intermediate <strong className="font-bold">Rp 150rb</strong>, Advance <strong className="font-bold">Rp 200rb</strong>.
               </p>
               </div>
 
@@ -422,7 +422,7 @@ export default function RegistrationPage() {
 
                    <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-md mb-4">
                         <p className="text-sm text-yellow-800">
-                            <strong class="font-bold">PERHATIAN: Biaya di bawah ini adalah <strong class="font-bold">ESTIMASI AWAL</strong>.</strong> <br/>
+                            <strong className="font-bold">PERHATIAN: Biaya di bawah ini adalah <strong className="font-bold">ESTIMASI AWAL</strong>.</strong> <br/>
                             Biaya Final akan disesuaikan setelah TPF mengesahkan level pemain Anda.
                         </p>
                     </div>
