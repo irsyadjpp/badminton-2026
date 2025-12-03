@@ -20,10 +20,11 @@ type MatchStatus = 'PRE_MATCH' | 'IN_PROGRESS' | 'FINISHED';
 
 export default function MatchControlPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
+  const matchId = params.id;
 
   // --- MOCK DATA ---
   const matchData = {
-    id: params.id,
+    id: matchId,
     category: "MD Intermediate",
     teamA: "PB Djarum",
     playersA: "Kevin Sanjaya / Marcus Gideon",
@@ -292,7 +293,7 @@ export default function MatchControlPage({ params }: { params: { id: string } })
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 bg-zinc-900 p-3 rounded-lg gap-4 border border-zinc-800">
          <div className="text-left w-full md:w-auto">
              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="text-[10px] border-zinc-600 text-zinc-400">MATCH #{params.id}</Badge>
+                <Badge variant="outline" className="text-[10px] border-zinc-600 text-zinc-400">MATCH #{matchId}</Badge>
                 <Badge className="bg-blue-900 text-blue-200 text-[10px]">{mode === 'GROUP' ? 'PENYISIHAN' : 'KNOCKOUT'}</Badge>
              </div>
              <div className="font-bold text-lg text-white">Partai ke-1 (Ganda Putra)</div>
@@ -456,5 +457,3 @@ function TeamPanel({ teamName, players, score, setScore, isServing, pos, onPoint
         </div>
     )
 }
-
-    
