@@ -208,7 +208,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             BCC ADMIN
           </h1>
         </div>
-        <nav className="flex-1 py-2">
+        <nav className="flex-1 py-2 overflow-y-auto">
           {renderNavLinks()}
         </nav>
         <div className="p-4 border-t border-border">
