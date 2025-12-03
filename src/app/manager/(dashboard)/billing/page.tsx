@@ -85,7 +85,7 @@ export default function BillingPage() {
                     {invoice.type === 'penalty' ? (
                         <Badge variant="destructive">Denda</Badge>
                     ) : (
-                        <Badge variant="secondary">Shuttlecock</Badge>
+                        <Badge variant="secondary">Penggunaan</Badge>
                     )}
                     {invoice.description}
                   </TableCell>
@@ -96,13 +96,21 @@ export default function BillingPage() {
           </Table>
         </CardContent>
         <CardFooter className="bg-secondary/20 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
-           <p className="text-sm text-muted-foreground">
-                Pembayaran dapat dilakukan secara kolektif melalui QRIS di Meja Panitia.
-           </p>
-           <Button className="bg-primary hover:bg-primary/90">
-               <QrCode className="w-4 h-4 mr-2" />
-               Bayar Sekarang via QRIS
-           </Button>
+           <div className="text-left flex-1">
+               <p className="text-sm text-muted-foreground">
+                    Pembayaran untuk semua item di atas harus dilakukan secara <strong className="text-foreground">kolektif (satu kali bayar)</strong>, tidak bisa per-item.
+               </p>
+           </div>
+           <div className="flex items-center gap-4">
+               <div className="text-right">
+                   <p className="text-xs text-muted-foreground">Total Bayar</p>
+                   <p className="font-bold text-lg text-destructive">Rp {totalAmount.toLocaleString('id-ID')}</p>
+               </div>
+               <Button className="bg-primary hover:bg-primary/90 h-12">
+                   <QrCode className="w-4 h-4 mr-2" />
+                   Bayar Sekarang
+               </Button>
+           </div>
         </CardFooter>
       </Card>
 
