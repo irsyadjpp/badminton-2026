@@ -229,16 +229,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <CollapsibleContent className="pl-6 mt-1">
              <div className="pl-5 border-l-2 border-border/50 space-y-1">
                 {menu.subItems.map((subItem: any) => {
-                  const isActive = pathname === subItem.href || (subItem.href === '/admin/matches' && pathname.startsWith('/admin/matches/'));
+                  let isActive = false;
+                  if (subItem.href === '/admin/matches') {
+                      // Hanya aktif jika path sama persis
+                      isActive = pathname === subItem.href;
+                  } else {
+                      // Perilaku default untuk menu lain
+                      isActive = pathname.startsWith(subItem.href);
+                  }
+                  
                   const NavContent = () => (
                     <NavLink href={subItem.href!} isActive={isActive}>
                       <span>{subItem.name}</span>
                     </NavLink>
                   );
+                  const itemKey = subItem.href || subItem.name;
                   if (isSheet) {
-                    return <SheetClose key={subItem.href} asChild><NavContent /></SheetClose>;
+                    return <SheetClose key={itemKey} asChild><NavContent /></SheetClose>;
                   }
-                  return <NavContent key={subItem.href} />;
+                  return <NavContent key={itemKey} />;
                 })}
              </div>
           </CollapsibleContent>
@@ -246,7 +255,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       );
     }
 
-    const isActive = pathname === menu.href;
+    const isActive = pathname === menu.href || (menu.href === '/admin' && pathname === '/admin/dashboard');
     const NavContent = () => (
       <NavLink href={menu.href!} isActive={isActive}>
         {menu.icon && <menu.icon className="w-5 h-5" />}
@@ -336,3 +345,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+
+    
