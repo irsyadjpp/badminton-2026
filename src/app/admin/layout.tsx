@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -6,7 +7,8 @@ import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, Users, Trophy, BarChart3, LogOut, Lock, 
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
-  FileCheck, Shield, Mic, Ticket, Award, Wallet
+  FileCheck, Shield, Mic, Ticket, Award, Wallet,
+  ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +19,54 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 const ADMIN_PIN = "2026"; 
+
+// --- DEFINISI MENU ---
+const getMenusByRole = (role: string) => {
+  
+  // MENU PANITIA (Back Office)
+  const adminMenus = [
+    { header: "Utama" },
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard, roles: ['DIRECTOR', 'FINANCE', 'BUSINESS', 'SECRETARY', 'OPERATIONS'] },
+    
+    { header: "Keuangan & Legal" },
+    { name: "Verifikasi Pembayaran", href: "/admin/teams", icon: Receipt, roles: ['DIRECTOR', 'FINANCE'] },
+    { name: "Jurnal & Reimburse", href: "/admin/finance/reimbursement-approval", icon: Wallet, roles: ['DIRECTOR', 'FINANCE'] },
+    
+    { header: "Peserta & Data" },
+    { name: "Verifikasi TPF (Audit)", href: "/admin/tpf", icon: CheckCircle, roles: ['DIRECTOR', 'TPF'] },
+    { name: "Data Pengunjung", href: "/admin/visitors", icon: Users, roles: ['DIRECTOR', 'BUSINESS'] },
+    { name: "Laporan Komersial", href: "/admin/analytics", icon: BarChart3, roles: ['DIRECTOR', 'BUSINESS'] },
+    
+    { header: "Operasional" },
+    { name: "Generator Sertifikat", href: "/admin/secretary/cert-gen", icon: FileText, roles: ['DIRECTOR', 'SECRETARY'] },
+    { name: "Undian Doorprize", href: "/admin/raffle", icon: Gift, roles: ['DIRECTOR', 'OPERATIONS'] },
+    // { name: "Medical Log", href: "/admin/medical", icon: Stethoscope, roles: ['DIRECTOR', 'OPERATIONS'] },
+  ];
+
+  // MENU WASIT & MATCH CONTROL (Field)
+  const technicalMenus = [
+    { header: "Match Control" },
+    { name: "Jadwal Lapangan", href: "/admin/referee", icon: ClipboardList, roles: ['MATCH_CONTROL', 'REFEREE', 'MLO'] },
+    { name: "Input Skor (Wasit)", href: "/admin/matches", icon: Activity, roles: ['MATCH_CONTROL', 'REFEREE', 'MLO'] },
+    { name: "Keputusan Protes", href: "/admin/protests", icon: Gavel, roles: ['MATCH_CONTROL', 'REFEREE'] },
+    // { name: "Cek Line-Up", href: "/admin/lineups", icon: Users, roles: ['MATCH_CONTROL', 'MLO'] },
+  ];
+
+  // Gabungkan menu berdasarkan Role Group
+  // Jika role adalah perangkat pertandingan, tampilkan menu teknis saja
+  if (['MATCH_CONTROL', 'REFEREE', 'MLO'].includes(role)) {
+    return technicalMenus.filter(m => m.roles?.includes(role) || m.header);
+  }
+  
+  // Jika role panitia, tampilkan menu admin
+  if (['DIRECTOR', 'FINANCE', 'BUSINESS', 'SECRETARY', 'OPERATIONS', 'TPF'].includes(role)) {
+    return adminMenus.filter(m => m.roles?.includes(role) || m.header);
+  }
+
+  // Fallback untuk role 'ADMIN' atau 'SUPERUSER' (tampilkan semua)
+  return [...adminMenus, ...technicalMenus];
+};
+
 
 interface NavLinkProps {
   href: string;
@@ -50,17 +100,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
   const pathname = usePathname();
+  
+  // MOCK SESSION
+  const [session, setSession] = useState({ isLoggedIn: false, role: 'DIRECTOR', name: 'Admin Super' });
 
   useEffect(() => {
-    const session = sessionStorage.getItem('admin_session');
-    if (session === 'true') setIsAuthenticated(true);
+    const sessionStr = sessionStorage.getItem('admin_session');
+    if (sessionStr) {
+        const storedSession = JSON.parse(sessionStr);
+        setSession(storedSession);
+        setIsAuthenticated(true);
+    }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent, role: string) => {
     e.preventDefault();
     if (pin === ADMIN_PIN) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_session', 'true');
+        const newSession = { isLoggedIn: true, role, name: `${role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()} User` };
+        setSession(newSession);
+        setIsAuthenticated(true);
+        sessionStorage.setItem('admin_session', JSON.stringify(newSession));
     } else {
       alert("PIN Salah!");
       setPin("");
@@ -77,12 +136,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="min-h-screen w-full flex bg-black text-white overflow-hidden">
         <div className="hidden lg:flex w-[60%] relative flex-col justify-between p-12 bg-zinc-900">
           <div className="absolute inset-0 z-0">
-              <Image 
-                  src="/images/gor-koni.jpg" 
-                  alt="Court" 
-                  fill 
-                  className="object-cover opacity-40 grayscale mix-blend-luminosity"
-              />
+              <Image src="/images/gor-koni.jpg" alt="Court" fill className="object-cover opacity-40 grayscale mix-blend-luminosity"/>
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
               <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
           </div>
@@ -112,104 +166,52 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 blur-[100px] pointer-events-none" />
            <div className="w-full max-w-md space-y-8 relative z-10">
               <div className="text-center lg:text-left">
-                  <h2 className="text-3xl font-black font-headline mb-2">Admin Panel</h2>
-                  <p className="text-zinc-400">Masukkan PIN untuk mengakses data.</p>
+                  <h2 className="text-3xl font-black font-headline mb-2">Simulasi Login Role</h2>
+                  <p className="text-zinc-400">Masukkan PIN Admin (2026) lalu pilih role.</p>
               </div>
               <div className="space-y-4">
-                  <form onSubmit={handleLogin} className="space-y-4">
+                  <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
                       <div className="space-y-2">
                           <Label className="text-xs font-bold uppercase text-zinc-500 tracking-wider">PIN Admin</Label>
                           <div className="relative">
                               <Lock className="absolute left-3 top-3 h-5 w-5 text-zinc-500" />
-                              <Input 
-                                  name="pin" 
-                                  type="password" 
-                                  placeholder="••••••••" 
-                                  className="pl-10 bg-zinc-900 border-zinc-800 text-white h-12 rounded-lg focus:ring-primary focus:border-primary transition-all placeholder:text-zinc-600 text-center tracking-[0.5em]" 
-                                  value={pin}
-                                  onChange={(e) => setPin(e.target.value)}
-                                  required
-                              />
+                              <Input name="pin" type="password" placeholder="••••" className="pl-10 bg-zinc-900 border-zinc-800 text-white h-12 rounded-lg focus:ring-primary focus:border-primary transition-all placeholder:text-zinc-600 text-center tracking-[0.5em]" value={pin} onChange={(e) => setPin(e.target.value)} required />
                           </div>
                       </div>
-                      <Button 
-                          type="submit" 
-                          className="w-full h-14 bg-primary text-white font-bold rounded-lg transition-all hover:bg-primary/90 text-lg group"
-                      >
-                          Masuk Dashboard
-                          <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
+                      <div className="grid grid-cols-2 gap-2">
+                          <Button onClick={(e) => handleLogin(e, 'DIRECTOR')} className="w-full h-12 bg-primary text-white font-bold rounded-lg transition-all hover:bg-primary/90">Director</Button>
+                          <Button onClick={(e) => handleLogin(e, 'FINANCE')} variant="secondary">Finance</Button>
+                          <Button onClick={(e) => handleLogin(e, 'REFEREE')} variant="secondary">Referee</Button>
+                          <Button onClick={(e) => handleLogin(e, 'TPF')} variant="secondary">TPF</Button>
+                      </div>
                   </form>
               </div>
-              <p className="text-center text-sm text-zinc-500 pt-6">
-                  Akses terbatas hanya untuk panitia dan wasit.
-              </p>
+              <p className="text-center text-sm text-zinc-500 pt-6">Akses terbatas hanya untuk panitia dan wasit.</p>
            </div>
         </div>
       </div>
     );
   }
+  
+  const currentMenus = getMenusByRole(session.role);
 
-  const menuGroups = [
-    {
-      title: "UTAMA",
-      items: [
-        { name: "Overview", href: "/admin", icon: LayoutDashboard },
-      ],
-    },
-    {
-      title: "MANAJEMEN PESERTA",
-      items: [
-        { name: "Pendaftaran Tim", href: "/admin/teams", icon: Users },
-        { name: "Verifikasi TPF", href: "/admin/tpf", icon: FileCheck },
-      ],
-    },
-    {
-      title: "OPERASIONAL PERTANDINGAN",
-      items: [
-        { name: "Area Wasit", href: "/admin/referee", icon: Shield },
-        { name: "Manajemen Protes", href: "/admin/protests", icon: AlertOctagon },
-        { name: "Input Skor (MLO)", href: "/admin/matches", icon: Mic },
-      ],
-    },
-    {
-        title: "KEUANGAN",
-        items: [
-            { name: "Ajukan Reimbursement", href: "/admin/reimbursement/submit", icon: Wallet },
-            { name: "Persetujuan (Finance)", href: "/admin/finance/reimbursement-approval", icon: ClipboardCheck },
-        ]
-    },
-    {
-        title: "LAPORAN & AKTIVASI",
-        items: [
-            { name: "Data Pengunjung", href: "/admin/visitors", icon: Users },
-            { name: "Laporan Sponsor", href: "/admin/analytics", icon: BarChart3 },
-            { name: "Undian Doorprize", href: "/admin/raffle", icon: Ticket },
-        ]
-    },
-    {
-        title: "SEKRETARIAT & MEDIA",
-        items: [
-            { name: "Generator Sertifikat", href: "/admin/secretary/cert-gen", icon: Award },
-        ]
-    }
-  ];
+  const renderNavLinks = (isSheet: boolean = false) => currentMenus.map((menu, idx) => {
+      if (menu.header) {
+          return !isSheet && (
+              <div key={idx} className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground tracking-wider">
+                  {menu.header}
+              </div>
+          );
+      }
+      const isActive = menu.href ? pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin') : false;
+      return (
+        <NavLink key={menu.href} href={menu.href!} isActive={isActive} isSheet={isSheet}>
+          {menu.icon && <menu.icon className="w-5 h-5" />}
+          <span>{menu.name}</span>
+        </NavLink>
+      )
+  });
 
-  const renderNavLinks = (isSheet: boolean = false) => menuGroups.map((group, groupIndex) => (
-    <div key={groupIndex} className="space-y-1">
-        {!isSheet && group.title && <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground tracking-wider">{group.title}</p>}
-        {group.items.map((menu) => {
-            const isActive = pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin');
-            return (
-              <NavLink key={menu.href} href={menu.href} isActive={isActive} isSheet={isSheet}>
-                <menu.icon className="w-5 h-5" />
-                <span>{menu.name}</span>
-              </NavLink>
-            )
-        })}
-        {groupIndex < menuGroups.length - 1 && !isSheet && <Separator className="my-2" />}
-    </div>
-  ));
 
   return (
     <div className="dark flex min-h-screen bg-background text-foreground">
@@ -247,12 +249,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <h1 className="font-headline font-black text-2xl text-primary">BCC ADMIN</h1>
                       </div>
                       <nav className="p-4 space-y-1">
-                          {menuGroups.flatMap(group => group.items).map((menu) => {
-                            const isActive = pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin');
+                          {currentMenus.map((menu) => {
+                            if(menu.header) return null;
+                            const isActive = pathname.startsWith(menu.href!) && (menu.href !== '/admin' || pathname === '/admin');
                             return (
                               <SheetClose key={menu.href} asChild>
                                 <Link 
-                                  href={menu.href}
+                                  href={menu.href!}
                                   className={cn(
                                     'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                                     isActive 
@@ -260,7 +263,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                       : 'text-muted-foreground hover:bg-secondary'
                                   )}
                                 >
-                                  <menu.icon className="w-5 h-5" />
+                                  {menu.icon && <menu.icon className="w-5 h-5" />}
                                   {menu.name}
                                 </Link>
                               </SheetClose>
@@ -280,11 +283,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Button>
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="font-bold text-primary">A</span>
+                        <span className="font-bold text-primary">{session.role.charAt(0)}</span>
                     </div>
                     <div className="text-sm hidden sm:block">
-                        <p className="font-bold">Admin</p>
-                        <p className="text-xs text-muted-foreground">Superuser</p>
+                        <p className="font-bold">{session.name}</p>
+                        <p className="text-xs text-muted-foreground">{session.role}</p>
                     </div>
                 </div>
              </div>
