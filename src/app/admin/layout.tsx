@@ -17,12 +17,13 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/s
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { logoutAdmin } from './actions';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // --- DEFINISI MENU ---
 const getMenusByRole = (role: string) => {
   const allMenus = [
     // --- CORE ---
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard, roles: ['ALL'] },
+    { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['ALL'] },
 
     // --- DIRECTOR ---
     { 
@@ -124,30 +125,60 @@ const getMenusByRole = (role: string) => {
   return filterMenu(allMenus);
 };
 
-
-interface NavLinkProps {
+interface NavItemProps {
   href: string;
   children: ReactNode;
-  onClick?: () => void;
-  isActive: boolean;
+  icon: React.ElementType;
 }
 
-const NavLink = ({ href, children, onClick, isActive }: NavLinkProps) => {
+const NavItem = ({ href, children, icon: Icon }: NavItemProps) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   return (
-    <Link 
+    <Link
       href={href}
-      onClick={onClick}
       className={cn(
-        'flex items-center gap-3 rounded-md text-sm transition-colors px-3 py-2.5',
-        isActive 
-          ? 'bg-primary/10 text-primary font-bold' 
-          : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium'
+        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+        isActive
+          ? 'bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground'
       )}
     >
+      <Icon className="w-4 h-4" />
       {children}
     </Link>
   );
 };
+
+interface NavGroupProps {
+    title: string;
+    icon: React.ElementType;
+    subItems: any[];
+    isInitiallyOpen: boolean;
+}
+
+const NavGroup = ({ title, icon: Icon, subItems, isInitiallyOpen }: NavGroupProps) => {
+    return (
+        <Collapsible defaultOpen={isInitiallyOpen}>
+            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary [&[data-state=open]>svg]:rotate-180">
+                 <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4" />
+                    {title}
+                 </div>
+                <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 py-1 pl-5">
+                {subItems.map((item) => (
+                    <NavItem key={item.href} href={item.href} icon={item.icon || ArrowRightCircle}>
+                        {item.name}
+                    </NavItem>
+                ))}
+            </CollapsibleContent>
+        </Collapsible>
+    );
+};
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
@@ -200,45 +231,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentMenus = getMenusByRole(session.role);
 
   const renderNavLinks = (isSheet: boolean = false) => currentMenus.map((menu: any, idx: number) => {
-    
-    const navContent = (item: any, isSubItem: boolean = false) => {
-        let isActive = false;
-        if (item.href === '/admin' || item.href === '/admin/matches') {
-            isActive = pathname === item.href;
-        } else {
-            isActive = pathname.startsWith(item.href);
-        }
-
-      const NavContentComponent = () => (
-        <NavLink href={item.href!} isActive={isActive}>
-            {item.icon && <item.icon className="w-5 h-5" />}
-            <span>{item.name}</span>
-        </NavLink>
-      );
-      
-      const itemKey = item.href || item.name;
-
-      if (isSheet) {
-          return <SheetClose key={itemKey} asChild><NavContentComponent /></SheetClose>;
-      }
-      return <NavContentComponent key={itemKey} />;
-    };
-    
     if (menu.subItems) {
-      return (
-        <div key={idx} className="space-y-1">
-          <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-            <menu.icon className="w-4 h-4" />
-            {menu.name}
-          </p>
-          <div className="flex flex-col gap-1">
-            {menu.subItems.map((subItem: any) => navContent(subItem, true))}
-          </div>
-        </div>
-      );
+        const isGroupActive = menu.subItems.some((sub:any) => pathname.startsWith(sub.href));
+        return (
+            <NavGroup 
+                key={menu.name}
+                title={menu.name}
+                icon={menu.icon}
+                subItems={menu.subItems}
+                isInitiallyOpen={isGroupActive}
+            />
+        );
     }
     
-    return navContent(menu, false);
+    return (
+        <NavItem key={menu.href} href={menu.href} icon={menu.icon}>
+            {menu.name}
+        </NavItem>
+    );
   });
 
 
@@ -252,7 +262,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             BCC ADMIN
           </h1>
         </div>
-        <nav className="flex-1 py-2 px-3 overflow-y-auto no-scrollbar space-y-2">
+        <nav className="flex-1 py-4 px-4 overflow-y-auto no-scrollbar space-y-2">
           {renderNavLinks()}
         </nav>
         <div className="p-4 border-t border-border">
