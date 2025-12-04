@@ -28,6 +28,7 @@ export function Header() {
       <SheetClose asChild><NavLink href="/about" onClick={closeSheet}>Tentang</NavLink></SheetClose>
       <SheetClose asChild><NavLink href="/faq" onClick={closeSheet}>FAQ</NavLink></SheetClose>
       <SheetClose asChild><NavLink href="/partners" onClick={closeSheet}>Sponsor</NavLink></SheetClose>
+      <SheetClose asChild><NavLink href="/recruitment" onClick={closeSheet}>Rekrutmen</NavLink></SheetClose>
       <SheetClose asChild><NavLink href="/contact" onClick={closeSheet}>Kontak</NavLink></SheetClose>
     </>
   );
@@ -48,6 +49,7 @@ export function Header() {
               <NavLink href="/about">Tentang</NavLink>
               <NavLink href="/faq">FAQ</NavLink>
               <NavLink href="/partners">Sponsor</NavLink>
+              <NavLink href="/recruitment">Rekrutmen</NavLink>
               <NavLink href="/contact">Kontak</NavLink>
           </nav>
 
