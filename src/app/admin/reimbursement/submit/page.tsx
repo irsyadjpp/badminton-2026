@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -21,19 +22,30 @@ export default function SubmitReimbursementPage() {
   
   // State Items
   const [items, setItems] = useState<any[]>([]);
-  const [newItem, setNewItem] = useState({ desc: "", cat: "", amount: "" });
+  const [newItem, setNewItem] = useState({ desc: "", cat: "", qty: "", price: "", total: "" });
+
+  // Efek untuk kalkulasi otomatis
+  useEffect(() => {
+    const qty = parseFloat(newItem.qty);
+    const price = parseFloat(newItem.price);
+    if (!isNaN(qty) && !isNaN(price)) {
+      const calculatedTotal = qty * price;
+      setNewItem(prev => ({ ...prev, total: String(calculatedTotal) }));
+    }
+  }, [newItem.qty, newItem.price]);
+
 
   const addItem = () => {
-    if (!newItem.desc || !newItem.amount) return;
+    if (!newItem.desc || !newItem.total) return;
     setItems([...items, { ...newItem, id: Date.now().toString() }]);
-    setNewItem({ desc: "", cat: "", amount: "" });
+    setNewItem({ desc: "", cat: "", qty: "", price: "", total: "" });
   };
 
   const removeItem = (id: string) => {
     setItems(items.filter(i => i.id !== id));
   };
 
-  const totalAmount = items.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const totalAmount = items.reduce((acc, curr) => acc + Number(curr.total), 0);
 
   const handleSubmit = async () => {
     if (items.length === 0) return toast({ title: "Gagal", description: "Minimal isi 1 item pengeluaran", variant: "destructive" });
@@ -47,14 +59,17 @@ export default function SubmitReimbursementPage() {
         bankName: bank.name,
         accountNumber: bank.number,
         accountHolder: bank.holder,
-        items: items,
+        items: items.map(({ id, ...rest }) => rest), // Kirim tanpa ID temp
         totalAmount: totalAmount
     };
 
     await submitReimbursement(payload);
     setIsSubmitting(false);
     toast({ title: "Terkirim!", description: "Klaim Anda sedang direview Bendahara.", className: "bg-green-600 text-white" });
-    // Reset form logic here if needed
+    // Reset form
+    setItems([]);
+    setApplicant({ name: "", division: "", phone: "", date: "" });
+    setBank({ name: "", number: "", holder: "" });
   };
 
   return (
@@ -70,9 +85,9 @@ export default function SubmitReimbursementPage() {
             <CardHeader><CardTitle className="text-base">Data Pemohon</CardTitle></CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Nama Lengkap</Label><Input placeholder="Nama Anda" onChange={e => setApplicant({...applicant, name: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Nama Lengkap</Label><Input placeholder="Nama Anda" value={applicant.name} onChange={e => setApplicant({...applicant, name: e.target.value})} /></div>
                     <div className="space-y-2"><Label>Divisi</Label>
-                        <Select onValueChange={v => setApplicant({...applicant, division: v})}>
+                        <Select value={applicant.division} onValueChange={v => setApplicant({...applicant, division: v})}>
                             <SelectTrigger><SelectValue placeholder="Pilih Divisi" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="OPERATIONS">Operasional</SelectItem>
@@ -84,8 +99,8 @@ export default function SubmitReimbursementPage() {
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Tanggal Belanja</Label><Input type="date" onChange={e => setApplicant({...applicant, date: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>No. WhatsApp</Label><Input type="tel" onChange={e => setApplicant({...applicant, phone: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Tanggal Belanja</Label><Input type="date" value={applicant.date} onChange={e => setApplicant({...applicant, date: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>No. WhatsApp</Label><Input type="tel" value={applicant.phone} onChange={e => setApplicant({...applicant, phone: e.target.value})} /></div>
                 </div>
             </CardContent>
         </Card>
@@ -94,10 +109,10 @@ export default function SubmitReimbursementPage() {
         <Card>
             <CardHeader><CardTitle className="text-base">Rekening Tujuan</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-2"><Label>Nama Bank</Label><Input placeholder="Cth: BCA / Mandiri" onChange={e => setBank({...bank, name: e.target.value})} /></div>
+                <div className="space-y-2"><Label>Nama Bank</Label><Input placeholder="Cth: BCA / Mandiri" value={bank.name} onChange={e => setBank({...bank, name: e.target.value})} /></div>
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>No. Rekening</Label><Input type="number" onChange={e => setBank({...bank, number: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>Atas Nama</Label><Input onChange={e => setBank({...bank, holder: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>No. Rekening</Label><Input type="number" value={bank.number} onChange={e => setBank({...bank, number: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Atas Nama</Label><Input value={bank.holder} onChange={e => setBank({...bank, holder: e.target.value})} /></div>
                 </div>
             </CardContent>
         </Card>
@@ -110,14 +125,14 @@ export default function SubmitReimbursementPage() {
             <div className="text-xl font-bold text-primary">Total: Rp {totalAmount.toLocaleString('id-ID')}</div>
         </CardHeader>
         <CardContent className="space-y-4">
-            <div className="flex gap-2 items-end border-b pb-4">
-                <div className="flex-1 space-y-2">
+            <div className="flex flex-col md:flex-row gap-2 items-end border-b pb-4">
+                <div className="flex-1 w-full space-y-2">
                     <Label>Deskripsi Barang/Jasa</Label>
-                    <Input placeholder="Cth: Nasi Box Panitia (20 pax)" value={newItem.desc} onChange={e => setNewItem({...newItem, desc: e.target.value})} />
+                    <Input placeholder="Cth: Nasi Box Panitia" value={newItem.desc} onChange={e => setNewItem({...newItem, desc: e.target.value})} />
                 </div>
-                <div className="w-40 space-y-2">
+                 <div className="md:w-40 w-full space-y-2">
                     <Label>Kategori</Label>
-                    <Select onValueChange={v => setNewItem({...newItem, cat: v})}>
+                    <Select value={newItem.cat} onValueChange={v => setNewItem({...newItem, cat: v})}>
                         <SelectTrigger><SelectValue placeholder="Kategori" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Konsumsi">Konsumsi</SelectItem>
@@ -128,11 +143,21 @@ export default function SubmitReimbursementPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="w-40 space-y-2">
-                    <Label>Jumlah (Rp)</Label>
-                    <Input type="number" placeholder="0" value={newItem.amount} onChange={e => setNewItem({...newItem, amount: e.target.value})} />
+                <div className="flex gap-2 w-full md:w-auto">
+                    <div className="w-20 space-y-2">
+                        <Label>Qty</Label>
+                        <Input type="number" placeholder="20" value={newItem.qty} onChange={e => setNewItem({...newItem, qty: e.target.value})} />
+                    </div>
+                    <div className="flex-1 space-y-2">
+                        <Label>Harga Satuan</Label>
+                        <Input type="number" placeholder="25000" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} />
+                    </div>
                 </div>
-                <Button onClick={addItem} size="icon"><Plus className="w-4 h-4" /></Button>
+                <div className="flex-1 w-full md:w-40 space-y-2">
+                    <Label>Total (Rp)</Label>
+                    <Input type="number" placeholder="0" value={newItem.total} onChange={e => setNewItem({...newItem, total: e.target.value})} />
+                </div>
+                <Button onClick={addItem} size="icon" className="w-full md:w-10"><Plus className="w-4 h-4" /></Button>
             </div>
 
             <Table>
@@ -140,6 +165,7 @@ export default function SubmitReimbursementPage() {
                     <TableRow>
                         <TableHead>Deskripsi</TableHead>
                         <TableHead>Kategori</TableHead>
+                        <TableHead>Detail</TableHead>
                         <TableHead className="text-right">Jumlah</TableHead>
                         <TableHead className="w-10"></TableHead>
                     </TableRow>
@@ -149,14 +175,17 @@ export default function SubmitReimbursementPage() {
                         <TableRow key={item.id}>
                             <TableCell>{item.desc}</TableCell>
                             <TableCell>{item.cat}</TableCell>
-                            <TableCell className="text-right font-mono">Rp {Number(item.amount).toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground font-mono">
+                                {item.qty && item.price ? `${item.qty} x ${Number(item.price).toLocaleString('id-ID')}` : '-'}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">Rp {Number(item.total).toLocaleString('id-ID')}</TableCell>
                             <TableCell>
                                 <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                             </TableCell>
                         </TableRow>
                     ))}
                     {items.length === 0 && (
-                        <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground h-24">Belum ada item ditambahkan</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground h-24">Belum ada item ditambahkan</TableCell></TableRow>
                     )}
                 </TableBody>
             </Table>
