@@ -29,8 +29,11 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (state.success) {
+      // Logic to store session client-side
+      sessionStorage.setItem('admin_session', JSON.stringify({ isLoggedIn: true, name: 'Admin', role: 'DIRECTOR' })); // Simplified
       toast({ title: "Login Berhasil", description: "Mengalihkan ke dashboard...", className: "bg-green-600 text-white" });
       router.push('/admin');
+      router.refresh(); // Force refresh to re-evaluate layout
     }
     if (state.message && !state.success) {
        toast({ title: "Gagal", description: state.message, variant: "destructive" });
@@ -39,9 +42,17 @@ export default function AdminLoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
-    await loginAdminGoogle();
-    toast({ title: "Google Login Berhasil", description: "Selamat datang, Director.", className: "bg-green-600 text-white" });
-    router.push('/admin');
+    const res = await loginAdminGoogle();
+    if(res.success){
+        // Logic to store session client-side
+        sessionStorage.setItem('admin_session', JSON.stringify({ isLoggedIn: true, name: 'Irsyad Jamal', role: 'DIRECTOR' })); // Simplified
+        toast({ title: "Google Login Berhasil", description: "Selamat datang, Director.", className: "bg-green-600 text-white" });
+        router.push('/admin');
+        router.refresh(); // Force refresh to re-evaluate layout
+    } else {
+        setIsGoogleLoading(false);
+        toast({ title: "Gagal", description: "Gagal login dengan Google.", variant: "destructive" });
+    }
   };
 
   return (
