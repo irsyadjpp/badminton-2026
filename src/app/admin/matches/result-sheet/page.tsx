@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Trophy, Users, CheckCircle2, Printer, Loader2 } from "lucide-react";
+import { Trophy, Users, CheckCircle2, Loader2, FilePenLine, AlertTriangle } from "lucide-react";
 import { type TieResult, type MatchParty } from "../actions";
+import { useToast } from '@/hooks/use-toast';
 
 // --- MOCK DATA (SIMULASI DATA YANG DITARIK DARI DATABASE) ---
 const MOCK_TIE_RESULT: TieResult = {
@@ -28,16 +28,41 @@ const MOCK_TIE_RESULT: TieResult = {
   finalScoreA: 3,
   finalScoreB: 2,
   winnerTeam: "PB Djarum KW",
-  managerA_verified: true,
-  managerB_verified: true,
-  referee_verified: true,
-  status: 'FINAL'
+  managerA_verified: true, // Manager A sudah setuju
+  managerB_verified: false, // Manager B belum
+  referee_verified: false, // Wasit belum
+  status: 'DRAFT'
 };
 // -------------------------------------------------------------
 
 
-export default function DigitalResultSheetPage() {
-  const [data] = useState<TieResult>(MOCK_TIE_RESULT);
+export default function RefereeResultSheetPage() {
+  const { toast } = useToast();
+  const [data, setData] = useState<TieResult>(MOCK_TIE_RESULT);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleRefereeVerification = async () => {
+    if (!data.managerA_verified || !data.managerB_verified) {
+        toast({
+            title: "Verifikasi Gagal",
+            description: "Kedua manajer tim harus menyetujui hasil terlebih dahulu sebelum wasit bisa mengesahkan.",
+            variant: "destructive"
+        });
+        return;
+    }
+    
+    setIsSubmitting(true);
+    // Di sini akan ada panggilan ke server action
+    await new Promise(r => setTimeout(r, 1500));
+    setData({...data, referee_verified: true, status: 'FINAL'});
+    setIsSubmitting(false);
+
+    toast({
+        title: "Disahkan!",
+        description: "Berita Acara telah dikunci dan disimpan secara permanen.",
+        className: "bg-green-600 text-white"
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -45,24 +70,22 @@ export default function DigitalResultSheetPage() {
       {/* HEADER & OPSI CETAK */}
       <div className="flex justify-between items-center print:hidden">
         <div>
-            <h1 className="text-3xl font-black font-headline text-primary">Berita Acara Hasil (Final)</h1>
-            <p className="text-muted-foreground">Ini adalah data final yang terkunci dan tidak dapat diubah.</p>
+            <h1 className="text-3xl font-black font-headline text-primary">Verifikasi Berita Acara</h1>
+            <p className="text-muted-foreground">Review hasil yang diinput dan sahkan jika semua data sudah benar.</p>
         </div>
-        <Button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-700">
-          <Printer className="w-4 h-4 mr-2" />
-          Cetak atau Simpan PDF
-        </Button>
       </div>
+      
+      {data.status === 'FINAL' && (
+        <Card className="bg-green-50 border-green-600 border-l-4">
+            <CardContent className="p-4 flex items-center justify-center gap-3 text-green-700 font-bold">
+                <CheckCircle2 className="w-5 h-5"/>
+                Hasil pertandingan ini sudah FINAL dan telah diarsipkan.
+            </CardContent>
+        </Card>
+      )}
 
-      {/* TAMPILAN CETAK/LAPORAN */}
-      <div className="p-4 md:p-8 bg-card border rounded-lg print:p-0 print:border-none print:shadow-none">
-
-        {/* --- KOP SURAT (Print Only) --- */}
-        <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
-           <h1 className="text-xl font-bold uppercase">Berita Acara Hasil Pertandingan</h1>
-           <h2 className="text-lg font-semibold">Bandung Community Championship 2026</h2>
-           <p className="text-xs">GOR KONI Bandung, {new Date(data.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        </div>
+      {/* TAMPILAN LAPORAN */}
+      <div className="p-0 md:p-8 bg-card border rounded-lg print:p-0 print:border-none print:shadow-none">
         
         {/* --- KARTU IDENTITAS PERTANDINGAN --- */}
         <Card className="mb-6 border-border">
@@ -100,21 +123,10 @@ export default function DigitalResultSheetPage() {
                             </AccordionTrigger>
                             <AccordionContent className="px-4 py-4 border rounded-lg -mt-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Kolom Tim A */}
-                                    <div className="text-sm">
-                                        <p className="font-bold mb-2 text-blue-700">Pemain Tim A:</p>
-                                        <p className="text-muted-foreground">{match.playerA1} / {match.playerA2}</p>
-                                    </div>
-                                    {/* Kolom Tim B */}
-                                    <div className="text-sm">
-                                        <p className="font-bold mb-2 text-red-700">Pemain Tim B:</p>
-                                        <p className="text-muted-foreground">{match.playerB1} / {match.playerB2}</p>
-                                    </div>
+                                    <div className="text-sm"><p className="font-bold mb-2 text-blue-700">Pemain Tim A:</p><p className="text-muted-foreground">{match.playerA1} / {match.playerA2}</p></div>
+                                    <div className="text-sm"><p className="font-bold mb-2 text-red-700">Pemain Tim B:</p><p className="text-muted-foreground">{match.playerB1} / {match.playerB2}</p></div>
                                 </div>
-                                <div className="mt-4 pt-4 border-t text-center">
-                                    <p className="text-xs text-muted-foreground">Skor</p>
-                                    <p className="font-mono text-lg font-semibold">{match.score}</p>
-                                </div>
+                                <div className="mt-4 pt-4 border-t text-center"><p className="text-xs text-muted-foreground">Skor</p><p className="font-mono text-lg font-semibold">{match.score}</p></div>
                             </AccordionContent>
                         </AccordionItem>
                     ))}
@@ -123,24 +135,24 @@ export default function DigitalResultSheetPage() {
         </Card>
 
         {/* --- HASIL AKHIR & VERIFIKASI --- */}
-        <Card className="bg-zinc-900 text-white border-none shadow-xl print:bg-white print:text-black print:border print:shadow-none">
+        <Card className="bg-zinc-900 text-white border-none shadow-xl">
             <CardContent className="p-6 md:p-8 space-y-6">
                 <div className="text-center">
-                    <p className="text-sm text-zinc-400 print:text-gray-500 uppercase tracking-widest mb-2">Hasil Akhir (Tie Score)</p>
+                    <p className="text-sm text-zinc-400 uppercase tracking-widest mb-2">Hasil Akhir (Tie Score)</p>
                     <div className="text-6xl font-black font-mono flex justify-center items-center gap-4">
-                        <span className="text-blue-400 print:text-blue-600">{data.finalScoreA}</span>
-                        <span className="text-zinc-600 print:text-gray-400">-</span>
-                        <span className="text-red-400 print:text-red-600">{data.finalScoreB}</span>
+                        <span className="text-blue-400">{data.finalScoreA}</span>
+                        <span className="text-zinc-600">-</span>
+                        <span className="text-red-400">{data.finalScoreB}</span>
                     </div>
-                     <div className="mt-4 flex items-center justify-center gap-2 text-yellow-400 print:text-yellow-600 text-xl font-bold">
+                     <div className="mt-4 flex items-center justify-center gap-2 text-yellow-400 text-xl font-bold">
                         <Trophy className="w-6 h-6" />
                         Pemenang: {data.winnerTeam}
                     </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/10 print:border-gray-300">
-                    <h4 className="font-bold text-sm text-center uppercase tracking-wider mb-4 text-zinc-400 print:text-gray-500">
-                        Verifikasi Digital
+                <div className="pt-6 border-t border-white/10">
+                    <h4 className="font-bold text-sm text-center uppercase tracking-wider mb-4 text-zinc-400">
+                        Status Verifikasi Digital
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
@@ -148,19 +160,30 @@ export default function DigitalResultSheetPage() {
                           { label: "Manajer Tim B", verified: data.managerB_verified },
                           { label: "Referee/Match Control", verified: data.referee_verified },
                         ].map(v => (
-                            <div key={v.label} className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-300 print:bg-gray-100 print:text-green-700 print:border-gray-200">
-                                <CheckCircle2 className="w-5 h-5 shrink-0" />
+                            <div key={v.label} className={`flex items-center gap-3 p-3 rounded-lg border ${v.verified ? "bg-green-500/10 border-green-500/20 text-green-300" : "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"}`}>
+                                {v.verified ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0"/>}
                                 <div>
                                     <p className="text-sm font-bold">{v.label}</p>
-                                    <p className="text-xs text-green-400 print:text-green-600">Telah Diverifikasi</p>
+                                    <p className="text-xs">{v.verified ? "Telah Menyetujui" : "Menunggu Persetujuan"}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
+
+                {data.status !== 'FINAL' && (
+                    <div className="pt-6 border-t border-white/10">
+                        <Button 
+                            className="w-full h-14 text-lg font-bold bg-primary hover:bg-primary/90"
+                            onClick={handleRefereeVerification}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin"/> : <><FilePenLine className="w-6 h-6 mr-2"/>SAHKAN SEBAGAI REFEREE</>}
+                        </Button>
+                    </div>
+                )}
             </CardContent>
         </Card>
-
       </div>
     </div>
   );

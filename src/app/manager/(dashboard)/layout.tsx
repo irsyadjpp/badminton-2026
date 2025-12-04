@@ -6,7 +6,7 @@ import { redirect, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Users, LogOut, Settings, CheckCircle, 
-  Download, Menu, Home, FileText, AlertCircle, Swords, CreditCard
+  Download, Menu, Home, FileText, AlertCircle, Swords, CreditCard, FilePenLine
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logoutManager } from '../actions';
@@ -42,6 +42,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
         title: "OPERASIONAL PERTANDINGAN",
         items: [
             { name: "Susunan Pemain", href: "/manager/lineup", icon: Swords },
+            { name: "Persetujuan Hasil", href: "/manager/result-approval", icon: FilePenLine },
             { name: "Ajukan Protes", href: "/manager/protest/submit", icon: AlertCircle },
             { name: "Tagihan & Denda", href: "/manager/billing", icon: CreditCard },
         ]
@@ -62,7 +63,9 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
 
   const renderNavLinks = (isSheet: boolean = false) => menuGroups.map((group, groupIndex) => (
     <div key={groupIndex} className="space-y-1">
-        {!isSheet && group.title && <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground tracking-wider">{group.title}</p>}
+        <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            {group.title}
+        </p>
         {group.items.map((menu) => {
             const isActive = pathname.startsWith(menu.href);
             const NavLinkComponent = (
@@ -73,11 +76,10 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group',
                       isActive 
-                        ? 'bg-primary/10 text-primary font-bold shadow-inner shadow-primary/10' 
+                        ? 'bg-primary/10 text-primary font-bold' 
                         : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium'
                     )}
                   >
-                    {!isSheet && <div className={cn('absolute left-0 w-1 h-6 rounded-r-full bg-primary transition-all', isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50')} />}
                     <menu.icon className="w-5 h-5" />
                     <span>{menu.name}</span>
                 </Link>
