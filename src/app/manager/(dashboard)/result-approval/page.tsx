@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, CheckCircle2, AlertTriangle, FilePenLine, Loader2 } from "lucide-react";
@@ -93,20 +93,27 @@ export default function ManagerResultApprovalPage() {
               </div>
               
               <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="details">
-                      <AccordionTrigger>Lihat Detail Setiap Partai</AccordionTrigger>
-                      <AccordionContent className="space-y-2 pt-2">
-                        {data.matches.map(match => (
-                            <div key={match.id} className="p-3 bg-secondary/30 rounded-md">
-                               <p className="text-xs font-bold text-primary">{match.category}</p>
-                               <div className="text-sm text-muted-foreground">
-                                   ({match.playerA1} / {match.playerA2}) vs ({match.playerB1} / {match.playerB2})
-                               </div>
-                               <p className="font-mono text-center font-semibold">{match.score}</p>
+                <AccordionItem value="details">
+                  <AccordionTrigger className="text-muted-foreground font-semibold">Lihat Detail Setiap Partai</AccordionTrigger>
+                  <AccordionContent className="space-y-3 pt-4">
+                    {data.matches.map((match, idx) => (
+                      <div key={idx} className="p-4 bg-secondary/40 rounded-lg">
+                        <div className="flex justify-between items-center">
+                            <div className="space-y-0.5">
+                                <p className="text-xs font-bold text-primary">{match.category}</p>
+                                <p className="text-sm text-muted-foreground">({match.playerA1} / {match.playerA2}) vs ({match.playerB1} / {match.playerB2})</p>
                             </div>
-                        ))}
-                      </AccordionContent>
-                  </AccordionItem>
+                            <div className="text-right">
+                                <p className="font-mono text-sm font-semibold">{match.score}</p>
+                                <Badge className={`mt-1 ${match.winner === 'A' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+                                    WIN: {match.winner}
+                                </Badge>
+                            </div>
+                        </div>
+                      </div>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
           </CardContent>
           <CardFooter className="p-4 bg-secondary/50 border-t">

@@ -113,9 +113,15 @@ export default function RefereeResultSheetPage() {
                 <Accordion type="multiple" defaultValue={['item-0','item-1','item-2','item-3','item-4']} className="w-full">
                     {data.matches.map((match, idx) => (
                         <AccordionItem key={match.id} value={`item-${idx}`}>
-                            <AccordionTrigger className="hover:no-underline bg-secondary/20 px-4 rounded-md mb-2">
+                            <AccordionTrigger className="hover:no-underline bg-secondary/20 px-4 rounded-md mb-2 text-left">
                                 <div className="flex justify-between w-full items-center pr-4">
-                                    <span className="font-bold text-sm text-primary">PARTAI {idx + 1}: {match.category}</span>
+                                    <div className="space-y-0.5">
+                                        <div className="font-bold text-sm text-primary flex items-center gap-2">
+                                            <span>PARTAI {idx + 1}</span>
+                                            <Badge variant="outline" className="text-xs h-5 bg-background">{match.category}</Badge>
+                                        </div>
+                                        <div className="text-sm font-mono text-muted-foreground">{match.score}</div>
+                                    </div>
                                     <Badge className={match.winner === 'A' ? 'bg-blue-600' : 'bg-red-600'}>
                                         WIN: TIM {match.winner}
                                     </Badge>
@@ -126,7 +132,6 @@ export default function RefereeResultSheetPage() {
                                     <div className="text-sm"><p className="font-bold mb-2 text-blue-700">Pemain Tim A:</p><p className="text-muted-foreground">{match.playerA1} / {match.playerA2}</p></div>
                                     <div className="text-sm"><p className="font-bold mb-2 text-red-700">Pemain Tim B:</p><p className="text-muted-foreground">{match.playerB1} / {match.playerB2}</p></div>
                                 </div>
-                                <div className="mt-4 pt-4 border-t text-center"><p className="text-xs text-muted-foreground">Skor</p><p className="font-mono text-lg font-semibold">{match.score}</p></div>
                             </AccordionContent>
                         </AccordionItem>
                     ))}
