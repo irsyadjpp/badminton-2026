@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type MatchMode = 'GROUP' | 'KNOCKOUT';
 type MatchStatus = 'PRE_MATCH' | 'IN_PROGRESS' | 'FINISHED';
@@ -244,19 +245,19 @@ export default function MatchControlPage() {
   // --- RENDER: COIN TOSS SCREEN ---
   if (status === 'PRE_MATCH') {
       return (
-          <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-              <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-white space-y-6 shadow-2xl">
-                  <div className="text-center border-b border-zinc-800 pb-4">
-                      <Coins className="w-12 h-12 text-yellow-500 mx-auto mb-2 animate-bounce" />
-                      <h1 className="text-2xl font-black font-headline">COIN TOSS</h1>
-                      <p className="text-zinc-400 text-sm">Persiapan Pertandingan</p>
-                  </div>
-
-                  <div className="space-y-4">
+          <div className="flex items-center justify-center p-4">
+              <Card className="max-w-md w-full">
+                <CardHeader className="text-center border-b pb-4">
+                    <Coins className="w-12 h-12 text-yellow-500 mx-auto mb-2" />
+                    <CardTitle className="text-2xl font-black font-headline">COIN TOSS</CardTitle>
+                    <p className="text-muted-foreground text-sm">Persiapan Pertandingan</p>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <div className="space-y-4">
                       <div>
-                          <Label className="text-zinc-400 mb-2 block">Mode Pertandingan</Label>
+                          <Label className="mb-2 block">Mode Pertandingan</Label>
                           <Select value={mode} onValueChange={(v: MatchMode) => setMode(v)}>
-                              <SelectTrigger className="w-full bg-zinc-800 border-zinc-700"><SelectValue/></SelectTrigger>
+                              <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
                               <SelectContent>
                                   <SelectItem value="GROUP">PENYISIHAN (1x30)</SelectItem>
                                   <SelectItem value="KNOCKOUT">PEREMPAT FINAL+ (3x15)</SelectItem>
@@ -265,27 +266,27 @@ export default function MatchControlPage() {
                       </div>
 
                       <div className="space-y-3">
-                          <Label className="text-zinc-400">Pemenang Undian (Tos)</Label>
+                          <Label>Pemenang Undian (Tos)</Label>
                           <RadioGroup value={tossWinner} onValueChange={(v: 'A'|'B') => setTossWinner(v)} className="grid grid-cols-2 gap-4">
-                              <div className={`border rounded-lg p-3 cursor-pointer flex items-center justify-center gap-2 ${tossWinner === 'A' ? 'bg-primary/20 border-primary' : 'border-zinc-700'}`}>
+                              <Label htmlFor="winnerA" className={`border rounded-lg p-3 cursor-pointer flex items-center justify-center gap-2 ${tossWinner === 'A' ? 'bg-primary/20 border-primary' : 'border-border'}`}>
                                   <RadioGroupItem value="A" id="winnerA" />
-                                  <Label htmlFor="winnerA" className="font-bold cursor-pointer">TIM A</Label>
-                              </div>
-                              <div className={`border rounded-lg p-3 cursor-pointer flex items-center justify-center gap-2 ${tossWinner === 'B' ? 'bg-primary/20 border-primary' : 'border-zinc-700'}`}>
+                                  <span className="font-bold">TIM A</span>
+                              </Label>
+                              <Label htmlFor="winnerB" className={`border rounded-lg p-3 cursor-pointer flex items-center justify-center gap-2 ${tossWinner === 'B' ? 'bg-primary/20 border-primary' : 'border-border'}`}>
                                   <RadioGroupItem value="B" id="winnerB" />
-                                  <Label htmlFor="winnerB" className="font-bold cursor-pointer">TIM B</Label>
-                              </div>
+                                  <span className="font-bold">TIM B</span>
+                              </Label>
                           </RadioGroup>
                       </div>
 
                       <div className="space-y-3">
-                          <Label className="text-zinc-400">Pemenang Memilih</Label>
+                          <Label>Pemenang Memilih</Label>
                           <RadioGroup value={tossChoice} onValueChange={(v: any) => setTossChoice(v)} className="grid grid-cols-3 gap-2">
                               {['SERVE', 'RECEIVE', 'SIDE'].map((choice) => (
-                                  <div key={choice} className={`border rounded-lg p-2 cursor-pointer flex flex-col items-center justify-center text-center ${tossChoice === choice ? 'bg-green-900/30 border-green-600' : 'border-zinc-700'}`}>
+                                  <Label key={choice} htmlFor={choice} className={`border rounded-lg p-2 cursor-pointer flex flex-col items-center justify-center text-center ${tossChoice === choice ? 'bg-green-100 dark:bg-green-900/30 border-green-600' : 'border-border'}`}>
                                       <RadioGroupItem value={choice} id={choice} className="sr-only" />
-                                      <Label htmlFor={choice} className="font-bold text-xs cursor-pointer">{choice}</Label>
-                                  </div>
+                                      <span className="font-bold text-xs">{choice}</span>
+                                  </Label>
                               ))}
                           </RadioGroup>
                       </div>
@@ -294,7 +295,8 @@ export default function MatchControlPage() {
                   <Button className="w-full h-12 text-lg font-bold bg-green-600 hover:bg-green-500" onClick={handleStartMatch}>
                       MULAI PERTANDINGAN
                   </Button>
-              </div>
+                </CardContent>
+              </Card>
           </div>
       );
   }
@@ -470,5 +472,7 @@ function TeamPanel({ teamName, players, score, setScore, isServing, pos, onPoint
         </div>
     )
 }
+
+    
 
     
