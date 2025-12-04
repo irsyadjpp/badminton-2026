@@ -10,7 +10,7 @@ import {
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
   FileText, Shield, Mic, Ticket, Award, Wallet,
   ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt, CheckCircle,
-  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator
+  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import Image from 'next/image';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const ADMIN_CODES: Record<string, { name: string; role: string }> = {
   // 1. PIMPINAN INTI (STEERING COMMITTEE)
@@ -54,58 +55,97 @@ const ADMIN_CODES: Record<string, { name: string; role: string }> = {
 const getMenusByRole = (role: string) => {
   const allMenus = [
     // --- CORE ---
-    { header: "Utama" },
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard, roles: ['ALL'] },
 
     // --- FINANCE ---
-    { header: "Keuangan" },
-    { name: "Dashboard Keuangan", href: "/admin/finance", icon: DollarSign, roles: ['FINANCE', 'DIRECTOR'] },
-    { name: "Verifikasi Pendaftaran", href: "/admin/teams", icon: Receipt, roles: ['FINANCE', 'DIRECTOR', 'BUSINESS_LEAD'] },
-    { name: "Approval Reimbursement", href: "/admin/finance/reimbursement-approval", icon: Wallet, roles: ['FINANCE', 'DIRECTOR'] },
-    { name: "Tagihan Sponsor", href: "/admin/finance/invoices", icon: FileText, roles: ['FINANCE', 'DIRECTOR', 'BUSINESS_LEAD'] },
-    { name: "Manajemen Tenant", href: "/admin/tenants", icon: Store, roles: ['FINANCE', 'BUSINESS', 'BUSINESS_LEAD'] },
-    { name: "Skema Honorarium", href: "/admin/finance/honorarium", icon: Calculator, roles: ['DIRECTOR'] },
+    { 
+      name: "Keuangan", 
+      icon: DollarSign, 
+      roles: ['FINANCE', 'DIRECTOR', 'BUSINESS_LEAD', 'TENANT_RELATIONS', 'BUSINESS'],
+      subItems: [
+        { name: "Dashboard Keuangan", href: "/admin/finance", roles: ['FINANCE', 'DIRECTOR'] },
+        { name: "Verifikasi Pendaftaran", href: "/admin/teams", roles: ['FINANCE', 'DIRECTOR', 'BUSINESS_LEAD'] },
+        { name: "Approval Reimbursement", href: "/admin/finance/reimbursement-approval", roles: ['FINANCE', 'DIRECTOR'] },
+        { name: "Tagihan Sponsor", href: "/admin/finance/invoices", roles: ['FINANCE', 'DIRECTOR', 'BUSINESS_LEAD'] },
+        { name: "Manajemen Tenant", href: "/admin/tenants", roles: ['FINANCE', 'TENANT_RELATIONS', 'BUSINESS_LEAD', 'BUSINESS'] },
+        { name: "Skema Honorarium", href: "/admin/finance/honorarium", roles: ['DIRECTOR'] },
+      ]
+    },
 
     // --- MATCH CONTROL ---
-    { header: "Pertandingan" },
-    { name: "Match Control Center", href: "/admin/matches", icon: Activity, roles: ['MATCH_COORD', 'REFEREE', 'IT_ADMIN', 'DIRECTOR', 'OPS_LEAD'] },
-    { name: "Verifikasi TPF", href: "/admin/tpf", icon: CheckCircle, roles: ['TPF', 'MATCH_COORD', 'DIRECTOR'] },
-    { name: "Call Room (Antrean)", href: "/admin/mlo/dashboard", icon: Megaphone, roles: ['MLO', 'MATCH_COORD'] },
-    { name: "Verifikasi Line-Up", href: "/admin/mlo/lineups", icon: ClipboardCheck, roles: ['MLO', 'MATCH_COORD'] },
-    { name: "Keputusan Protes", href: "/admin/protests", icon: Gavel, roles: ['REFEREE', 'MATCH_COORD', 'DIRECTOR'] },
-    { name: "Papan Skor Wasit", href: "/admin/referee", icon: Gavel, roles: ['REFEREE', 'MATCH_COORD', 'IT_ADMIN'] },
+    { 
+      name: "Pertandingan", 
+      icon: Activity, 
+      roles: ['MATCH_COORD', 'REFEREE', 'IT_ADMIN', 'DIRECTOR', 'OPS_LEAD', 'TPF', 'MLO'],
+      subItems: [
+        { name: "Match Control Center", href: "/admin/matches", roles: ['MATCH_COORD', 'REFEREE', 'IT_ADMIN', 'DIRECTOR', 'OPS_LEAD'] },
+        { name: "Verifikasi TPF", href: "/admin/tpf", roles: ['TPF', 'MATCH_COORD', 'DIRECTOR'] },
+        { name: "Call Room (Antrean)", href: "/admin/mlo/dashboard", roles: ['MLO', 'MATCH_COORD'] },
+        { name: "Verifikasi Line-Up", href: "/admin/mlo/lineups", roles: ['MLO', 'MATCH_COORD'] },
+        { name: "Keputusan Protes", href: "/admin/protests", roles: ['REFEREE', 'MATCH_COORD', 'DIRECTOR'] },
+        { name: "Papan Skor Wasit", href: "/admin/referee", roles: ['REFEREE', 'MATCH_COORD', 'IT_ADMIN'] },
+      ]
+    },
 
     // --- OPERATIONS ---
-    { header: "Operasional" },
-    { name: "Gate Check-in", href: "/admin/gate", icon: QrCode, roles: ['GATE', 'OPS_LEAD', 'IT_ADMIN'] },
-    { name: "Log Medis", href: "/admin/medical", icon: Stethoscope, roles: ['MEDIC', 'OPS_LEAD', 'DIRECTOR'] },
-    { name: "Logistik Kok", href: "/admin/logistics", icon: Archive, roles: ['LOGISTICS', 'OPS_LEAD', 'MATCH_COORD'] },
-    { name: "Undian Doorprize", href: "/admin/raffle", icon: Gift, roles: ['OPS_LEAD', 'DIRECTOR', 'SHOW_DIR', 'MEDIA'] },
-    { name: "Pengajuan Reimbursement", href: "/admin/reimbursement/submit", icon: Wallet, roles: ['ALL'] },
+    { 
+      name: "Operasional", 
+      icon: Users,
+      roles: ['GATE', 'OPS_LEAD', 'IT_ADMIN', 'MEDIC', 'LOGISTICS', 'DIRECTOR', 'SHOW_DIR', 'MEDIA', 'ALL'],
+      subItems: [
+        { name: "Gate Check-in", href: "/admin/gate", roles: ['GATE', 'OPS_LEAD', 'IT_ADMIN'] },
+        { name: "Log Medis", href: "/admin/medical", roles: ['MEDIC', 'OPS_LEAD', 'DIRECTOR'] },
+        // { name: "Logistik Kok", href: "/admin/logistics", roles: ['LOGISTICS', 'OPS_LEAD', 'MATCH_COORD'] },
+        { name: "Undian Doorprize", href: "/admin/raffle", roles: ['OPS_LEAD', 'DIRECTOR', 'SHOW_DIR', 'MEDIA'] },
+        { name: "Pengajuan Reimbursement", href: "/admin/reimbursement/submit", roles: ['ALL'] },
+      ]
+    },
 
     // --- COMMERCIAL & MEDIA ---
-    { header: "Bisnis & Media" },
-    { name: "Data Pengunjung", href: "/admin/visitors", icon: Users, roles: ['BUSINESS_LEAD', 'BUSINESS', 'DIRECTOR'] },
-    { name: "Laporan Sponsor", href: "/admin/analytics", icon: BarChart3, roles: ['BUSINESS_LEAD', 'BUSINESS', 'DIRECTOR'] },
-    { name: "Manajemen Media", href: "/admin/media", icon: Video, roles: ['SHOW_DIR', 'MEDIA', 'DIRECTOR'] },
+    { 
+      name: "Bisnis & Media", 
+      icon: BarChart3,
+      roles: ['BUSINESS_LEAD', 'BUSINESS', 'DIRECTOR', 'SHOW_DIR', 'MEDIA'],
+      subItems: [
+        { name: "Data Pengunjung", href: "/admin/visitors", roles: ['BUSINESS_LEAD', 'BUSINESS', 'DIRECTOR'] },
+        { name: "Laporan Sponsor", href: "/admin/analytics", roles: ['BUSINESS_LEAD', 'BUSINESS', 'DIRECTOR'] },
+        { name: "Manajemen Media", href: "/admin/media", roles: ['SHOW_DIR', 'MEDIA', 'DIRECTOR'] },
+      ]
+    },
 
     // --- SECRETARY ---
-    { header: "Sekretariat" },
-    { name: "Dokumen Legal", href: "/admin/secretary/archive", icon: ShieldAlert, roles: ['SECRETARY', 'DIRECTOR'] },
-    { name: "Generator Sertifikat", href: "/admin/secretary/cert-gen", icon: FileText, roles: ['SECRETARY', 'DIRECTOR', 'SHOW_DIR'] },
+     { 
+      name: "Sekretariat", 
+      icon: FileText,
+      roles: ['SECRETARY', 'DIRECTOR', 'SHOW_DIR'],
+      subItems: [
+        // { name: "Dokumen Legal", href: "/admin/secretary/archive", roles: ['SECRETARY', 'DIRECTOR'] },
+        { name: "Generator Sertifikat", href: "/admin/secretary/cert-gen", roles: ['SECRETARY', 'DIRECTOR', 'SHOW_DIR'] },
+      ]
+    },
     
     // --- SYSTEM ---
-    { header: "System" },
     { name: "Pengaturan Global", href: "/admin/settings", icon: Settings, roles: ['DIRECTOR', 'IT_ADMIN'] },
   ];
 
-  return allMenus.filter(m => {
-    if (m.header) return true;
-    if (!m.roles) return false;
-    if (m.roles.includes('ALL')) return true;
-    if (role === 'IT_ADMIN' || role === 'DIRECTOR') return true;
-    return m.roles.includes(role);
-  });
+  const filterMenu = (menuItems: any[]) => {
+    return menuItems.map(item => {
+      if (item.subItems) {
+        const visibleSubItems = item.subItems.filter((sub:any) => 
+          sub.roles.includes(role) || role === 'IT_ADMIN' || role === 'DIRECTOR' || sub.roles.includes('ALL')
+        );
+        if (visibleSubItems.length > 0) {
+          return { ...item, subItems: visibleSubItems };
+        }
+        return null;
+      }
+      
+      const canAccess = item.roles.includes(role) || role === 'IT_ADMIN' || role === 'DIRECTOR' || item.roles.includes('ALL');
+      return canAccess ? item : null;
+    }).filter(Boolean);
+  };
+  
+  return filterMenu(allMenus);
 };
 
 
@@ -114,27 +154,23 @@ interface NavLinkProps {
   children: ReactNode;
   onClick?: () => void;
   isActive: boolean;
-  isSheet: boolean;
 }
 
-const NavLink = ({ href, children, onClick, isActive, isSheet }: NavLinkProps) => {
-  const linkContent = (
+const NavLink = ({ href, children, onClick, isActive }: NavLinkProps) => {
+  return (
     <Link 
       href={href}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group',
+        'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors',
         isActive 
-          ? 'bg-primary/10 text-primary font-bold shadow-inner shadow-primary/10' 
+          ? 'bg-primary/10 text-primary font-bold' 
           : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium'
       )}
     >
-      {!isSheet && <div className={cn('absolute left-0 w-1 h-6 rounded-r-full bg-primary transition-all', isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50')} />}
       {children}
     </Link>
   );
-  
-  return isSheet ? <SheetClose asChild>{linkContent}</SheetClose> : linkContent;
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -240,29 +276,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   
   const currentMenus = getMenusByRole(session.role);
 
-  const renderNavLinks = (isSheet: boolean = false) => currentMenus.map((menu, idx) => {
-      // Logic to not render a header if no items in its group are visible
-      if (menu.header) {
-        const nextItemIndex = currentMenus.findIndex((m, i) => i > idx && !m.header);
-        if (nextItemIndex === -1) return null; // No items after this header
-        
-        const itemsInGroup = currentMenus.slice(idx + 1, nextItemIndex > -1 ? nextItemIndex : currentMenus.length).filter(m => !m.header);
-        if (itemsInGroup.length === 0) return null; // Don't render header if its group is empty for the current role
-
-        return !isSheet && (
-          <div key={idx} className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground tracking-wider">
-            {menu.header}
-          </div>
-        );
-      }
-
-      const isActive = menu.href ? pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin') : false;
+  const renderNavLinks = (isSheet: boolean = false) => currentMenus.map((menu: any, idx: number) => {
+    if (menu.subItems) {
+      const isParentActive = menu.subItems.some((sub: any) => pathname.startsWith(sub.href));
       return (
-        <NavLink key={menu.href} href={menu.href!} isActive={isActive} isSheet={isSheet}>
-          {menu.icon && <menu.icon className="w-5 h-5" />}
-          <span>{menu.name}</span>
-        </NavLink>
-      )
+        <Collapsible key={idx} defaultOpen={isParentActive}>
+          <CollapsibleTrigger className="flex justify-between items-center w-full group">
+              <div className={cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors w-full',
+                isParentActive ? 'text-primary' : 'text-foreground/80 hover:bg-secondary/50'
+              )}>
+                <menu.icon className="w-5 h-5" />
+                <span>{menu.name}</span>
+              </div>
+              <ChevronDown className={cn(
+                  'w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180',
+                  isParentActive && 'text-primary'
+              )} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-6 border-l border-border ml-5 mt-1 space-y-1">
+            {menu.subItems.map((subItem: any) => {
+              const isActive = pathname.startsWith(subItem.href) && (subItem.href !== '/admin' || pathname === '/admin');
+              return (
+                <NavLink key={subItem.href} href={subItem.href!} isActive={isActive}>
+                  <span>{subItem.name}</span>
+                </NavLink>
+              );
+            })}
+          </CollapsibleContent>
+        </Collapsible>
+      );
+    }
+
+    const isActive = menu.href ? pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin') : false;
+    return (
+      <NavLink key={menu.href} href={menu.href!} isActive={isActive}>
+        {menu.icon && <menu.icon className="w-5 h-5" />}
+        <span>{menu.name}</span>
+      </NavLink>
+    );
   });
 
 
@@ -276,7 +328,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             BCC ADMIN
           </h1>
         </div>
-        <nav className="flex-1 py-2 overflow-y-auto no-scrollbar">
+        <nav className="flex-1 py-4 px-2 overflow-y-auto no-scrollbar space-y-1">
           {renderNavLinks()}
         </nav>
         <div className="p-4 border-t border-border">
@@ -301,12 +353,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <h1 className="font-headline font-black text-xl text-primary">BCC ADMIN</h1>
                       </div>
                       <nav className="p-4 space-y-2">
-                        {currentMenus.map((menu, idx) => {
-                            if (menu.header) {
-                                const nextItemIndex = currentMenus.findIndex((m, i) => i > idx && !m.header);
-                                if (nextItemIndex === -1 && idx !== currentMenus.length -1) return <Separator key={idx} className="my-2" />;
-                                if(currentMenus[idx+1] && currentMenus[idx+1].header) return null;
-                                return <Separator key={idx} className="my-2" />;
+                        {currentMenus.map((menu:any, idx) => {
+                            if (menu.subItems) {
+                              return <p key={idx} className="text-muted-foreground text-xs font-bold uppercase pt-4 px-2">{menu.name}</p>;
                             }
                             const isActive = pathname.startsWith(menu.href!) && (menu.href !== '/admin' || pathname === '/admin');
                             return (
