@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function HonorariumPage() {
   const { toast } = useToast();
-  const [budget, setBudget] = useState(30000000); // Default 30 Juta
+  const [budget, setBudget] = useState(30000000); // Anggaran ditetapkan di sini
   const [staffList, setStaffList] = useState<StaffEvaluation[]>([]);
   
   // Modal State
@@ -33,14 +33,26 @@ export default function HonorariumPage() {
     setStaffList(data);
   };
 
+  const handleSave = async () => {
+      if (selectedStaff && tempScores) {
+          await saveEvaluation(selectedStaff.id, tempScores);
+          toast({ title: "Penilaian Disimpan", description: `Skor ${selectedStaff.name} diperbarui.` });
+          setIsModalOpen(false);
+          loadData(); // Refresh table untuk kalkulasi ulang
+      }
+  };
+
   // --- KALKULASI HONOR OTOMATIS (LOGIC E) ---
   const totalPointsAllStaff = staffList.reduce((acc, curr) => acc + curr.rawScore, 0);
   const valuePerPoint = totalPointsAllStaff > 0 ? budget / totalPointsAllStaff : 0;
 
-  const calculatedList = staffList.map(staff => ({
-      ...staff,
-      honorReceived: Math.round(staff.rawScore * valuePerPoint)
-  }));
+  const calculatedList = staffList.map(staff => {
+      const newHonor = Math.round(staff.rawScore * valuePerPoint);
+      if (staff.honorReceived !== newHonor) {
+          return { ...staff, honorReceived: newHonor };
+      }
+      return staff;
+  });
   // -------------------------------------------
 
   const openEvaluation = (staff: StaffEvaluation) => {
@@ -52,15 +64,6 @@ export default function HonorariumPage() {
   const handleScoreChange = (key: keyof EvaluationParams, val: number) => {
       if (tempScores) {
           setTempScores({ ...tempScores, [key]: val });
-      }
-  };
-
-  const handleSave = async () => {
-      if (selectedStaff && tempScores) {
-          await saveEvaluation(selectedStaff.id, tempScores);
-          toast({ title: "Penilaian Disimpan", description: `Skor ${selectedStaff.name} diperbarui.` });
-          setIsModalOpen(false);
-          loadData(); // Refresh table
       }
   };
 
@@ -89,20 +92,14 @@ export default function HonorariumPage() {
             <p className="text-muted-foreground">Evaluasi kinerja & kalkulasi honor otomatis (Sistem Poin).</p>
         </div>
         
-        {/* BUDGET INPUT */}
+        {/* BUDGET LABEL */}
         <Card className="w-full md:w-auto bg-secondary/30 border-primary/20">
             <CardContent className="p-4 flex items-center gap-4">
                 <div className="p-3 bg-green-100 text-green-700 rounded-full"><Coins className="w-6 h-6" /></div>
                 <div>
                     <p className="text-xs text-muted-foreground uppercase font-bold">Total Anggaran Honor</p>
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">Rp</span>
-                        <Input 
-                            type="number" 
-                            value={budget} 
-                            onChange={(e) => setBudget(Number(e.target.value))} 
-                            className="h-8 w-36 font-mono font-bold bg-white"
-                        />
+                    <div className="text-2xl font-black font-mono">
+                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(budget)}
                     </div>
                 </div>
             </CardContent>
