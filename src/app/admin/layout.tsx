@@ -10,7 +10,7 @@ import {
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
   FileText, Shield, Mic, Ticket, Award, Wallet,
   ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt, CheckCircle,
-  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone
+  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,6 +64,7 @@ const getMenusByRole = (role: string) => {
     { name: "Approval Reimbursement", href: "/admin/finance/reimbursement-approval", icon: Wallet, roles: ['FINANCE', 'DIRECTOR'] },
     { name: "Tagihan Sponsor", href: "/admin/finance/invoices", icon: FileText, roles: ['FINANCE', 'DIRECTOR', 'BUSINESS_LEAD'] },
     { name: "Manajemen Tenant", href: "/admin/tenants", icon: Store, roles: ['FINANCE', 'BUSINESS', 'BUSINESS_LEAD'] },
+    { name: "Skema Honorarium", href: "/admin/finance/honorarium", icon: Calculator, roles: ['DIRECTOR'] },
 
     // --- MATCH CONTROL ---
     { header: "Pertandingan" },
