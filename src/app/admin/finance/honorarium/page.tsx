@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -181,7 +182,7 @@ export default function HonorariumPage() {
 
       {/* TABS UNTUK PANITIA & KONTRIBUTOR */}
       <Tabs defaultValue="panitia" className="w-full">
-        <TabsList>
+        <TabsList className="w-full grid grid-cols-2">
             <TabsTrigger value="panitia">Panitia (P1-P16)</TabsTrigger>
             <TabsTrigger value="kontributor">Kontributor (NP1-NP4)</TabsTrigger>
         </TabsList>
@@ -268,54 +269,64 @@ export default function HonorariumPage() {
       </Tabs>
       
       {/* PANDUAN PENILAIAN */}
-      <Card>
-        <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                Panduan Parameter Penilaian (P1-P16)
-            </CardTitle>
-            <CardDescription>Gunakan pedoman ini untuk memberikan penilaian yang objektif.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-                {parameterDetails.map((param) => (
-                    <AccordionItem value={param.id} key={param.id}>
-                        <AccordionTrigger className="font-bold text-left hover:no-underline">{param.title}</AccordionTrigger>
-                        <AccordionContent className="space-y-2">
-                            <p className="text-muted-foreground italic mb-3">{param.description}</p>
-                            <ul className="space-y-1 text-sm">
-                                {param.scores.map((score, i) => (
-                                    <li key={i} className="flex gap-2">
-                                        <span className="font-semibold">{score.charAt(0)}:</span> 
-                                        <span className="text-muted-foreground">{score.slice(2)}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-            <div className="mt-6">
-                <h4 className="font-bold mb-2">Makna Umum Skor 1-5</h4>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Skor</TableHead>
-                            <TableHead>Makna Ringkas</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {generalScores.map(s => (
-                            <TableRow key={s.score}>
-                                <TableCell className="font-bold text-lg">{s.score}</TableCell>
-                                <TableCell>{s.meaning}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-        </CardContent>
-      </Card>
+      <div className="text-center">
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                    <BookOpen className="w-4 h-4 text-primary" /> Lihat Panduan Penilaian
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh]">
+                <DialogHeader>
+                    <DialogTitle>Panduan Parameter Penilaian (P1-P16)</DialogTitle>
+                    <DialogDescription>Gunakan pedoman ini untuk memberikan penilaian yang objektif.</DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 overflow-y-auto">
+                    <div>
+                        <Accordion type="single" collapsible className="w-full">
+                            {parameterDetails.map((param) => (
+                                <AccordionItem value={param.id} key={param.id}>
+                                    <AccordionTrigger className="font-bold text-left hover:no-underline">{param.title}</AccordionTrigger>
+                                    <AccordionContent className="space-y-2">
+                                        <p className="text-muted-foreground italic mb-3">{param.description}</p>
+                                        <ul className="space-y-1 text-sm">
+                                            {param.scores.map((score, i) => (
+                                                <li key={i} className="flex gap-2">
+                                                    <span className="font-semibold">{score.charAt(0)}:</span> 
+                                                    <span className="text-muted-foreground">{score.slice(2)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </div>
+                    <div>
+                        <div className="sticky top-0 bg-background/95 backdrop-blur-sm p-1 rounded-lg">
+                            <h4 className="font-bold mb-2">Makna Umum Skor 1-5</h4>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[100px]">Skor</TableHead>
+                                        <TableHead>Makna Ringkas</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {generalScores.map(s => (
+                                        <TableRow key={s.score}>
+                                            <TableCell className="font-bold text-lg">{s.score}</TableCell>
+                                            <TableCell>{s.meaning}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+      </div>
 
 
       {/* MODAL PENILAIAN DINAMIS */}
