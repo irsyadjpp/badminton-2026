@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -78,7 +79,7 @@ export default function MedicalDashboard() {
                     <Plus className="w-5 h-5 mr-2" /> Catat Insiden Baru
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg bg-background">
                 <DialogHeader>
                     <DialogTitle>Laporan Penanganan Medis</DialogTitle>
                 </DialogHeader>
@@ -193,4 +194,5 @@ export default function MedicalDashboard() {
       </Card>
     </div>
   );
-}
+
+    
