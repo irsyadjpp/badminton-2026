@@ -9,7 +9,7 @@ import {
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
   FileText, Shield, Mic, Ticket, Award, Wallet,
   ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt, CheckCircle,
-  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown
+  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/s
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useToast } from '@/hooks/use-toast';
 
 const ADMIN_CODES: Record<string, { name: string; role: string }> = {
   // 1. PIMPINAN INTI (STEERING COMMITTEE)
@@ -52,6 +53,9 @@ const ADMIN_CODES: Record<string, { name: string; role: string }> = {
   "601": { name: "Tim IT Support", role: "IT_ADMIN" } 
 };
 
+// PIN Master untuk demo
+const MASTER_PIN = "202626";
+
 // --- DEFINISI MENU ---
 const getMenusByRole = (role: string) => {
   const allMenus = [
@@ -65,7 +69,6 @@ const getMenusByRole = (role: string) => {
       roles: ['DIRECTOR'],
       subItems: [
         { name: "Struktur Panitia", href: "/admin/director/committee", roles: ['DIRECTOR'] },
-        { name: "Generator SK", href: "/admin/director/sk-generator", roles: ['DIRECTOR'] },
       ]
     },
 
@@ -185,11 +188,21 @@ const NavLink = ({ href, children, onClick, isActive }: NavLinkProps) => {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
   const pathname = usePathname();
   
   const [session, setSession] = useState({ isLoggedIn: false, role: 'DIRECTOR', name: 'Admin Super' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // --- MOCK SIMULATION DATA ---
+  const MOCK_GOOGLE_USER = {
+    name: "Irsyad Jamal",
+    email: "irsyad@managementbcc.com",
+    role: "DIRECTOR"
+  };
 
   useEffect(() => {
     const sessionStr = sessionStorage.getItem('admin_session');
@@ -207,18 +220,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleGoogleLogin = () => {
+    setLoading(true);
+    setError('');
+    
+    setTimeout(() => {
+      setLoading(false);
+      toast({ title: `Selamat Datang, ${MOCK_GOOGLE_USER.name}!`, description: "Simulasi login via Google berhasil." });
+      
+      const newSession = { isLoggedIn: true, role: MOCK_GOOGLE_USER.role, name: MOCK_GOOGLE_USER.name };
+      setSession(newSession);
+      setIsAuthenticated(true);
+      sessionStorage.setItem('admin_session', JSON.stringify(newSession));
+    }, 1500);
+  };
+
+  const handlePinLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const user = ADMIN_CODES[pin as keyof typeof ADMIN_CODES];
-    if (user) {
+    setLoading(true);
+    setError('');
+
+    setTimeout(() => {
+      setLoading(false);
+      const user = ADMIN_CODES[pin as keyof typeof ADMIN_CODES];
+      if (user) {
+        toast({ title: `Akses Diterima: ${user.name}` });
         const newSession = { isLoggedIn: true, role: user.role, name: user.name };
         setSession(newSession);
         setIsAuthenticated(true);
         sessionStorage.setItem('admin_session', JSON.stringify(newSession));
-    } else {
-      alert("PIN Salah!");
-      setPin("");
-    }
+      } else {
+        setError("PIN Salah! Akses ditolak.");
+        toast({ title: "PIN Salah", variant: "destructive" });
+        setPin('');
+      }
+    }, 1000);
   };
 
   const handleLogout = () => {
@@ -230,12 +266,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen w-full flex bg-black text-white overflow-hidden">
+      <div className="min-h-screen w-full flex bg-zinc-950 text-white overflow-hidden">
         <div className="hidden lg:flex w-[60%] relative flex-col justify-between p-12 bg-zinc-900">
           <div className="absolute inset-0 z-0">
-              <Image src="/images/gor-koni.jpg" alt="Court" fill className="object-cover opacity-40 grayscale mix-blend-luminosity"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-              <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
+              <Image src="/images/gor-koni.jpg" alt="Court" fill className="object-cover opacity-30 grayscale mix-blend-luminosity"/>
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent" />
+              <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-10 mix-blend-overlay"></div>
           </div>
           <div className="relative z-10">
                <div className="flex items-center gap-3 mb-2">
@@ -255,27 +291,65 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="relative z-10 flex gap-6 text-sm text-zinc-500 font-mono">
               <span>© 2026 BCC Dev Team</span>
-              <span>v2.0.1 (Admin Panel)</span>
+              <span>v2.1.0 (Admin Panel)</span>
           </div>
         </div>
-        <div className="w-full lg:w-[40%] flex items-center justify-center p-8 relative">
+
+        <div className="w-full lg:w-[40%] flex items-center justify-center p-8 relative bg-zinc-950 lg:bg-transparent">
            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] pointer-events-none" />
            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 blur-[100px] pointer-events-none" />
-           <div className="w-full max-w-md space-y-8 relative z-10">
+           <div className="w-full max-w-sm space-y-8 relative z-10">
               <div className="text-center lg:text-left">
-                  <h2 className="text-3xl font-black font-headline mb-2">Admin Portal Login</h2>
-                  <p className="text-zinc-400">Masukkan PIN unik sesuai divisi Anda.</p>
+                  <h2 className="text-3xl font-black font-headline mb-2">Admin Portal</h2>
+                  <p className="text-zinc-400">Masuk untuk mengelola turnamen.</p>
               </div>
+              
               <div className="space-y-4">
-                  <form onSubmit={handleLogin} className="space-y-4">
-                      <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase text-zinc-500 tracking-wider">PIN Panitia</Label>
-                          <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-5 w-5 text-zinc-500" />
-                              <Input name="pin" type="password" placeholder="••••" className="pl-10 bg-zinc-900 border-zinc-800 text-white h-12 rounded-lg focus:ring-primary focus:border-primary transition-all placeholder:text-zinc-600 text-center tracking-[0.5em]" value={pin} onChange={(e) => setPin(e.target.value)} required />
-                          </div>
-                      </div>
-                      <Button type="submit" className="w-full h-12 bg-primary text-white font-bold rounded-lg transition-all hover:bg-primary/90">Login</Button>
+                  <Button
+                    onClick={handleGoogleLogin}
+                    disabled={loading}
+                    className="w-full h-12 flex items-center justify-center gap-3 bg-white text-zinc-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-200 text-base"
+                  >
+                    {loading ? <Loader2 className="animate-spin" /> : (
+                      <>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Masuk dengan Google
+                      </>
+                    )}
+                  </Button>
+
+                  <div className="relative flex py-2 items-center">
+                      <div className="flex-grow border-t border-zinc-700"></div>
+                      <span className="flex-shrink mx-4 text-zinc-500 text-xs font-bold">ATAU</span>
+                      <div className="flex-grow border-t border-zinc-700"></div>
+                  </div>
+
+                  <form onSubmit={handlePinLogin}>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase text-zinc-500 tracking-wider">PIN Akses</Label>
+                       <Input
+                        type="password"
+                        maxLength={6}
+                        value={pin}
+                        onChange={(e) => setPin(e.target.value)}
+                        className="w-full px-4 py-3 text-center text-xl tracking-[0.5em] bg-zinc-900 border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-white h-14"
+                        placeholder="••••••"
+                        disabled={loading}
+                      />
+                    </div>
+                    {error && <p className="text-red-500 text-xs text-center mt-2">{error}</p>}
+                    <Button
+                      type="submit"
+                      disabled={loading || pin.length < 3}
+                      className="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg mt-4 h-12 text-base hover:bg-primary/90 transition duration-200 disabled:opacity-50"
+                    >
+                      {loading ? <Loader2 className="animate-spin" /> : 'Lanjutkan dengan PIN'}
+                    </Button>
                   </form>
               </div>
               <p className="text-center text-sm text-zinc-500 pt-6">Akses terbatas hanya untuk panitia dan wasit.</p>
@@ -309,11 +383,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
              <div className="pl-6 border-l border-border space-y-1">
                 {menu.subItems.map((subItem: any) => {
                   const isActive = pathname.startsWith(subItem.href) && (subItem.href !== '/admin' || pathname === '/admin');
-                  return (
+                  const NavContent = () => (
                     <NavLink key={subItem.href} href={subItem.href!} isActive={isActive}>
                       <span>{subItem.name}</span>
                     </NavLink>
                   );
+                  return isSheet ? <SheetClose asChild><NavContent /></SheetClose> : <NavContent />;
                 })}
              </div>
           </CollapsibleContent>
@@ -322,12 +397,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     const isActive = menu.href ? pathname.startsWith(menu.href) && (menu.href !== '/admin' || pathname === '/admin') : false;
-    return (
+    const NavContent = () => (
       <NavLink key={menu.href} href={menu.href!} isActive={isActive}>
         {menu.icon && <menu.icon className="w-5 h-5" />}
         <span>{menu.name}</span>
       </NavLink>
     );
+    return isSheet ? <SheetClose asChild><NavContent /></SheetClose> : <NavContent />;
   });
 
 
@@ -404,4 +480,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 }
 
+    
     
