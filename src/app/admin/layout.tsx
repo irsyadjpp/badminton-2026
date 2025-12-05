@@ -9,7 +9,7 @@ import {
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
   FileText, Shield, Mic, Ticket, Award, Wallet,
   ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt, CheckCircle,
-  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2
+  Store, Video, QrCode, Archive, ShieldAlert, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2, UserCog, UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -31,7 +31,8 @@ const getMenusByRole = (role: string) => {
       icon: Shield,
       roles: ['DIRECTOR'],
       subItems: [
-        { name: "Struktur Panitia", href: "/admin/director/committee", roles: ['DIRECTOR'] },
+        { name: "Master Roster Panitia", href: "/admin/director/roster", icon: UserPlus, roles: ['DIRECTOR'] },
+        { name: "Struktur & Penugasan", href: "/admin/director/committee", icon: UserCog, roles: ['DIRECTOR'] },
       ]
     },
 
@@ -159,6 +160,7 @@ interface NavGroupProps {
 }
 
 const NavGroup = ({ title, icon: Icon, subItems, isInitiallyOpen }: NavGroupProps) => {
+    const pathname = usePathname();
     return (
         <Collapsible defaultOpen={isInitiallyOpen}>
             <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary [&[data-state=open]>svg]:rotate-180">
@@ -170,9 +172,19 @@ const NavGroup = ({ title, icon: Icon, subItems, isInitiallyOpen }: NavGroupProp
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-1 py-1 pl-5">
                 {subItems.map((item) => (
-                    <NavItem key={item.href} href={item.href} icon={item.icon || ArrowRightCircle}>
+                    <Link 
+                      key={item.href} 
+                      href={item.href}
+                      className={cn(
+                          'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                          pathname.startsWith(item.href)
+                            ? 'bg-secondary text-foreground'
+                            : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground'
+                      )}
+                    >
+                        <item.icon className="w-4 h-4" />
                         {item.name}
-                    </NavItem>
+                    </Link>
                 ))}
             </CollapsibleContent>
         </Collapsible>
@@ -233,7 +245,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const renderNavLinks = (isSheet: boolean = false) => currentMenus.map((menu: any, idx: number) => {
     if (menu.subItems) {
         const isGroupActive = menu.subItems.some((sub:any) => pathname.startsWith(sub.href));
-        return (
+        const NavComponent = (
             <NavGroup 
                 key={menu.name}
                 title={menu.name}
@@ -242,6 +254,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 isInitiallyOpen={isGroupActive}
             />
         );
+        return isSheet ? <SheetClose asChild>{NavComponent}</SheetClose> : NavComponent;
     }
     
     return (
@@ -328,7 +341,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
-
-    
-
-    

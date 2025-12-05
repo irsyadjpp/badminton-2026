@@ -3,14 +3,20 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Save, Users, RefreshCw, UserPlus, Trash2 } from "lucide-react";
+import { Save, Users, RefreshCw, UserPlus, Trash2, UserCog } from "lucide-react";
 import { getCommitteeStructure, updateCommitteeStructure } from "./actions";
 import { type CommitteeDivision } from '@/lib/committee-data';
 import { useToast } from "@/hooks/use-toast";
 import { INITIAL_COMMITTEE_STRUCTURE } from '@/lib/committee-data';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 
 export default function CommitteeManagementPage() {
@@ -18,6 +24,15 @@ export default function CommitteeManagementPage() {
   const [divisions, setDivisions] = useState<CommitteeDivision[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // MOCK MASTER ROSTER - Nanti ini akan di-fetch dari actions
+  const masterRoster = [
+      { id: "irsyad_j", name: "Irsyad Jamal Pratama Putra" },
+      { id: "rizki_k", name: "Rizki Karami" },
+      { id: "annisa_s", name: "Annisa Syafira" },
+      { id: "selvi_y", name: "Selvi Yulia" },
+      // ...tambahkan semua panitia lain di sini
+  ];
 
   useEffect(() => {
     loadData();
@@ -31,7 +46,6 @@ export default function CommitteeManagementPage() {
   };
   
   const resetData = () => {
-      // Deep copy from initial constant
       setDivisions(JSON.parse(JSON.stringify(INITIAL_COMMITTEE_STRUCTURE)));
       toast({
           title: "Struktur Direset",
@@ -40,25 +54,28 @@ export default function CommitteeManagementPage() {
   }
 
   // Update nama personil
-  const handleMemberChange = (divIndex: number, memberIndex: number, field: 'name' | 'position', value: string) => {
+  const handleMemberChange = (divIndex: number, memberIndex: number, field: 'name' | 'position' | 'id', value: string) => {
     const newDivisions = [...divisions];
-    newDivisions[divIndex].members[memberIndex] = {
-      ...newDivisions[divIndex].members[memberIndex],
-      [field]: value
-    };
+    
+    // Jika field yang diubah adalah 'name', update juga ID nya dari master roster
+    let memberData = { ...newDivisions[divIndex].members[memberIndex], [field]: value };
+    if (field === 'name') {
+        const selectedPerson = masterRoster.find(p => p.name === value);
+        memberData.id = selectedPerson?.id;
+    }
+    
+    newDivisions[divIndex].members[memberIndex] = memberData;
     setDivisions(newDivisions);
   };
 
-  // Tambah posisi baru dalam divisi
   const addMember = (divIndex: number) => {
     const newDivisions = [...divisions];
     newDivisions[divIndex].members.push({ position: "Posisi Baru", name: "" });
     setDivisions(newDivisions);
   };
 
-  // Hapus posisi
   const removeMember = (divIndex: number, memberIndex: number) => {
-    if (confirm("Yakin ingin menghapus posisi ini?")) {
+    if (confirm("Yakin ingin menghapus posisi ini dari struktur?")) {
         const newDivisions = [...divisions];
         newDivisions[divIndex].members.splice(memberIndex, 1);
         setDivisions(newDivisions);
@@ -80,15 +97,15 @@ export default function CommitteeManagementPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-            <h2 className="text-3xl font-bold font-headline text-primary">Manajemen Struktur Panitia</h2>
-            <p className="text-muted-foreground">Bentuk tim dan tetapkan personil untuk BCC 2026.</p>
+            <h2 className="text-3xl font-bold font-headline text-primary">Struktur & Penugasan Panitia</h2>
+            <p className="text-muted-foreground">Assign personil dari Master Roster ke posisi yang tersedia.</p>
         </div>
         <div className="flex gap-2">
             <Button variant="outline" onClick={resetData}>
                 <RefreshCw className="w-4 h-4 mr-2" /> Reset
             </Button>
             <Button onClick={handleSave} disabled={isSaving || isLoading} className="bg-primary">
-                <Save className="w-4 h-4 mr-2" /> {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                <Save className="w-4 h-4 mr-2" /> {isSaving ? "Menyimpan..." : "Simpan Penugasan"}
             </Button>
         </div>
       </div>
@@ -109,42 +126,39 @@ export default function CommitteeManagementPage() {
                 </CardHeader>
                 <CardContent className="p-4 space-y-4">
                     {div.members.map((member, memIdx) => (
-                        <div key={memIdx} className="flex gap-3 items-end">
-                            <div className="flex-1 space-y-1">
+                        <div key={memIdx} className="grid grid-cols-12 gap-3 items-end">
+                            <div className="col-span-5 space-y-1">
                                 <Label className="text-xs text-muted-foreground">Jabatan</Label>
-                                <Input 
-                                    value={member.position} 
-                                    onChange={(e) => handleMemberChange(divIdx, memIdx, 'position', e.target.value)}
-                                    className="h-8 font-semibold bg-secondary/10"
-                                />
+                                <p className="font-semibold text-sm h-8 flex items-center">{member.position}</p>
                             </div>
-                            <div className="flex-[2] space-y-1">
+                            <div className="col-span-6 space-y-1">
                                 <Label className="text-xs text-muted-foreground">Nama Personil</Label>
-                                <Input 
+                                <Select 
                                     value={member.name} 
-                                    onChange={(e) => handleMemberChange(divIdx, memIdx, 'name', e.target.value)}
-                                    className="h-8"
-                                    placeholder="Belum diisi..."
-                                />
+                                    onValueChange={(value) => handleMemberChange(divIdx, memIdx, 'name', value)}
+                                >
+                                    <SelectTrigger className="h-8">
+                                        <SelectValue placeholder="Pilih Personil..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="">-- Kosongkan --</SelectItem>
+                                        {masterRoster.map(person => (
+                                            <SelectItem key={person.id} value={person.name}>{person.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                onClick={() => removeMember(divIdx, memIdx)}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="col-span-1">
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-8 w-8 text-destructive hover:bg-destructive/10 invisible" // Tombol hapus disembunyikan untuk mencegah perubahan struktur
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
                     ))}
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full border-dashed text-muted-foreground"
-                        onClick={() => addMember(divIdx)}
-                    >
-                        <UserPlus className="w-4 h-4 mr-2" /> Tambah Posisi
-                    </Button>
                 </CardContent>
               </Card>
             ))
