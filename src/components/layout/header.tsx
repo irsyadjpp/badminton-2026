@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const NavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void; }) => {
   return (
@@ -53,6 +54,7 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
+             <ThemeToggle />
             <div className="hidden md:flex items-center gap-2">
               <Button asChild>
                 <Link href="/manager/login">

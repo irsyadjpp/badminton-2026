@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -18,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { logoutAdmin } from './actions';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 // --- DEFINISI MENU ---
 const getMenusByRole = (role: string) => {
@@ -319,9 +321,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Button variant="ghost" size="icon" asChild>
                   <Link href="/"><Home className="w-4 h-4" /></Link>
                 </Button>
-                 <Button variant="ghost" size="icon">
-                    <Settings className="w-4 h-4" />
-                </Button>
+                 <ThemeToggle />
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                         <span className="font-bold text-primary">{session.name.charAt(0)}</span>

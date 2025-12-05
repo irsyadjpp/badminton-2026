@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +15,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/s
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -138,6 +140,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
                 <Button variant="ghost" size="icon" asChild>
                   <Link href="/"><Home className="w-4 h-4" /></Link>
                 </Button>
+                <ThemeToggle />
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                         <span className="font-bold text-primary">M</span>
