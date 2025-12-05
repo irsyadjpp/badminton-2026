@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { MoreHorizontal, PlusCircle, Trash2, Edit, GraduationCap, Briefcase } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Edit, GraduationCap, Briefcase, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ import { type CommitteeMember, committeeMemberSchema } from '@/lib/schemas/commi
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { VOLUNTEER_DIVISIONS } from '@/lib/schemas/volunteer';
 import { Textarea } from '@/components/ui/textarea';
+import Link from 'next/link';
 
 export default function RosterPage() {
   const { toast } = useToast();
@@ -156,7 +157,10 @@ export default function RosterPage() {
                                         <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => handleOpenModal(member)}><Edit className="w-4 h-4 mr-2"/> Edit Data Lengkap</DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href={`/admin/director/roster/${member.id}`}><UserRound className="w-4 h-4 mr-2"/> Lihat Detail</Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleOpenModal(member)}><Edit className="w-4 h-4 mr-2"/> Edit Data</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleDelete(member.id!)} className="text-destructive"><Trash2 className="w-4 h-4 mr-2"/> Hapus</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -265,3 +269,5 @@ export default function RosterPage() {
     </div>
   );
 }
+
+    
