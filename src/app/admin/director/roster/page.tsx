@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { MoreHorizontal, PlusCircle, Trash2, Edit, GraduationCap, Briefcase, UserRound } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Edit, GraduationCap, Briefcase, UserRound, Phone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,6 +98,35 @@ export default function RosterPage() {
       }
   }
 
+  const getDivisionFromExpertise = (expertise: string | undefined) => {
+    if (!expertise) return 'N/A';
+    
+    const mapping: Record<string, string> = {
+      'Penasihat Senior': 'Pimpinan',
+      'IT & Project Management': 'IT & Digital',
+      'Sekretariat & Acara': 'Sekretariat',
+      'Administrasi': 'Sekretariat',
+      'Keuangan': 'Keuangan',
+      'Match Control': 'Pertandingan',
+      'MLO': 'Pertandingan',
+      'TPF': 'Pertandingan',
+      'Business': 'Komersial',
+      'Sponsorship': 'Komersial',
+      'Tenant Relations': 'Komersial',
+      'Media & Sosmed': 'Media',
+      'Content Creator': 'Media',
+      'Dokumentasi': 'Media',
+      'Operasional': 'Operasional',
+      'Keamanan': 'Operasional',
+      'Medis': 'Operasional',
+      'Registrasi': 'Operasional',
+      'Logistik': 'Operasional',
+      'Legal': 'Legal',
+    };
+
+    return mapping[expertise] || 'Lainnya';
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -116,18 +145,19 @@ export default function RosterPage() {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Nama Personil</TableHead>
-                        <TableHead>Informasi Personal</TableHead>
-                        <TableHead>Posisi Pilihan</TableHead>
+                        <TableHead>Jabatan</TableHead>
+                        <TableHead>Divisi</TableHead>
+                        <TableHead>No. HP</TableHead>
                         <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {isLoading ? (
                         Array.from({length: 5}).map((_, i) => (
-                            <TableRow key={i}><TableCell colSpan={4}><div className="h-10 bg-secondary/50 animate-pulse rounded-md"/></TableCell></TableRow>
+                            <TableRow key={i}><TableCell colSpan={5}><div className="h-10 bg-secondary/50 animate-pulse rounded-md"/></TableCell></TableRow>
                         ))
                     ) : roster.length === 0 ? (
-                        <TableRow><TableCell colSpan={4} className="text-center h-24">Belum ada anggota di roster.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center h-24">Belum ada anggota di roster.</TableCell></TableRow>
                     ) : (
                         roster.map((member) => (
                         <TableRow key={member.id}>
@@ -139,17 +169,17 @@ export default function RosterPage() {
                                     </Avatar>
                                     <div>
                                       <p>{member.name}</p>
-                                      <p className="text-xs text-muted-foreground">{member.expertise}</p>
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell className="text-xs space-y-1">
-                                <div className="flex items-center gap-2"><Briefcase className="w-3 h-3 text-muted-foreground" /> {member.status || "N/A"}</div>
-                                <div className="flex items-center gap-2"><GraduationCap className="w-3 h-3 text-muted-foreground" /> {member.education || "N/A"}</div>
+                            <TableCell>
+                                <p className="text-xs font-semibold">{member.expertise}</p>
                             </TableCell>
-                            <TableCell className="text-xs space-y-1">
-                                <p><span className="font-bold">P1:</span> {member.division1?.split(':')[0]}</p>
-                                <p className="text-muted-foreground"><span className="font-bold">P2:</span> {member.division2?.split(':')[0]}</p>
+                            <TableCell>
+                                <Badge variant="outline">{getDivisionFromExpertise(member.expertise)}</Badge>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                                {member.phone || "N/A"}
                             </TableCell>
                             <TableCell className="text-right">
                                <DropdownMenu>
@@ -188,7 +218,7 @@ export default function RosterPage() {
                         <FormItem><FormLabel>Nama Lengkap</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                      <FormField control={form.control} name="expertise" render={({ field }) => (
-                        <FormItem><FormLabel>Keahlian Utama</FormLabel><FormControl><Input placeholder="Contoh: Keuangan, Media, IT" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Keahlian Utama / Jabatan</FormLabel><FormControl><Input placeholder="Contoh: Keuangan, Media, IT" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
 
                     <div className="grid grid-cols-2 gap-4">
@@ -269,5 +299,3 @@ export default function RosterPage() {
     </div>
   );
 }
-
-    
