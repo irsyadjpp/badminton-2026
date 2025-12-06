@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -61,13 +62,14 @@ const getMenusByRole = (role: string) => {
       icon: Activity, 
       roles: ['MATCH_COORD', 'REFEREE', 'IT_ADMIN', 'DIRECTOR', 'OPS_LEAD', 'TPF', 'MLO'],
       subItems: [
-        { name: "Match Control Center", href: "/admin/matches", icon: LayoutDashboard, roles: ['MATCH_COORD', 'REFEREE', 'IT_ADMIN', 'DIRECTOR', 'OPS_LEAD'] },
+        { name: "Match Control Desk", href: "/admin/match-control/assignment", icon: LayoutDashboard, roles: ['MATCH_COORD', 'DIRECTOR'] },
         { name: "Berita Acara Hasil", href: "/admin/matches/result-sheet", icon: FileText, roles: ['REFEREE', 'MATCH_COORD'] },
         { name: "Verifikasi TPF", href: "/admin/tpf", icon: ShieldCheck, roles: ['TPF', 'MATCH_COORD', 'DIRECTOR'] },
         { name: "Call Room (Antrean)", href: "/admin/mlo/dashboard", icon: Megaphone, roles: ['MLO', 'MATCH_COORD'] },
         { name: "Verifikasi Line-Up", href: "/admin/mlo/lineups", icon: ClipboardCheck, roles: ['MLO', 'MATCH_COORD'] },
         { name: "Keputusan Protes", href: "/admin/protests", icon: Gavel, roles: ['REFEREE', 'MATCH_COORD', 'DIRECTOR'] },
         { name: "Papan Skor Wasit", href: "/admin/referee", icon: Trophy, roles: ['REFEREE', 'MATCH_COORD', 'IT_ADMIN'] },
+        { name: "Checklist Venue", href: "/admin/referee/checklist", icon: ShieldCheck, roles: ['REFEREE', 'DIRECTOR'] },
       ]
     },
 
@@ -364,3 +366,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { UmpireControls } from '@/components/admin/umpire-controls';
 
 type MatchMode = 'GROUP' | 'KNOCKOUT';
 type MatchStatus = 'PRE_MATCH' | 'IN_PROGRESS' | 'FINISHED';
@@ -288,7 +290,7 @@ export default function MatchControlPage() {
 
         const msg = checkGameStatus(newA, newB);
         if (msg && !msg.startsWith('SET') && !msg.startsWith('MATCH')) {
-          toast({ title: msg, className: "bg-blue-600 text-white" });
+          toast({ title: msg, className: "bg-primary" });
         }
 
     } else {
@@ -300,6 +302,28 @@ export default function MatchControlPage() {
         }
     }
   };
+
+  const handleOverrule = () => {
+    // This is a simple logic. A real overrule might need to know which point to correct.
+    // For now, let's just swap the last point.
+    if (history.length > 0) {
+        const lastState = history[history.length-1];
+        
+        // Find out who scored last by comparing with current score
+        const teamAScoredLast = scoreA > lastState.scoreA;
+        
+        // Undo the last point
+        handlePoint('A', 'MIN'); // this will restore to lastState
+        
+        // Add point to the other team
+        if(teamAScoredLast) {
+            handlePoint('B', 'ADD');
+        } else {
+            handlePoint('A', 'ADD');
+        }
+    }
+  };
+
 
   if (status === 'PRE_MATCH') {
       return (
@@ -425,56 +449,40 @@ export default function MatchControlPage() {
         {teamSides.teamB === 'RIGHT' ? teamBPanel : teamAPanel}
       </div>
 
-      <div className="mt-3 grid grid-cols-4 gap-4">
-         <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="secondary" className="h-14 flex flex-col gap-0" disabled={status === 'FINISHED'}>
-                    <Gavel className="w-5 h-5 text-red-500" />
-                    <span className="text-[9px] font-bold uppercase">Sanksi</span>
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader><DialogTitle>Pilih Tim & Kartu</DialogTitle></DialogHeader>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <p className="text-xs text-center text-muted-foreground">TIM A</p>
-                        <Button onClick={() => handleCard('A', 'YELLOW')} className="w-full bg-yellow-500 text-black hover:bg-yellow-400">Kuning</Button>
-                        <Button onClick={() => handleCard('A', 'RED')} className="w-full bg-red-600 hover:bg-red-500">Merah (+1 Lawan)</Button>
-                        <Button onClick={() => handleCard('A', 'BLACK')} className="w-full bg-black text-white">Hitam (WO)</Button>
-                    </div>
-                    <div className="space-y-2">
-                        <p className="text-xs text-center text-muted-foreground">TIM B</p>
-                        <Button onClick={() => handleCard('B', 'YELLOW')} className="w-full bg-yellow-500 text-black hover:bg-yellow-400">Kuning</Button>
-                        <Button onClick={() => handleCard('B', 'RED')} className="w-full bg-red-600 hover:bg-red-500">Merah (+1 Lawan)</Button>
-                        <Button onClick={() => handleCard('B', 'BLACK')} className="w-full bg-black text-white">Hitam (WO)</Button>
-                    </div>
+      <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+         {/* Kontrol Umpire */}
+         <UmpireControls 
+             onFault={() => {
+                 // Memberi poin ke lawan dari server saat ini
+                 const opponent = server === 'A' ? 'B' : 'A';
+                 handlePoint(opponent, 'ADD');
+             }}
+             onOverrule={handleOverrule}
+         />
+
+         <div className="grid grid-cols-2 gap-2">
+            <div className="h-full rounded-md flex flex-col items-center justify-center p-2 bg-secondary">
+                <span className="text-[8px] text-muted-foreground uppercase">SHUTTLE</span>
+                <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-lg">{shuttles}</span>
+                    <button onClick={() => setShuttles(s=>s+1)} disabled={status === 'FINISHED'} className="text-green-500 text-xs bg-background px-1 rounded disabled:opacity-50 disabled:cursor-not-allowed">+</button>
                 </div>
-            </DialogContent>
-         </Dialog>
-
-         <Button variant="secondary" className="h-14 flex flex-col gap-0" onClick={() => setServer(server === 'A' ? 'B' : 'A')} disabled={status === 'FINISHED'}>
-            <ArrowLeftRight className="w-5 h-5" />
-            <span className="text-[9px] font-bold uppercase">Service Over</span>
-         </Button>
-
-         <div className="h-14 rounded-md flex flex-col items-center justify-center">
-             <span className="text-[8px] text-muted-foreground uppercase">SHUTTLE</span>
-             <div className="flex items-center gap-2">
-                 <span className="font-mono font-bold text-lg">{shuttles}</span>
-                 <button onClick={() => setShuttles(s=>s+1)} disabled={status === 'FINISHED'} className="text-green-500 text-xs bg-secondary px-1 rounded disabled:opacity-50 disabled:cursor-not-allowed">+</button>
-             </div>
+            </div>
+            <Button variant="secondary" className="h-full flex flex-col gap-0" onClick={() => setServer(server === 'A' ? 'B' : 'A')} disabled={status === 'FINISHED'}>
+               <ArrowLeftRight className="w-5 h-5" />
+               <span className="text-[9px] font-bold uppercase">Service Over</span>
+            </Button>
          </div>
-
-         {status === 'FINISHED' ? (
-             <Button className="h-14 bg-green-600 hover:bg-green-500" onClick={() => window.location.href='/admin/referee'}>
-                 <MonitorPlay className="w-4 h-4 mr-1" /> SELESAI
-             </Button>
-         ) : (
-             <div className="h-14 flex items-center justify-center rounded-md">
-                 <span className="text-green-500 font-bold text-xs animate-pulse">● LIVE</span>
-             </div>
-         )}
       </div>
+      
+      {status === 'FINISHED' && (
+             <Button className="w-full h-14 bg-green-600 hover:bg-green-500 mt-4" onClick={() => window.location.href='/admin/referee'}>
+                 <MonitorPlay className="w-4 h-4 mr-1" /> SELESAI & KIRIM HASIL
+             </Button>
+      )}
+
     </div>
   );
 }
+
+    
