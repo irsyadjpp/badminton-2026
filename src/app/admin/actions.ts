@@ -52,7 +52,8 @@ export async function loginAdminByCode(prevState: any, formData: FormData) {
     name: adminInfo.name,
     role: adminInfo.role,
     isLoggedIn: true,
-    method: 'PIN'
+    method: 'PIN',
+    isOnboarded: false, // NEW: Force onboarding check
   });
 
   cookies().set('bcc_admin_session', sessionData, {
@@ -75,7 +76,8 @@ export async function loginAdminGoogle() {
     name: "Irsyad Jamal (Google)",
     role: "DIRECTOR", // Default Role untuk Google Login simulasi
     isLoggedIn: true,
-    method: 'GOOGLE'
+    method: 'GOOGLE',
+    isOnboarded: false, // NEW: Force onboarding check
   });
 
   cookies().set('bcc_admin_session', sessionData, {
@@ -101,4 +103,21 @@ export async function getAdminSession() {
   } catch (e) {
     return null;
   }
+}
+
+// NEW: Action to sign integrity pact
+export async function signIntegrityPact() {
+  const session = await getAdminSession();
+  if (!session) return { success: false };
+
+  const updatedSession = { ...session, isOnboarded: true };
+
+  cookies().set('bcc_admin_session', JSON.stringify(updatedSession), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7,
+    path: '/',
+  });
+
+  return { success: true };
 }

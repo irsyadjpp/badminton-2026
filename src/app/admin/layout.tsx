@@ -8,7 +8,7 @@ import {
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
   FileText, Shield, Mic, Ticket, Award, Wallet,
   ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt, CheckCircle,
-  Store, Video, QrCode, Archive, ShieldCheck, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2, UserCog, UserPlus, FileBadge
+  Store, Video, QrCode, Archive, ShieldCheck, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2, UserCog, UserPlus, FileBadge, UserRound
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
@@ -17,12 +17,14 @@ import { useToast } from '@/hooks/use-toast';
 import { logoutAdmin } from './actions';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { IntegrityPactModal } from '@/components/admin/integrity-pact-modal';
 
 // --- DEFINISI MENU ---
 const getMenusByRole = (role: string) => {
   const allMenus = [
     // --- CORE ---
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['ALL'] },
+    { name: "Profil Saya", href: "/admin/profile", icon: UserRound, roles: ['ALL'] },
 
     // --- DIRECTOR ---
     { 
@@ -194,8 +196,7 @@ const NavGroup = ({ title, icon: Icon, subItems, isInitiallyOpen }: NavGroupProp
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [session, setSession] = useState({ isLoggedIn: false, role: 'DIRECTOR', name: 'Admin Super' });
+  const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   
@@ -206,23 +207,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             const storedSession = JSON.parse(sessionStr);
             if (storedSession && storedSession.isLoggedIn) {
                 setSession(storedSession);
-                setIsAuthenticated(true);
+            } else if (pathname !== '/admin/login') {
+                redirect('/admin/login');
             }
         } catch (error) {
             console.error("Failed to parse admin session", error);
             sessionStorage.removeItem('admin_session');
+            if (pathname !== '/admin/login') redirect('/admin/login');
         }
     } else if (pathname !== '/admin/login') {
         redirect('/admin/login');
     }
     setLoading(false);
   }, [pathname]);
+  
+  const handlePactComplete = () => {
+    const updatedSession = { ...session, isOnboarded: true };
+    setSession(updatedSession);
+    sessionStorage.setItem('admin_session', JSON.stringify(updatedSession));
+  };
+
 
   const handleLogout = async () => {
     await logoutAdmin();
     sessionStorage.removeItem('admin_session');
-    setIsAuthenticated(false);
+    setSession(null);
     toast({ title: "Logout Berhasil" });
+    redirect('/');
   };
   
   if (loading) {
@@ -233,7 +244,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAuthenticated) {
+  if (!session?.isLoggedIn) {
     if (pathname === '/admin/login') {
         return <div className="min-h-screen">{children}</div>;
     }
@@ -268,6 +279,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
 
   return (
+    <>
+    <IntegrityPactModal 
+        isOpen={session.isLoggedIn && !session.isOnboarded}
+        onComplete={handlePactComplete}
+        userName={session.name}
+    />
     <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar */}
       <aside className="w-72 bg-card hidden md:flex flex-col fixed h-full">
@@ -342,5 +359,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </main>
       </div>
     </div>
+    </>
   );
 }
