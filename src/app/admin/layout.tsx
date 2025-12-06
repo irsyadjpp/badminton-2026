@@ -1,9 +1,11 @@
 
+
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, redirect } from 'next/navigation';
+import Image from 'next/image';
 import { 
   LayoutDashboard, Users, Trophy, BarChart3, LogOut, Lock, 
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
@@ -293,10 +295,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-72 bg-card hidden md:flex flex-col fixed h-full">
         <div className="p-6 flex items-center gap-3">
-          <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18.81 9.5L12 2.69L5.19 9.5H18.81ZM12 21.31L5.19 14.5H18.81L12 21.31Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-          </svg>
+          <Image src="/images/logo.png" alt="BCC Logo" width={32} height={32} />
           <h1 className="font-headline font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-fuchsia-500">
             BCC ADMIN
           </h1>
@@ -366,5 +365,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </>
   );
 }
-
-    
