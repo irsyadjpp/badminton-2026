@@ -6,9 +6,9 @@ import { usePathname, redirect } from 'next/navigation';
 import { 
   LayoutDashboard, Users, Trophy, BarChart3, LogOut, Lock, 
   ClipboardCheck, ArrowRight, Menu, Home, Settings, AlertOctagon,
-  FileText, Shield, Mic, Ticket, Award, Wallet,
+  FileText, ShieldCheck, Mic, Ticket, Award, Wallet,
   ClipboardList, Activity, Gavel, Gift, Stethoscope, Receipt, CheckCircle,
-  Store, Video, QrCode, Archive, ShieldCheck, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2, UserCog, UserPlus, FileBadge, UserRound
+  Store, Video, QrCode, Archive, FileBadge, DollarSign, ArrowRightCircle, Megaphone, Calculator, ChevronDown, Loader2, UserCog, UserPlus, UserRound, Kanban
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
@@ -25,6 +25,7 @@ const getMenusByRole = (role: string) => {
     // --- CORE ---
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['ALL'] },
     { name: "Profil Saya", href: "/admin/profile", icon: UserRound, roles: ['ALL'] },
+    { name: "Workspace", href: "/admin/workspace", icon: Kanban, roles: ['ALL'] },
     { name: "RKA & Planning", href: "/admin/planning", icon: ClipboardList, roles: ['ALL'] },
 
     // --- DIRECTOR ---
