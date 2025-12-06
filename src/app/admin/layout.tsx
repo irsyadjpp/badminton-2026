@@ -25,6 +25,7 @@ const getMenusByRole = (role: string) => {
     // --- CORE ---
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['ALL'] },
     { name: "Profil Saya", href: "/admin/profile", icon: UserRound, roles: ['ALL'] },
+    { name: "RKA & Planning", href: "/admin/planning", icon: ClipboardList, roles: ['ALL'] },
 
     // --- DIRECTOR ---
     { 
