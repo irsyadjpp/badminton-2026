@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useRef, useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { IdCardTemplate } from "@/components/admin/id-card-template";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 
 // MOCK DATA USER (Nanti diambil dari Session/DB)
@@ -142,10 +143,12 @@ export default function ProfilePage() {
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-3xl bg-zinc-950 border-zinc-800">
-                        <div className="flex flex-col items-center space-y-6 py-6">
-                            <h2 className="text-xl font-headline font-bold text-white uppercase tracking-widest">
-                                ID Card Preview
-                            </h2>
+                      <DialogHeader>
+                          <DialogTitle className="text-xl font-headline font-bold text-white uppercase tracking-widest text-center">
+                            ID Card Preview
+                          </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center space-y-6 py-6">
                             
                             {/* Visual Render untuk User Lihat */}
                             <div className="scale-75 md:scale-100 origin-center p-4 border border-zinc-800 rounded-xl bg-black">
@@ -337,5 +340,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
