@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -144,8 +145,8 @@ export default function PlanningPage() {
                                 <div className="bg-secondary/20 p-3 rounded text-sm">
                                     <strong>Output:</strong> {prog.objective}
                                 </div>
-                                <div className="flex items-center gap-2 font-mono font-bold text-lg text-primary">
-                                    <DollarSign className="w-5 h-5" /> Rp {prog.costEstimate.toLocaleString('id-ID')}
+                                <div className="font-mono font-bold text-lg text-primary">
+                                    Rp {prog.costEstimate.toLocaleString('id-ID')}
                                 </div>
                                 
                                 {/* AREA KHUSUS DIRECTOR/FINANCE */}
