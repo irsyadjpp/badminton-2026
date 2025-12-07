@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { submitVerificationResult, type PlayerVerification } from "@/app/admin/tpf/actions";
+import { RUBRIC_GUIDELINES } from '@/lib/tpf-data';
 
 // Konstanta Bonus [cite: 681-698]
 const BONUS_POINTS = {
@@ -31,6 +32,7 @@ const BONUS_POINTS = {
 export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolean, onClose: () => void, player: PlayerVerification }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("visual");
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   
   // State Skor Utama (A) [cite: 678]
   const [scores, setScores] = useState({
@@ -42,6 +44,7 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolea
   
   const [notes, setNotes] = useState("");
   const [finalCalc, setFinalCalc] = useState({ scoreA: 0, scoreB: 0, total: 0, level: "", tier: "", color: "" });
+  const [videoStatus, setVideoStatus] = useState<'VALID' | 'INVALID'>('VALID');
 
   // Kalkulasi Real-time 
   useEffect(() => {
@@ -62,31 +65,44 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolea
     let level = "REJECTED";
     let tier = "Over Spec / Joki";
     let color = "bg-red-100 text-red-800 border-red-500";
-
-    if (finalScore >= 14 && finalScore <= 36) {
-        level = "BEGINNER";
-        color = "bg-green-100 text-green-800 border-green-500";
-        if (finalScore <= 24) tier = "Tier 3 (Newbie)";
-        else if (finalScore <= 30) tier = "Tier 2 (Rookie)";
-        else tier = "Tier 1 (Prospect)";
-    } else if (finalScore >= 37 && finalScore <= 62) {
-        level = "INTERMEDIATE";
-        color = "bg-blue-100 text-blue-800 border-blue-500";
-        if (finalScore <= 44) tier = "Tier 3 (Grinder)";
-        else if (finalScore <= 54) tier = "Tier 2 (Striker)";
-        else tier = "Tier 1 (Carry)";
-    } else if (finalScore >= 63 && finalScore <= 89) {
-        level = "ADVANCE";
-        color = "bg-purple-100 text-purple-800 border-purple-500";
-        if (finalScore <= 70) tier = "Tier 3 (Master)";
-        else if (finalScore <= 80) tier = "Tier 2 (Savage)";
-        else tier = "Tier 1 (Prime)";
+    
+    if (videoStatus === 'INVALID') {
+        level = "REJECTED";
+        tier = "Video Tidak Sesuai Syarat";
+    } else {
+        if (finalScore >= 14 && finalScore <= 36) {
+            level = "BEGINNER";
+            color = "bg-green-100 text-green-800 border-green-500";
+            if (finalScore <= 24) tier = "Tier 3 (Newbie)";
+            else if (finalScore <= 30) tier = "Tier 2 (Rookie)";
+            else tier = "Tier 1 (Prospect)";
+        } else if (finalScore >= 37 && finalScore <= 62) {
+            level = "INTERMEDIATE";
+            color = "bg-blue-100 text-blue-800 border-blue-500";
+            if (finalScore <= 44) tier = "Tier 3 (Grinder)";
+            else if (finalScore <= 54) tier = "Tier 2 (Striker)";
+            else tier = "Tier 1 (Carry)";
+        } else if (finalScore >= 63 && finalScore <= 89) {
+            level = "ADVANCE";
+            color = "bg-purple-100 text-purple-800 border-purple-500";
+            if (finalScore <= 70) tier = "Tier 3 (Master)";
+            else if (finalScore <= 80) tier = "Tier 2 (Savage)";
+            else tier = "Tier 1 (Prime)";
+        }
     }
 
     setFinalCalc({ scoreA: totalA, scoreB: totalB, total: finalScore, level, tier, color });
-  }, [scores, skills]);
+  }, [scores, skills, videoStatus]);
 
   const handleSubmit = async () => {
+      if (videoStatus === 'INVALID' && !notes) {
+          return toast({
+              title: "Catatan Wajib Diisi",
+              description: "Jika video tidak valid, berikan alasan di kolom catatan.",
+              variant: "destructive"
+          });
+      }
+
       await submitVerificationResult(player.id, { 
           ...finalCalc, 
           status: finalCalc.level === 'REJECTED' ? 'REJECTED' : 'APPROVED',
@@ -101,12 +117,12 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolea
       <DialogContent className="max-w-[95vw] h-[95vh] p-0 flex flex-col overflow-hidden bg-background">
         
         {/* HEADER */}
-        <div className="px-6 py-4 border-b flex justify-between items-center bg-card shrink-0">
+        <div className="px-6 py-4 border-b flex justify-between items-center bg-white shrink-0 text-black">
             <div>
                 <DialogTitle className="text-xl font-bold flex items-center gap-2">
                     <PlayCircle className="w-5 h-5 text-primary"/> Audit: {player.name}
                 </DialogTitle>
-                <p className="text-sm text-muted-foreground">{player.team} • {player.category} (Claimed)</p>
+                <p className="text-sm text-slate-500">{player.team} • {player.category} (Claimed)</p>
             </div>
             
             {/* SCORECARD STICKY DI ATAS */}
@@ -145,21 +161,12 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolea
                 
                 {/* Cheat Sheet (Scrollable) [cite: 714-743] */}
                 <ScrollArea className="flex-1 bg-zinc-900 text-zinc-300 p-4">
-                    <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                        <Info className="w-4 h-4 text-blue-400"/> Panduan Visual (Cheat Sheet)
-                    </h4>
-                    <div className="space-y-4 text-xs">
-                        <CheatItem title="1. Grip" bad="Panci, kaku, bunyi bletak" good="Salaman, luwes, bunyi tring" />
-                        <CheatItem title="2. Footwork" bad="Lari jogging, berat, diam" good="Geser (chasse), jinjit, ringan" />
-                        <CheatItem title="3. Backhand" bad="Lari mutar badan, panik" good="Clear sampai belakang, santai" />
-                        <CheatItem title="4. Attack" bad="Melambung keluar, nyangkut" good="Menukik tajam, bunyi ledakan" />
-                        <CheatItem title="5. Defense" bad="Buang muka, raket ditaruh" good="Tembok, drive balik, tenang" />
-                    </div>
+                    <Button onClick={() => setIsGuideOpen(true)} variant="outline" className="w-full mb-4 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">Buka Panduan Rubrik Lengkap</Button>
                 </ScrollArea>
             </div>
 
             {/* PANEL KANAN: FORM PENILAIAN (60%) */}
-            <div className="col-span-12 lg:col-span-7 bg-slate-50 flex flex-col h-full overflow-hidden">
+            <div className="col-span-12 lg:col-span-7 bg-slate-50 flex flex-col h-full overflow-hidden text-slate-900">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
                     <div className="px-6 pt-4 bg-white border-b">
                         <TabsList className="grid w-full grid-cols-2">
@@ -169,82 +176,64 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolea
                     </div>
 
                     <ScrollArea className="flex-1 p-6">
-                        <TabsContent value="visual" className="mt-0 space-y-6">
-                            <div className="grid gap-6">
-                                <ScoreSlider 
-                                    label="1. Biomekanik (Grip)" 
-                                    desc="Apakah pegangan raket kaku (Panci) atau luwes (Salaman)?" 
-                                    val={scores.grip} setVal={(v) => setScores({...scores, grip: v})} 
-                                />
-                                <ScoreSlider 
-                                    label="2. Footwork (Kaki)" 
-                                    desc="Lari berat (Jogging) vs Langkah geser/jinjit (Chasse)?" 
-                                    val={scores.footwork} setVal={(v) => setScores({...scores, footwork: v})} 
-                                />
-                                <ScoreSlider 
-                                    label="3. Backhand (Kiri)" 
-                                    desc="Bisa clear lurus sampai belakang?" 
-                                    val={scores.backhand} setVal={(v) => setScores({...scores, backhand: v})} 
-                                />
-                                <ScoreSlider 
-                                    label="4. Attack (Smash)" 
-                                    desc="Power dan sudut tukikan smash." 
-                                    val={scores.attack} setVal={(v) => setScores({...scores, attack: v})} 
-                                />
-                                <ScoreSlider 
-                                    label="5. Defense (Bertahan)" 
-                                    desc="Tenang jadi tembok atau panik buang bola?" 
-                                    val={scores.defense} setVal={(v) => setScores({...scores, defense: v})} 
-                                />
-                                <ScoreSlider 
-                                    label="6. Game IQ (Rotasi)" 
-                                    desc="Saling mengisi posisi atau sering tabrakan?" 
-                                    val={scores.gameIq} setVal={(v) => setScores({...scores, gameIq: v})} 
-                                />
-                                <ScoreSlider 
-                                    label="7. Physique (Fisik)" 
-                                    desc="Stabil dari awal sampai akhir video?" 
-                                    val={scores.physique} setVal={(v) => setScores({...scores, physique: v})} 
-                                />
+                         <div className="space-y-2 mb-6">
+                            <Label className="font-bold">Status Video</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button variant={videoStatus === 'VALID' ? 'default' : 'outline'} className="bg-green-600 hover:bg-green-700" onClick={() => setVideoStatus('VALID')}>Valid</Button>
+                                <Button variant={videoStatus === 'INVALID' ? 'destructive' : 'outline'} onClick={() => setVideoStatus('INVALID')}>Tidak Valid</Button>
                             </div>
-                        </TabsContent>
+                         </div>
+                        
+                        <div className={videoStatus === 'INVALID' ? 'opacity-30 pointer-events-none' : ''}>
+                            <TabsContent value="visual" className="mt-0 space-y-6">
+                                {RUBRIC_GUIDELINES.map(rubric => (
+                                     <ScoreSlider 
+                                        key={rubric.id}
+                                        label={rubric.title} 
+                                        desc={rubric.scores[2].desc} // Show "Standar" desc
+                                        val={scores[rubric.id as keyof typeof scores]} 
+                                        setVal={(v) => setScores({...scores, [rubric.id]: v})} 
+                                    />
+                                ))}
+                            </TabsContent>
 
-                        <TabsContent value="bonus" className="mt-0 space-y-6">
-                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800 mb-4 flex gap-2">
-                                <AlertTriangle className="w-4 h-4 shrink-0" />
-                                Centang hanya jika teknik terlihat jelas dan sukses minimal 1x.
-                            </div>
+                            <TabsContent value="bonus" className="mt-0 space-y-6">
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800 mb-4 flex gap-2">
+                                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                                    Centang hanya jika teknik terlihat jelas dan sukses minimal 1x.
+                                </div>
 
-                            <SkillGroup title="A. Kelompok Serangan (Attack)" icon={<Zap className="w-4 h-4 text-red-500"/>} items={[
-                                {id: 'jumpingSmash', l: 'Jumping Smash (+3)'},
-                                {id: 'stickSmash', l: 'Stick Smash (+3)'},
-                                {id: 'backhandSmash', l: 'Backhand Smash (+4)'},
-                                {id: 'netKill', l: 'Net Kill (+2)'},
-                                {id: 'flickServe', l: 'Flick Serve (+2)'}
-                            ]} state={skills} setState={setSkills} />
+                                <SkillGroup title="A. Kelompok Serangan (Attack)" icon={<Zap className="w-4 h-4 text-red-500"/>} items={[
+                                    {id: 'jumpingSmash', l: 'Jumping Smash (+3)'},
+                                    {id: 'stickSmash', l: 'Stick Smash (+3)'},
+                                    {id: 'backhandSmash', l: 'Backhand Smash (+4)'},
+                                    {id: 'netKill', l: 'Net Kill (+2)'},
+                                    {id: 'flickServe', l: 'Flick Serve (+2)'}
+                                ]} state={skills} setState={setSkills} />
 
-                            <SkillGroup title="B. Kelompok Kontrol" icon={<Shield className="w-4 h-4 text-blue-500"/>} items={[
-                                {id: 'spinningNet', l: 'Spinning Net (+3)'},
-                                {id: 'crossNet', l: 'Cross Net (+3)'},
-                                {id: 'backhandDrop', l: 'Backhand Drop (+3)'},
-                                {id: 'backhandClear', l: 'Backhand Clear (+3)'},
-                                {id: 'crossDefense', l: 'Cross Defense (+3)'}
-                            ]} state={skills} setState={setSkills} />
+                                <SkillGroup title="B. Kelompok Kontrol" icon={<Shield className="w-4 h-4 text-blue-500"/>} items={[
+                                    {id: 'spinningNet', l: 'Spinning Net (+3)'},
+                                    {id: 'crossNet', l: 'Cross Net (+3)'},
+                                    {id: 'backhandDrop', l: 'Backhand Drop (+3)'},
+                                    {id: 'backhandClear', l: 'Backhand Clear (+3)'},
+                                    {id: 'crossDefense', l: 'Cross Defense (+3)'}
+                                ]} state={skills} setState={setSkills} />
 
-                            <SkillGroup title="C. Kecerdasan & Refleks" icon={<BrainCircuit className="w-4 h-4 text-purple-500"/>} items={[
-                                {id: 'splitStep', l: 'Split Step (+4)'},
-                                {id: 'divingDefense', l: 'Diving Defense (+3)'},
-                                {id: 'deception', l: 'Deception / Hold (+4)'},
-                                {id: 'intercept', l: 'Intercept (+3)'},
-                                {id: 'judgement', l: 'Watch the Line (+2)'}
-                            ]} state={skills} setState={setSkills} />
-                        </TabsContent>
+                                <SkillGroup title="C. Kecerdasan & Refleks" icon={<BrainCircuit className="w-4 h-4 text-purple-500"/>} items={[
+                                    {id: 'splitStep', l: 'Split Step (+4)'},
+                                    {id: 'divingDefense', l: 'Diving Defense (+3)'},
+                                    {id: 'deception', l: 'Deception / Hold (+4)'},
+                                    {id: 'intercept', l: 'Intercept (+3)'},
+                                    {id: 'judgement', l: 'Watch the Line (+2)'}
+                                ]} state={skills} setState={setSkills} />
+                            </TabsContent>
+                        </div>
                     </ScrollArea>
 
                     {/* FOOTER ACTIONS */}
                     <div className="p-4 border-t bg-white space-y-3 shrink-0">
                         <Textarea 
-                            placeholder="Catatan Khusus (Opsional). Contoh: 'Menit 02:15 melakukan backhand smash tajam.'" 
+                            placeholder="Catatan Khusus (Wajib diisi jika video tidak valid). Contoh: 'Video highlight, bukan uncut.' atau 'Pemain melakukan backhand smash di menit 02:15, wajib Advance.'" 
                             value={notes} 
                             onChange={e => setNotes(e.target.value)} 
                             className="h-16 text-sm"
@@ -265,15 +254,31 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: { isOpen: boolea
 
 function ScoreSlider({ label, desc, val, setVal }: any) {
     return (
-        <div className="bg-white p-4 rounded-lg border shadow-sm space-y-3">
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-3">
             <div className="flex justify-between items-center">
-                <Label className="text-base font-bold">{label}</Label>
-                <Badge variant="outline" className="text-lg font-mono w-10 justify-center bg-slate-100">{val}</Badge>
+                {/* FIX: Paksa warna text jadi hitam (slate-900) */}
+                <Label className="text-base font-bold text-slate-900">{label}</Label>
+                
+                {/* FIX: Badge skor dibuat kontras */}
+                <Badge variant="outline" className="text-lg font-mono w-10 justify-center bg-slate-100 text-slate-900 border-slate-300">
+                    {val}
+                </Badge>
             </div>
-            <p className="text-xs text-muted-foreground">{desc}</p>
-            <Slider value={[val]} min={1} max={5} step={1} onValueChange={(v) => setVal(v[0])} className="py-2" />
+            
+            {/* FIX: Deskripsi jadi abu-abu gelap */}
+            <p className="text-xs text-slate-600 leading-relaxed">{desc}</p>
+            
+            <Slider 
+                value={[val]} 
+                min={1} max={5} step={1} 
+                onValueChange={(v) => setVal(v[0])} 
+                className="py-2" 
+            />
+            
             <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                <span>1. Buruk</span><span>3. Cukup</span><span>5. Sempurna</span>
+                <span>1. Buruk</span>
+                <span>3. Cukup</span>
+                <span>5. Sempurna</span>
             </div>
         </div>
     )
@@ -281,17 +286,25 @@ function ScoreSlider({ label, desc, val, setVal }: any) {
 
 function SkillGroup({ title, icon, items, state, setState }: any) {
     return (
-        <div className="bg-white p-4 rounded-lg border shadow-sm">
-            <h4 className="font-bold mb-3 flex items-center gap-2">{icon} {title}</h4>
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+            {/* FIX: Judul Group jadi gelap */}
+            <h4 className="font-bold mb-3 flex items-center gap-2 text-slate-900">
+                {icon} {title}
+            </h4>
             <div className="grid grid-cols-2 gap-3">
                 {items.map((i: any) => (
-                    <div key={i.id} className="flex items-center space-x-2">
+                    <div key={i.id} className="flex items-start space-x-2">
                         <Checkbox 
                             id={i.id} 
                             checked={state[i.id] || false}
                             onCheckedChange={(c) => setState({...state, [i.id]: !!c})} 
+                            className="mt-0.5 border-slate-400 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                         />
-                        <label htmlFor={i.id} className="text-sm font-medium cursor-pointer select-none leading-none">
+                        {/* FIX: Label Checkbox jadi abu-abu gelap */}
+                        <label 
+                            htmlFor={i.id} 
+                            className="text-sm font-medium cursor-pointer select-none leading-tight text-slate-700 hover:text-slate-900 transition-colors"
+                        >
                             {i.l}
                         </label>
                     </div>
@@ -312,3 +325,5 @@ function CheatItem({ title, bad, good }: any) {
         </div>
     )
 }
+
+    
