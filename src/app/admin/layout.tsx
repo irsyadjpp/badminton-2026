@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -340,5 +339,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </>
   );
 }
-
-    

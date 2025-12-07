@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,6 +27,7 @@ export default function VolunteerManagementPage() {
   }, []);
 
   const loadData = async () => {
+    setIsLoading(true);
     const res = await getVolunteers();
     setData(res);
     setIsLoading(false);
