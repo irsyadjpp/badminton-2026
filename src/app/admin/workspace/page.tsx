@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { 
   Kanban, FolderOpen, Bell, Clock, AlertCircle, CheckCircle2,
-  Download, Upload, Star, PlusCircle, Loader2, Megaphone, GripVertical 
+  Download, Upload, Star, PlusCircle, Loader2, Megaphone, GripVertical,
+  ClipboardCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getWorkspaceData, updateTaskStatus, uploadResource, createTask, createAnnouncement, type Task } from "./actions";
@@ -33,9 +34,30 @@ const getSession = () => {
 
 // Definisi Kolom Kanban
 const KANBAN_COLUMNS: Record<string, { label: string; color: string; icon: React.ElementType; iconColor: string; }> = {
-  TODO: { label: 'TO DO', color: 'bg-zinc-100 dark:bg-zinc-900', icon: Clock, iconColor: 'text-zinc-500' },
-  IN_PROGRESS: { label: 'IN PROGRESS', color: 'bg-blue-50 dark:bg-blue-950/30', icon: AlertCircle, iconColor: 'text-blue-500' },
-  DONE: { label: 'DONE', color: 'bg-green-50 dark:bg-green-950/30', icon: CheckCircle2, iconColor: 'text-green-600' }
+  TODO: { 
+    label: 'TO DO', 
+    color: 'bg-zinc-100 dark:bg-zinc-900', 
+    icon: Clock, 
+    iconColor: 'text-zinc-500' 
+  },
+  IN_PROGRESS: { 
+    label: 'IN PROGRESS', 
+    color: 'bg-blue-50 dark:bg-blue-950/30', 
+    icon: AlertCircle, 
+    iconColor: 'text-blue-500' 
+  },
+  IN_REVIEW: { 
+    label: 'IN REVIEW', 
+    color: 'bg-purple-50 dark:bg-purple-950/30', // Warna Ungu untuk Review
+    icon: ClipboardCheck, 
+    iconColor: 'text-purple-500' 
+  },
+  DONE: { 
+    label: 'DONE', 
+    color: 'bg-green-50 dark:bg-green-950/30', 
+    icon: CheckCircle2, 
+    iconColor: 'text-green-600' 
+  }
 };
 
 export default function WorkspacePage() {

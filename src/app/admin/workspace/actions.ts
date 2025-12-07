@@ -6,7 +6,7 @@ export type Task = {
   division: string;
   pic: string;
   deadline: string;
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
+  status: 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE';
   priority: 'HIGH' | 'MEDIUM' | 'LOW';
 };
 
@@ -31,7 +31,7 @@ export type Announcement = {
 // MOCK DATABASE
 let TASKS: Task[] = [
   { id: "T-01", title: "Follow-up Proposal Bank BJB", division: "BUSINESS", pic: "Teri", deadline: "2025-12-10", status: "IN_PROGRESS", priority: "HIGH" },
-  { id: "T-02", title: "Desain Konten IG (Phase 1)", division: "MEDIA", pic: "Susi", deadline: "2025-12-15", status: "TODO", priority: "MEDIUM" },
+  { id: "T-02", title: "Desain Konten IG (Phase 1)", division: "MEDIA", pic: "Susi", deadline: "2025-12-15", status: "IN_REVIEW", priority: "MEDIUM" }, // Contoh di review
   { id: "T-03", title: "Siapkan Form Pendaftaran", division: "MATCH", pic: "Wicky", deadline: "2025-12-20", status: "DONE", priority: "HIGH" },
 ];
 
