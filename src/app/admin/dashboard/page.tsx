@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { QrCode, Utensils, Wallet, CheckCircle2, MapPin, ScanLine, Trophy, AlertCircle, Camera, Upload, Clock } from "lucide-react";
+import { QrCode, Utensils, Wallet, CheckCircle2, MapPin, ScanLine, Trophy, AlertCircle, Camera, Upload, Clock, ShieldCheck } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
-import { clockIn, redeemMeal, completeMission, getCommitteeData } from "./actions";
+import { clockIn, redeemMeal, completeMission, getCommitteeData, getMyDutyRoster } from "./actions";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -27,6 +27,7 @@ export default function CommitteeDashboard() {
   
   // State Data
   const [data, setData] = useState<any>(null);
+  const [roster, setRoster] = useState<any>(null);
 
   // State Fitur
   const [isClockedIn, setIsClockedIn] = useState(false);
@@ -37,11 +38,13 @@ export default function CommitteeDashboard() {
   // Mission Modal State
   const [isMissionModalOpen, setIsMissionModalOpen] = useState(false);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+  const [isSubmittingMission, setIsSubmittingMission] = useState(false);
 
 
   // Load Data Awal
   useEffect(() => {
     getCommitteeData().then(setData);
+    getMyDutyRoster().then(setRoster);
   }, []);
 
   // 1. HANDLER ABSENSI
@@ -77,8 +80,10 @@ export default function CommitteeDashboard() {
     e.preventDefault();
     if (!selectedMission) return;
 
+    setIsSubmittingMission(true);
     const formData = new FormData(e.currentTarget);
-    const res = await completeMission(selectedMission.id, formData);
+    formData.append('missionId', selectedMission.id.toString());
+    const res = await completeMission(formData);
     
     if (res.success) {
       const newMissions = data.missions.map((m: any) => 
@@ -88,9 +93,10 @@ export default function CommitteeDashboard() {
       toast({ title: "Terkirim!", description: res.message });
       setIsMissionModalOpen(false);
     }
+    setIsSubmittingMission(false);
   };
 
-  if (!data) return <div className="p-8 text-white flex items-center justify-center h-full"><Loader2 className="w-8 h-8 animate-spin" /></div>;
+  if (!data || !roster) return <div className="p-8 text-white flex items-center justify-center h-full"><Loader2 className="w-8 h-8 animate-spin" /></div>;
 
   return (
     <div className="min-h-screen bg-black text-white font-body pb-20">
@@ -121,24 +127,32 @@ export default function CommitteeDashboard() {
 
       <div className="relative z-10 p-6 space-y-6">
         
-        <Card className="bg-zinc-900 border-l-4 border-l-blue-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm uppercase text-zinc-400">Jadwal Tugas (Shift)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center mb-2">
-              <div className="font-bold text-white text-lg">{data.dutyRoster.time}</div>
-              <Badge variant="outline" className="text-blue-400 border-blue-400">{data.dutyRoster.status}</Badge>
-            </div>
-            <div className="flex items-center gap-2 text-zinc-300">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span>{data.dutyRoster.location}</span>
-            </div>
-            <div className="mt-3 pt-3 border-t border-zinc-800 text-xs text-zinc-500">
-              Supervisor: {data.dutyRoster.supervisor}
-            </div>
-          </CardContent>
-        </Card>
+        {roster && (
+            <Card className="bg-zinc-900 border-l-4 border-l-primary shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                  <Clock className="w-3 h-3" /> Shift Jadwal Anda
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="text-2xl font-black text-white font-headline">{roster.currentShift.time}</div>
+                    <div className="flex items-center gap-2 text-primary font-bold text-sm mt-1">
+                      <MapPin className="w-4 h-4" />
+                      {roster.currentShift.location}
+                    </div>
+                  </div>
+                  <Badge className="bg-primary hover:bg-primary animate-pulse">ACTIVE</Badge>
+                </div>
+                
+                <div className="pt-3 border-t border-zinc-800 flex items-center gap-2 text-xs text-zinc-500">
+                  <ShieldCheck className="w-3 h-3" />
+                  Supervisor: {roster.currentShift.supervisor}
+                </div>
+              </CardContent>
+            </Card>
+        )}
         
         <Card className="bg-zinc-900 border-zinc-800 shadow-xl overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10"><QrCode className="w-24 h-24 text-white" /></div>
@@ -182,11 +196,13 @@ export default function CommitteeDashboard() {
                             </span>
                         </div>
                         {mission.status === 'TODO' && (
-                            <DialogTrigger asChild>
-                                <Button size="sm" variant="ghost" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => { setSelectedMission(mission); setIsMissionModalOpen(true); }}>
-                                    <Upload className="w-4 h-4 mr-1"/> Selesaikan Misi
-                                </Button>
-                            </DialogTrigger>
+                            <Dialog open={selectedMission?.id === mission.id} onOpenChange={(open) => !open && setSelectedMission(null)}>
+                                <DialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => setSelectedMission(mission)}>
+                                        <Upload className="w-4 h-4 mr-1"/> Selesaikan Misi
+                                    </Button>
+                                </DialogTrigger>
+                            </Dialog>
                         )}
                         {mission.status === 'PENDING_REVIEW' && (
                             <Badge variant="outline" className="border-yellow-500 text-yellow-500">Review</Badge>
@@ -258,19 +274,21 @@ export default function CommitteeDashboard() {
         </Tabs>
       </div>
 
-       <Dialog open={isMissionModalOpen} onOpenChange={setIsMissionModalOpen}>
-        <DialogContent>
+      <Dialog open={!!selectedMission} onOpenChange={(open) => !open && setSelectedMission(null)}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
             <DialogHeader>
                 <DialogTitle>Selesaikan Misi: {selectedMission?.title}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleMissionSubmit} className="space-y-4">
+            <form onSubmit={handleMissionSubmit} className="space-y-4 py-4">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Upload Bukti Foto</label>
-                    <Input name="proofImage" type="file" accept="image/*" required />
+                    <Label>Upload Bukti Foto</Label>
+                    <Input name="proof" type="file" accept="image/*" required className="file:text-primary file:font-bold"/>
                     <p className="text-xs text-muted-foreground">Ambil foto yang menunjukkan Anda telah menyelesaikan tugas.</p>
                 </div>
                 <DialogFooter>
-                    <Button type="submit">Kirim Bukti</Button>
+                    <Button type="submit" className="w-full font-bold" disabled={isSubmittingMission}>
+                        {isSubmittingMission ? <Loader2 className="animate-spin" /> : "Kirim Bukti Kerja"}
+                    </Button>
                 </DialogFooter>
             </form>
         </DialogContent>

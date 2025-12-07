@@ -26,11 +26,16 @@ export async function redeemMeal() {
 }
 
 // --- 3. MISI (GAMIFICATION) ---
-export async function completeMission(missionId: number, proofImage: FormData) {
-  await new Promise(r => setTimeout(r, 1000)); // Simulasi upload
-  // 1. Upload foto ke storage (logic di sini)
+export async function completeMission(formData: FormData) {
+  await new Promise(r => setTimeout(r, 1500)); // Simulasi upload
+  
+  const missionId = formData.get('missionId');
+  const proofImage = formData.get('proof'); // File foto
+
+  // Di sini nanti ada logic upload ke Storage (S3/GCS)
+  console.log(`Mission ${missionId} completed with proof: ${(proofImage as File).name}`);
+
   // 2. Simpan status mission jadi "PENDING_REVIEW"
-  console.log("Proof received for mission:", missionId);
   // 3. XP baru masuk SETELAH di-approve Koordinator Divisi
   return { 
     success: true, 
@@ -69,5 +74,22 @@ export async function getCommitteeData() {
       { id: 2, title: "Input skor 10 pertandingan", xp: 100, status: 'TODO' },
       { id: 3, title: "Bantu bersihkan area VIP", xp: 75, status: 'PENDING_REVIEW' },
     ]
+  };
+}
+
+
+export async function getMyDutyRoster() {
+  return {
+    currentShift: {
+      time: "08:00 - 12:00",
+      location: "Gate Utama (Ticket Checking)",
+      supervisor: "Budi Santoso (Head Security)",
+      status: "CURRENT"
+    },
+    nextShift: {
+      time: "13:00 - 17:00",
+      location: "VIP Lounge (Access Control)",
+      status: "UPCOMING"
+    }
   };
 }
