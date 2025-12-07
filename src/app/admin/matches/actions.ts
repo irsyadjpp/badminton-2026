@@ -1,47 +1,44 @@
-
 'use server';
 
-// Tipe Data Hasil Tie
-export type MatchParty = {
-  id: number;
-  category: string;
-  playerA1: string;
-  playerA2: string;
-  playerB1: string;
-  playerB2: string;
-  score: string; // "21-19, 18-21, 21-15"
-  winner: 'A' | 'B' | null;
-};
+import { revalidatePath } from "next/cache";
 
-export type TieResult = {
+export type Match = {
   id: string;
-  date: string;
+  category: string; // MD, WD, XD
+  playerA: string;
+  playerB: string;
   court: string;
-  round: string;
-  teamA: string;
-  teamB: string;
-  matches: MatchParty[];
-  finalScoreA: number;
-  finalScoreB: number;
-  winnerTeam: string;
-  managerA_verified: boolean;
-  managerB_verified: boolean;
-  referee_verified: boolean;
-  status: 'DRAFT' | 'FINAL';
+  time: string;
+  status: 'SCHEDULED' | 'LIVE' | 'COMPLETED';
 };
 
-// Mock Database
-let TIE_RESULTS: TieResult[] = [];
+// MOCK DB
+let matchesDB: Match[] = [
+  { id: "M01", category: "MD Open", playerA: "Kevin/Marcus", playerB: "Ahsan/Hendra", court: "1", time: "09:00", status: "SCHEDULED" }
+];
 
-export async function submitTieResult(data: TieResult) {
-  // Simulasi delay database
-  await new Promise(r => setTimeout(r, 1000));
-  
-  // Simpan ke "Database"
-  TIE_RESULTS.push({ ...data, status: 'FINAL' });
-  
-  return { 
-    success: true, 
-    message: `Hasil Pertandingan ${data.teamA} vs ${data.teamB} Berhasil Disimpan.` 
+export async function getMatches() {
+  return matchesDB;
+}
+
+export async function createMatch(data: FormData) {
+  await new Promise(r => setTimeout(r, 800));
+  const newMatch: Match = {
+    id: `M${Date.now().toString().slice(-4)}`,
+    category: data.get('category') as string,
+    playerA: data.get('playerA') as string,
+    playerB: data.get('playerB') as string,
+    court: data.get('court') as string || '-',
+    time: data.get('time') as string || '00:00',
+    status: 'SCHEDULED'
   };
+  matchesDB.push(newMatch);
+  revalidatePath('/admin/matches');
+  return { success: true };
+}
+
+export async function deleteMatch(id: string) {
+  matchesDB = matchesDB.filter(m => m.id !== id);
+  revalidatePath('/admin/matches');
+  return { success: true };
 }

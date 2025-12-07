@@ -1,146 +1,118 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Activity, Clock, AlertTriangle, Mic, 
-  MoreVertical, ArrowRightCircle, Users 
-} from "lucide-react";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { CalendarPlus, Trash2, RefreshCw } from "lucide-react";
+import { getMatches, createMatch, deleteMatch, type Match } from "./actions";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock Data: Status 5 Lapangan
-const initialCourts = [
-  { id: 1, status: "LIVE", match: "MD-A (Djarum vs Jaya)", score: "21-19, 5-2", umpire: "Budi", time: "15:00" },
-  { id: 2, status: "WARMUP", match: "XD-B (SGS vs Exist)", score: "-", umpire: "Ani", time: "02:00" },
-  { id: 3, status: "INTERVAL", match: "WD-C (Mutiara vs Tangkas)", score: "11-8", umpire: "Cipto", time: "00:45" },
-  { id: 4, status: "EMPTY", match: "-", score: "-", umpire: "-", time: "-" },
-  { id: 5, status: "LIVE", match: "MD-C (Falcon vs Eagle)", score: "18-18", umpire: "Dedi", time: "22:10" },
-];
+export default function MasterMatchPage() {
+  const { toast } = useToast();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-// Mock Data: Antrean (Call Room)
-const queue = [
-  { id: 101, category: "MD Beginner", teamA: "PB A", teamB: "PB B", status: "READY" },
-  { id: 102, category: "XD Advance", teamA: "PB X", teamB: "PB Y", status: "CHECKING" },
-  { id: 103, category: "WD Inter", teamA: "PB 1", teamB: "PB 2", status: "WAITING" },
-];
+  // Load Data
+  useEffect(() => { load() }, []);
+  
+  const load = async () => {
+    const data = await getMatches();
+    setMatches(data);
+  };
 
-export default function MatchControlDashboard() {
+  const handleCreate = async (formData: FormData) => {
+    await createMatch(formData);
+    toast({ title: "Jadwal Dibuat", description: "Pertandingan masuk ke database." });
+    setIsOpen(false);
+    load();
+  };
 
-  const handlePushToCourt = (courtId: number, matchId: number) => {
-      // Logika memindahkan match dari antrean ke lapangan kosong
-      alert(`Memindahkan Match #${matchId} ke Lapangan ${courtId}`);
+  const handleDelete = async (id: string) => {
+    if(!confirm("Hapus jadwal ini?")) return;
+    await deleteMatch(id);
+    toast({ title: "Terhapus", variant: "destructive" });
+    load();
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-            <h2 className="text-3xl font-bold font-headline text-primary">Match Control Center</h2>
-            <p className="text-muted-foreground">Monitoring Rolling System & Status Lapangan.</p>
+            <h2 className="text-3xl font-bold font-headline">Master Jadwal Pertandingan</h2>
+            <p className="text-muted-foreground">Database seluruh pertandingan BCC 2026.</p>
         </div>
-        <div className="flex gap-3">
-            <Button variant="destructive" className="animate-pulse shadow-red-200 shadow-lg">
-                <AlertTriangle className="w-4 h-4 mr-2" /> Darurat Medis
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-                <Mic className="w-4 h-4 mr-2" /> Panggil Suara (Announcer)
-            </Button>
-        </div>
-      </div>
-
-      {/* MONITOR 5 LAPANGAN */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {initialCourts.map((court) => (
-          <Card key={court.id} className={`border-t-4 ${
-              court.status === 'LIVE' ? 'border-t-green-500 shadow-md' : 
-              court.status === 'WARMUP' ? 'border-t-yellow-500' :
-              court.status === 'INTERVAL' ? 'border-t-blue-500' :
-              'border-t-gray-300 bg-gray-50'
-          }`}>
-            <CardContent className="p-4 flex flex-col h-full justify-between">
-                <div>
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="font-black text-xl">COURT {court.id}</span>
-                        <Badge variant="outline" className="text-[10px]">{court.status}</Badge>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button className="bg-primary"><CalendarPlus className="mr-2 h-4 w-4"/> Buat Match Baru</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Jadwal Baru</DialogTitle></DialogHeader>
+                <form action={handleCreate} className="space-y-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <Select name="category" required defaultValue="MD Open">
+                            <SelectTrigger><SelectValue placeholder="Kategori" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="MD Open">Ganda Putra (MD)</SelectItem>
+                                <SelectItem value="XD Open">Ganda Campuran (XD)</SelectItem>
+                                <SelectItem value="Beginner">Pemula</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Input name="time" type="time" required />
                     </div>
-                    
-                    {court.status !== 'EMPTY' ? (
-                        <>
-                            <div className="text-sm font-bold truncate mb-1" title={court.match}>{court.match}</div>
-                            <div className="text-2xl font-mono font-black text-primary mb-2">{court.score}</div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Users className="w-3 h-3" /> Wasit: {court.umpire}
-                            </div>
-                            {court.status === 'WARMUP' || court.status === 'INTERVAL' ? (
-                                <div className="mt-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-center font-mono text-xs animate-pulse">
-                                    <Clock className="w-3 h-3 inline mr-1" /> {court.time}
-                                </div>
-                            ) : (
-                                <div className="mt-2 text-xs text-gray-400 text-center">Durasi: {court.time}</div>
-                            )}
-                        </>
-                    ) : (
-                        <div className="h-24 flex items-center justify-center text-gray-400 text-sm italic">
-                            Lapangan Kosong
-                        </div>
-                    )}
-                </div>
-
-                {/* MENU AKSI PER LAPANGAN */}
-                <div className="mt-4 pt-3 border-t flex justify-end">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0"><MoreVertical className="w-4 h-4" /></Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Ubah Wasit</DropdownMenuItem>
-                            <DropdownMenuItem>Koreksi Skor</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">Hentikan Pertandingan</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </CardContent>
-          </Card>
-        ))}
+                    <div className="grid grid-cols-2 gap-4 items-center">
+                        <Input name="playerA" placeholder="Pasangan A (Cth: Kevin/Marcus)" required />
+                        <div className="text-center font-bold">VS</div>
+                        <Input name="playerB" placeholder="Pasangan B (Cth: Ahsan/Hendra)" required />
+                    </div>
+                    <div className="space-y-2">
+                        <Input name="court" placeholder="Rencana Court (Opsional)" />
+                    </div>
+                    <Button type="submit" className="w-full">Simpan Jadwal</Button>
+                </form>
+            </DialogContent>
+        </Dialog>
       </div>
 
-      {/* ANTREAN & CALL ROOM (ROLLING SYSTEM) */}
-      <Card className="border-2 border-primary/10">
-        <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2">
-                <ArrowRightCircle className="w-5 h-5 text-primary" />
-                Antrean Pertandingan (Call Room)
-            </CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="space-y-2">
-                {queue.map((q) => (
-                    <div key={q.id} className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg hover:bg-secondary/20 transition-colors">
-                        <div className="flex items-center gap-4">
-                            <div className="font-mono text-sm font-bold text-muted-foreground">#{q.id}</div>
-                            <div>
-                                <div className="font-bold text-sm">{q.category}</div>
-                                <div className="text-xs text-muted-foreground">{q.teamA} vs {q.teamB}</div>
-                            </div>
-                            <Badge className={q.status === 'READY' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                                {q.status}
+      <div className="border rounded-md">
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Waktu</TableHead>
+                    <TableHead>Kategori</TableHead>
+                    <TableHead>Matchup</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {matches.map((m) => (
+                    <TableRow key={m.id}>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{m.id}</TableCell>
+                        <TableCell>{m.time}</TableCell>
+                        <TableCell><Badge variant="outline">{m.category}</Badge></TableCell>
+                        <TableCell className="font-medium">
+                            {m.playerA} <span className="text-red-500 font-bold mx-1">vs</span> {m.playerB}
+                        </TableCell>
+                        <TableCell>
+                            <Badge className={m.status === 'LIVE' ? 'bg-red-600 animate-pulse' : 'bg-gray-500'}>
+                                {m.status}
                             </Badge>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                             {/* Assign ke Lapangan Kosong (Misal Court 4) */}
-                             <Button size="sm" variant="outline" onClick={() => handlePushToCourt(4, q.id)} disabled={q.status !== 'READY'}>
-                                Masuk Court 4
-                             </Button>
-                        </div>
-                    </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(m.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                                <Trash2 className="w-4 h-4"/>
+                            </Button>
+                        </TableCell>
+                    </TableRow>
                 ))}
-            </div>
-        </CardContent>
-      </Card>
+            </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

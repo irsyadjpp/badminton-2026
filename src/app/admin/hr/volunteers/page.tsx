@@ -1,92 +1,142 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, UserCheck, UserX, Filter, MoreHorizontal } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-
-// Mock Data (Backend: table 'volunteers')
-const MOCK_VOLUNTEERS = [
-  { id: "V001", name: "Asep Sunandar", role: "LOGISTIK", status: "ACCEPTED", wa: "0812..." },
-  { id: "V002", name: "Lilis Suryani", role: "PENDING", status: "INTERVIEW", wa: "0856..." },
-  { id: "V003", name: "Jajang Nurjaman", role: "PENDING", status: "REJECTED", wa: "0878..." },
-];
+import { MoreHorizontal, Plus, Trash2, Loader2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { getVolunteers, addVolunteer, updateVolunteer, deleteVolunteer, type Volunteer } from "./actions";
 
 export default function VolunteerManagementPage() {
   const { toast } = useToast();
-  const [volunteers, setVolunteers] = useState(MOCK_VOLUNTEERS);
-  const [filter, setFilter] = useState("ALL");
-  const [selectedVol, setSelectedVol] = useState<any>(null);
-  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [data, setData] = useState<Volunteer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fungsi Update Status (CRUD: Update)
-  const updateStatus = (id: string, status: string, role?: string) => {
-    setVolunteers(prev => prev.map(v => v.id === id ? { ...v, status, role: role || v.role } : v));
-    toast({ title: "Status Diperbarui", description: `Volunteer ${status}` });
-    setIsAssignOpen(false);
+  // Load Data Real (bukan mock lokal lagi)
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    const res = await getVolunteers();
+    setData(res);
+    setIsLoading(false);
   };
 
-  const filteredData = volunteers.filter(v => filter === "ALL" || v.status === filter);
+  // CRUD: CREATE
+  const handleAdd = async (formData: FormData) => {
+    setIsSubmitting(true);
+    const res = await addVolunteer(formData);
+    if (res.success) {
+      toast({ title: "Sukses", description: res.message });
+      setIsAddOpen(false);
+      loadData();
+    }
+    setIsSubmitting(false);
+  };
+
+  // CRUD: UPDATE STATUS
+  const handleStatusChange = async (id: string, status: any) => {
+    const res = await updateVolunteer(id, { status });
+    if (res.success) {
+        toast({ title: "Updated", description: `Status berubah jadi ${status}` });
+        loadData();
+    }
+  };
+
+  // CRUD: DELETE
+  const handleDelete = async (id: string) => {
+    if(!confirm("Yakin hapus data ini?")) return;
+    const res = await deleteVolunteer(id);
+    if (res.success) {
+        toast({ title: "Deleted", description: res.message, variant: "destructive" });
+        loadData();
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold font-headline">Database Volunteer</h2>
-        <div className="flex gap-2">
-            <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[150px]"><Filter className="w-4 h-4 mr-2"/> {filter}</SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="ALL">Semua Status</SelectItem>
-                    <SelectItem value="PENDING">Baru Masuk</SelectItem>
-                    <SelectItem value="INTERVIEW">Tahap Interview</SelectItem>
-                    <SelectItem value="ACCEPTED">Diterima</SelectItem>
-                    <SelectItem value="REJECTED">Ditolak</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+                <Button><Plus className="mr-2 h-4 w-4"/> Tambah Manual</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Input Volunteer Baru</DialogTitle></DialogHeader>
+                <form action={handleAdd} className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label>Nama Lengkap</Label>
+                        <Input name="name" required placeholder="Cth: Budi Santoso" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>WhatsApp</Label>
+                        <Input name="wa" required placeholder="0812..." type="tel" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Role Awal</Label>
+                        <Select name="role" defaultValue="PENDING">
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="PENDING">Pending (Belum Assign)</SelectItem>
+                                <SelectItem value="LO">LO</SelectItem>
+                                <SelectItem value="LOGISTIK">Logistik</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="animate-spin"/> : "Simpan Data"}
+                    </Button>
+                </form>
+            </DialogContent>
+        </Dialog>
       </div>
 
       <div className="rounded-md border">
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Nama Lengkap</TableHead>
-                    <TableHead>WhatsApp</TableHead>
-                    <TableHead>Divisi (Assignment)</TableHead>
+                    <TableHead>Nama</TableHead>
+                    <TableHead>Kontak</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Aksi</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {filteredData.map((vol) => (
+                {isLoading ? (
+                    <TableRow><TableCell colSpan={5} className="text-center py-8">Loading data...</TableCell></TableRow>
+                ) : data.map((vol) => (
                     <TableRow key={vol.id}>
-                        <TableCell className="font-medium">{vol.name}</TableCell>
+                        <TableCell className="font-bold">{vol.name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground">{vol.wa}</TableCell>
-                        <TableCell>
-                            {vol.role === 'PENDING' ? <span className="text-muted-foreground italic">- Belum Ditentukan -</span> : <Badge variant="outline">{vol.role}</Badge>}
-                        </TableCell>
+                        <TableCell><Badge variant="outline">{vol.role}</Badge></TableCell>
                         <TableCell>
                             <Badge className={
                                 vol.status === 'ACCEPTED' ? 'bg-green-600' : 
-                                vol.status === 'REJECTED' ? 'bg-red-600' : 
-                                vol.status === 'INTERVIEW' ? 'bg-yellow-500' : 'bg-gray-500'
+                                vol.status === 'REJECTED' ? 'bg-red-600' : 'bg-yellow-500'
                             }>{vol.status}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4"/></Button></DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => updateStatus(vol.id, 'INTERVIEW')}>Panggil Interview</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { setSelectedVol(vol); setIsAssignOpen(true); }}>Terima & Tugaskan</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => updateStatus(vol.id, 'REJECTED')} className="text-red-600">Tolak Lamaran</DropdownMenuItem>
+                                    <DropdownMenuLabel>Ubah Status</DropdownMenuLabel>
+                                    <DropdownMenuItem onClick={() => handleStatusChange(vol.id, 'INTERVIEW')}>Panggil Interview</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusChange(vol.id, 'ACCEPTED')}>Terima (Accept)</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusChange(vol.id, 'REJECTED')} className="text-red-500">Tolak (Reject)</DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleDelete(vol.id)} className="text-red-600 font-bold">
+                                        <Trash2 className="w-4 h-4 mr-2"/> Hapus
+                                    </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </TableCell>
@@ -95,26 +145,6 @@ export default function VolunteerManagementPage() {
             </TableBody>
         </Table>
       </div>
-
-      {/* MODAL ASSIGNMENT */}
-      <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
-          <DialogContent>
-              <DialogHeader><DialogTitle>Tugaskan {selectedVol?.name}</DialogTitle></DialogHeader>
-              <div className="py-4">
-                  <label className="text-sm font-medium mb-2 block">Pilih Divisi Penempatan</label>
-                  <Select onValueChange={(val) => updateStatus(selectedVol.id, 'ACCEPTED', val)}>
-                      <SelectTrigger><SelectValue placeholder="Pilih Divisi..." /></SelectTrigger>
-                      <SelectContent>
-                          <SelectItem value="MATCH_CONTROL">Match Control</SelectItem>
-                          <SelectItem value="LOGISTIK">Logistik & Runner</SelectItem>
-                          <SelectItem value="MEDIA">Media & Dokum</SelectItem>
-                          <SelectItem value="SECURITY">Gate & Security</SelectItem>
-                          <SelectItem value="LO">Liaison Officer</SelectItem>
-                      </SelectContent>
-                  </Select>
-              </div>
-          </DialogContent>
-      </Dialog>
     </div>
   );
 }
