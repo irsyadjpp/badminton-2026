@@ -1,3 +1,4 @@
+
 'use server';
 
 import { cookies } from 'next/headers';
@@ -5,7 +6,7 @@ import { redirect } from 'next/navigation';
 
 // SIMULASI DATABASE USER
 // Di production, ini diganti database query (Prisma/Supabase)
-const MOCK_USERS_DB = [
+const MOCK_DB_USERS = [
   { 
     email: process.env.DIRECTOR_EMAIL || "director@bcc.com", 
     name: "Project Director", 
@@ -22,19 +23,23 @@ export async function loginAdminGoogle() {
     avatar: "https://github.com/shadcn.png"
   };
 
+  const userPayload = {
+      ...googleUser,
+      role: "DIRECTOR", // Langsung assign role
+      isProfileCompleted: true, // Anggap profil sudah lengkap
+      isOnboarded: true, // Anggap sudah melewati pakta integritas
+  };
+
   // 2. Buat Session dengan role Director tanpa validasi
   const sessionData = JSON.stringify({
-    ...googleUser,
-    role: "DIRECTOR", // Langsung assign role
-    isProfileCompleted: true, // Anggap profil sudah lengkap
-    isOnboarded: true, // Anggap sudah melewati pakta integritas
+    ...userPayload,
     isLoggedIn: true,
   });
 
   cookies().set('bcc_admin_session', sessionData, { httpOnly: true, path: '/' });
 
   // 3. Langsung Redirect ke Dashboard
-  return { success: true, redirectUrl: '/admin/dashboard' };
+  return { success: true, redirectUrl: '/admin/dashboard', user: userPayload };
 }
 
 // 2. Logic Login PIN (Alternatif untuk di Lapangan)

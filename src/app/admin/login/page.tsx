@@ -46,6 +46,13 @@ export default function AdminLoginPage() {
     setIsGoogleLoading(true);
     const res = await loginAdminGoogle();
     if(res.success){
+        const sessionData = {
+            ...res.user,
+            isLoggedIn: true
+        };
+        // Simpan sesi di sessionStorage agar layout bisa mendeteksinya
+        sessionStorage.setItem('admin_session', JSON.stringify(sessionData));
+
         toast({ title: "Google Login Berhasil", description: "Selamat datang!", className: "bg-green-600 text-white" });
         router.push(res.redirectUrl || '/admin/dashboard');
         router.refresh();
