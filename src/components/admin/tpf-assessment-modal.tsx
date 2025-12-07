@@ -22,7 +22,7 @@ import {
 
 // INDIKATOR UTAMA (Skor 1-5)
 const TECHNICAL_RUBRICS = [
-    { id: 'biomechanics', label: '1. BIOMEKANIK (Grip & Wrist)', desc: 'Efisiensi tenaga & cara pegang' },
+    { id: 'biomechanics', label: '1. BIOMEKANIK (Grip)', desc: 'Efisiensi tenaga & cara pegang' },
     { id: 'footwork', label: '2. FOOTWORK (Gerak Kaki)', desc: 'Kelincahan & Split Step' },
     { id: 'backhand', label: '3. BACKHAND OVERHEAD', desc: 'Pukulan kiri belakang' },
     { id: 'attack', label: '4. ATTACK (Smash Power)', desc: 'Kekuatan & Sudut' },
@@ -31,64 +31,76 @@ const TECHNICAL_RUBRICS = [
     { id: 'physique', label: '7. PHYSIQUE', desc: 'Fisik & Mental' },
 ];
 
-// SKILL MODIFIER (Bonus)
-const SKILL_BONUSES = [
-    { id: 'baseline_clear', label: 'Baseline Backhand Clear', points: 3 },
-    { id: 'split_step', label: 'Refleks Split Step', points: 4 },
-    { id: 'spinning_net', label: 'Spinning Net', points: 3 },
-    { id: 'deception', label: 'Deception / Hold', points: 4 },
-    { id: 'cross_defense', label: 'Cross Court Defense', points: 3 },
+const SKILL_BONUSES_ATTACK = [
+    { id: 'jumping_smash', label: 'Jumping Smash', points: 3 },
+    { id: 'stick_smash', label: 'Stick Smash', points: 3 },
+    { id: 'backhand_smash', label: 'Backhand Smash', points: 4 },
+    { id: 'net_kill', label: 'Net Kill', points: 2 },
+    { id: 'flick_serve', label: 'Flick Serve', points: 2 },
 ];
 
+const SKILL_BONUSES_CONTROL = [
+    { id: 'spinning_net', label: 'Spinning Net', points: 3 },
+    { id: 'cross_net', label: 'Cross Net', points: 3 },
+    { id: 'backhand_drop', label: 'Backhand Drop', points: 3 },
+    { id: 'backhand_clear', label: 'Backhand Clear', points: 3 },
+    { id: 'cross_defense', label: 'Cross Defense', points: 3 },
+];
+
+const SKILL_BONUSES_IQ = [
+    { id: 'split_step', label: 'Split Step', points: 4 },
+    { id: 'diving_defense', label: 'Diving Defense', points: 3 },
+    { id: 'deception_hold', label: 'Deception / Hold', points: 4 },
+    { id: 'intercept', label: 'Intercept', points: 3 },
+    { id: 'judgement', label: 'Judgement (Bola Out)', points: 2 },
+];
+
+
 export function TpfAssessmentModal({ isOpen, onClose, player }: any) {
-    // State untuk Skor
     const [scores, setScores] = useState<Record<string, number>>({});
     const [bonuses, setBonuses] = useState<Record<string, boolean>>({});
     const [logCheck, setLogCheck] = useState({ early: false, mid: false, late: false });
-    
-    // State Baru: Status Video
     const [videoStatus, setVideoStatus] = useState<"VALID" | "INVALID" | null>(null);
+
+    const allBonuses = [...SKILL_BONUSES_ATTACK, ...SKILL_BONUSES_CONTROL, ...SKILL_BONUSES_IQ];
     
-    // Kalkulasi Real-time
+    // Kalkulasi Skor
     const totalScoreA = Object.values(scores).reduce((a, b) => a + b, 0);
-    const totalBonusB = SKILL_BONUSES.reduce((acc, item) => acc + (bonuses[item.id] ? item.points : 0), 0);
-    const finalScore = totalScoreA + totalBonusB;
+    const totalBonusB = allBonuses.reduce((acc, item) => acc + (bonuses[item.id] ? item.points : 0), 0);
+    const finalScore = (totalScoreA * 2) + totalBonusB;
 
-    // Logic Penentuan Level (Otomatis REJECT jika video invalid)
-    let calculatedLevel = "BEGINNER";
-    let levelColor = "text-green-600";
-    let seedingPoints = 0;
+    // Penentuan Level & Tier
+    let calculatedLevel = "REJECTED";
+    let calculatedTier = "N/A";
+    let levelColor = "text-destructive";
 
-    if (videoStatus === "INVALID") {
-        calculatedLevel = "REJECTED (VIDEO)";
-        levelColor = "text-destructive";
-        seedingPoints = 0;
-    } else {
-        if (finalScore >= 16) { calculatedLevel = "INTERMEDIATE"; levelColor = "text-blue-600"; }
-        if (finalScore >= 30) { calculatedLevel = "ADVANCE"; levelColor = "text-red-600"; }
-
-        // Logic Seeding Points
-        if (calculatedLevel === "BEGINNER") {
-            if (finalScore <= 9) seedingPoints = 10;
-            else if (finalScore <= 12) seedingPoints = 20;
-            else seedingPoints = 30;
-        } else if (calculatedLevel === "INTERMEDIATE") {
-            if (finalScore <= 20) seedingPoints = 40;
-            else if (finalScore <= 25) seedingPoints = 50;
-            else seedingPoints = 60;
-        } else if (calculatedLevel === "ADVANCE") {
-            if (finalScore <= 37) seedingPoints = 70;
-            else if (finalScore <= 45) seedingPoints = 80;
-            else seedingPoints = 100;
-        }
+    if (videoStatus === 'VALID') {
+        if (finalScore >= 81) { calculatedLevel = "ADVANCE"; calculatedTier = "Tier 1 (Prime)"; levelColor = "text-red-600"; }
+        else if (finalScore >= 71) { calculatedLevel = "ADVANCE"; calculatedTier = "Tier 2 (Savage)"; levelColor = "text-red-600"; }
+        else if (finalScore >= 63) { calculatedLevel = "ADVANCE"; calculatedTier = "Tier 3 (Master)"; levelColor = "text-red-600"; }
+        else if (finalScore >= 55) { calculatedLevel = "INTERMEDIATE"; calculatedTier = "Tier 1 (Carry)"; levelColor = "text-blue-600"; }
+        else if (finalScore >= 45) { calculatedLevel = "INTERMEDIATE"; calculatedTier = "Tier 2 (Striker)"; levelColor = "text-blue-600"; }
+        else if (finalScore >= 37) { calculatedLevel = "INTERMEDIATE"; calculatedTier = "Tier 3 (Grinder)"; levelColor = "text-blue-600"; }
+        else if (finalScore >= 31) { calculatedLevel = "BEGINNER"; calculatedTier = "Tier 1 (Prospect)"; levelColor = "text-green-600"; }
+        else if (finalScore >= 25) { calculatedLevel = "BEGINNER"; calculatedTier = "Tier 2 (Rookie)"; levelColor = "text-green-600"; }
+        else if (finalScore >= 14) { calculatedLevel = "BEGINNER"; calculatedTier = "Tier 3 (Newbie)"; levelColor = "text-green-600"; }
+        else { calculatedLevel = "BEGINNER"; calculatedTier = "Tier 3 (Newbie)"; levelColor = "text-green-600"; }
+    } else if (videoStatus === 'INVALID') {
+        calculatedLevel = "REJECTED";
+        calculatedTier = "Video Invalid";
     }
 
+    if (finalScore > 90) {
+        calculatedLevel = "REJECTED";
+        calculatedTier = "Skor Terlalu Tinggi (Indikasi Atlet)";
+        levelColor = "text-destructive";
+    }
+    
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-7xl h-[90vh] flex flex-col p-0 overflow-hidden">
+            <DialogContent className="max-w-7xl h-[95vh] flex flex-col p-0 overflow-hidden">
                 <div className="flex h-full">
                     
-                    {/* KOLOM KIRI: VIDEO PLAYER */}
                     <div className="w-1/2 bg-black flex flex-col">
                         <div className="flex-1 relative">
                             <iframe 
@@ -99,178 +111,75 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: any) {
                                 allowFullScreen
                             />
                         </div>
-                        {/* Log Sampling Control */}
                         <div className="p-4 bg-zinc-900 text-white border-t border-zinc-800">
                             <h4 className="text-xs font-bold uppercase tracking-widest mb-3 text-zinc-400">Log Sampling (Wajib Tonton)</h4>
                             <div className="flex gap-4">
                                 <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                                    <Checkbox 
-                                        checked={logCheck.early} 
-                                        onCheckedChange={(c) => setLogCheck(prev => ({...prev, early: !!c}))} 
-                                        className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                    />
+                                    <Checkbox checked={logCheck.early} onCheckedChange={(c) => setLogCheck(prev => ({...prev, early: !!c}))} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"/>
                                     1. Early (0-5)
                                 </label>
                                 <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                                    <Checkbox 
-                                        checked={logCheck.mid} 
-                                        onCheckedChange={(c) => setLogCheck(prev => ({...prev, mid: !!c}))}
-                                        className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                    />
+                                    <Checkbox checked={logCheck.mid} onCheckedChange={(c) => setLogCheck(prev => ({...prev, mid: !!c}))} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"/>
                                     2. Mid (Interval)
                                 </label>
                                 <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                                    <Checkbox 
-                                        checked={logCheck.late} 
-                                        onCheckedChange={(c) => setLogCheck(prev => ({...prev, late: !!c}))}
-                                        className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                    />
+                                    <Checkbox checked={logCheck.late} onCheckedChange={(c) => setLogCheck(prev => ({...prev, late: !!c}))} className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"/>
                                     3. Late (18++)
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    {/* KOLOM KANAN: FORM PENILAIAN */}
                     <div className="w-1/2 flex flex-col bg-background">
                         <DialogHeader className="px-6 py-4 border-b flex flex-row items-center justify-between">
                             <div>
-                                <DialogTitle>Audit Teknis: {player?.name}</DialogTitle>
-                                <DialogDescription>Klaim Awal: <span className="font-bold text-foreground">{player?.claim}</span></DialogDescription>
+                                <DialogTitle>Audit: {player?.name} ({player?.team})</DialogTitle>
+                                <DialogDescription>Klaim Awal: <span className="font-bold text-foreground">{player?.category}</span></DialogDescription>
                             </div>
                             
                             <Sheet>
-                                <SheetTrigger asChild>
-                                    <Button variant="outline" size="sm" className="gap-2">
-                                        <BookOpen className="w-4 h-4" />
-                                        Panduan Rubrik
-                                    </Button>
-                                </SheetTrigger>
-                                <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-                                    <SheetHeader className="mb-6">
-                                        <SheetTitle>Panduan Skoring Teknis</SheetTitle>
-                                        <SheetDescription>
-                                            Gunakan panduan ini untuk menentukan skor 1-5 secara objektif.
-                                        </SheetDescription>
-                                    </SheetHeader>
-                                    <div className="space-y-8">
-                                        {RUBRIC_GUIDELINES.map((rubric) => (
-                                            <div key={rubric.id} className="space-y-3">
-                                                <h4 className="font-bold text-primary border-b pb-1">{rubric.title}</h4>
-                                                <ul className="space-y-3">
-                                                    {rubric.scores.map((s) => (
-                                                        <li key={s.score} className="text-sm grid grid-cols-[20px_1fr] gap-2">
-                                                            <span className={`font-bold ${s.score <= 2 ? 'text-red-500' : s.score === 3 ? 'text-yellow-600' : 'text-green-600'}`}>
-                                                                {s.score}
-                                                            </span>
-                                                            <span className="text-muted-foreground">{s.desc}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </SheetContent>
+                                <SheetTrigger asChild><Button variant="outline" size="sm" className="gap-2"><BookOpen className="w-4 h-4" /> Panduan</Button></SheetTrigger>
+                                <SheetContent className="w-[400px] sm:w-[540px]"><ScrollArea className="h-full pr-6"><SheetHeader className="mb-6"><SheetTitle>Panduan Skoring Teknis</SheetTitle><SheetDescription>Gunakan panduan ini untuk menentukan skor 1-5 secara objektif.</SheetDescription></SheetHeader><div className="space-y-8">{RUBRIC_GUIDELINES.map((rubric) => (<div key={rubric.id} className="space-y-3"><h4 className="font-bold text-primary border-b pb-1">{rubric.title}</h4><ul className="space-y-3">{rubric.scores.map((s) => (<li key={s.score} className="text-sm grid grid-cols-[20px_1fr] gap-2"><span className={`font-bold ${s.score <= 2 ? 'text-red-500' : s.score === 3 ? 'text-yellow-600' : 'text-green-600'}`}>{s.score}</span><span className="text-muted-foreground">{s.desc}</span></li>))}</ul></div>))}</div></ScrollArea></SheetContent>
                             </Sheet>
                         </DialogHeader>
 
                         <ScrollArea className="flex-1 px-6 py-4">
                             <div className="space-y-8 pb-10">
-                                
-                                {/* --- BAGIAN BARU: STATUS VIDEO --- */}
                                 <div className="p-4 border-2 border-dashed rounded-lg bg-secondary/10">
                                     <Label className="text-base font-bold mb-3 block">Status Video (Wajib Diisi)</Label>
-                                    <RadioGroup 
-                                        onValueChange={(val) => setVideoStatus(val as "VALID" | "INVALID")}
-                                        className="flex flex-col sm:flex-row gap-4"
-                                    >
-                                        <div className={`flex items-center space-x-2 border p-3 rounded-md w-full cursor-pointer transition-colors ${videoStatus === 'VALID' ? 'bg-green-50 border-green-500' : 'hover:bg-secondary'}`}>
-                                            <RadioGroupItem value="VALID" id="status-valid" />
-                                            <Label htmlFor="status-valid" className="cursor-pointer font-medium">Valid (Uncut)</Label>
-                                        </div>
-                                        <div className={`flex items-center space-x-2 border p-3 rounded-md w-full cursor-pointer transition-colors ${videoStatus === 'INVALID' ? 'bg-red-50 border-red-500' : 'hover:bg-secondary'}`}>
-                                            <RadioGroupItem value="INVALID" id="status-invalid" />
-                                            <Label htmlFor="status-invalid" className="cursor-pointer font-medium text-destructive">Invalid (Rusak/Edit/Angle Buruk)</Label>
-                                        </div>
+                                    <RadioGroup onValueChange={(val) => setVideoStatus(val as any)} className="flex gap-4">
+                                        <div className={`flex items-center space-x-2 border p-3 rounded-md flex-1 cursor-pointer transition-colors ${videoStatus === 'VALID' ? 'bg-green-50 border-green-500' : 'hover:bg-secondary'}`}><RadioGroupItem value="VALID" id="status-valid" /><Label htmlFor="status-valid" className="cursor-pointer font-medium">Valid (Uncut)</Label></div>
+                                        <div className={`flex items-center space-x-2 border p-3 rounded-md flex-1 cursor-pointer transition-colors ${videoStatus === 'INVALID' ? 'bg-red-50 border-red-500' : 'hover:bg-secondary'}`}><RadioGroupItem value="INVALID" id="status-invalid" /><Label htmlFor="status-invalid" className="cursor-pointer font-medium text-destructive">Invalid (Edit/Buram)</Label></div>
                                     </RadioGroup>
                                 </div>
-                                {/* --------------------------------- */}
 
-                                {/* FORM HANYA AKTIF JIKA VIDEO VALID */}
-                                <div className={videoStatus === 'INVALID' ? 'opacity-50 pointer-events-none grayscale' : ''}>
-                                    
-                                    {/* A. AUDIT TEKNIS */}
+                                <div className={!videoStatus || videoStatus === 'INVALID' ? 'opacity-50 pointer-events-none grayscale' : ''}>
                                     <div className="space-y-6">
-                                        <h3 className="font-bold text-lg flex items-center gap-2 border-b pb-2">
-                                            A. Indikator Utama (Skor 1-5)
-                                        </h3>
-                                        {TECHNICAL_RUBRICS.map((item) => (
-                                            <div key={item.id} className="space-y-3 p-4 rounded-lg bg-secondary/20 hover:bg-secondary/40 transition-colors">
-                                                <div className="flex justify-between items-center">
-                                                    <Label className="text-base font-semibold">{item.label}</Label>
-                                                    <span className="text-xs text-muted-foreground">{item.desc}</span>
-                                                </div>
-                                                <RadioGroup 
-                                                    onValueChange={(val) => setScores(prev => ({...prev, [item.id]: parseInt(val)}))}
-                                                    className="flex justify-between"
-                                                >
-                                                    {[1, 2, 3, 4, 5].map((val) => (
-                                                        <div key={val} className="flex flex-col items-center gap-1">
-                                                            <RadioGroupItem value={val.toString()} id={`${item.id}-${val}`} />
-                                                            <Label htmlFor={`${item.id}-${val}`} className="text-xs font-normal text-muted-foreground">{val}</Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
-                                            </div>
+                                        <h3 className="font-bold text-lg flex items-center gap-2 border-b pb-2">A. Indikator Utama (Skor 1-5)</h3>
+                                        {TECHNICAL_RUBRICS.map((item) => (<div key={item.id} className="space-y-3 p-4 rounded-lg bg-secondary/20 hover:bg-secondary/40"><div className="flex justify-between items-center"><Label className="text-base font-semibold">{item.label}</Label><span className="text-xs text-muted-foreground">{item.desc}</span></div><RadioGroup onValueChange={(val) => setScores(prev => ({...prev, [item.id]: parseInt(val)}))} className="flex justify-between">{[1, 2, 3, 4, 5].map((val) => (<div key={val} className="flex flex-col items-center gap-1"><RadioGroupItem value={val.toString()} id={`${item.id}-${val}`} /><Label htmlFor={`${item.id}-${val}`} className="text-xs font-normal text-muted-foreground">{val}</Label></div>))}</RadioGroup></div>))}
+                                    </div>
+                                    
+                                    <div className="space-y-4 mt-8">
+                                        <h3 className="font-bold text-lg flex items-center gap-2 border-b pb-2">B. Bonus Skill (Modifier)</h3>
+                                        {[ { title: 'Kelompok Serangan', items: SKILL_BONUSES_ATTACK }, { title: 'Kelompok Kontrol', items: SKILL_BONUSES_CONTROL }, { title: 'Kelompok IQ & Fisik', items: SKILL_BONUSES_IQ } ].map(group => (
+                                            <div key={group.title} className="p-4 border rounded-lg"><h4 className="font-semibold text-sm mb-3">{group.title}</h4><div className="grid grid-cols-2 gap-3">
+                                                {group.items.map((bonus) => (<div key={bonus.id} className="flex items-center space-x-3"><Checkbox id={bonus.id} onCheckedChange={(c) => setBonuses(prev => ({...prev, [bonus.id]: !!c}))} /><div className="flex-1"><Label htmlFor={bonus.id} className="font-medium text-xs">{bonus.label}</Label></div><Badge variant="secondary">+{bonus.points}</Badge></div>))}
+                                            </div></div>
                                         ))}
                                     </div>
-
-                                    {/* B. SKILL MODIFIER */}
-                                    <div className="space-y-4 mt-8">
-                                        <h3 className="font-bold text-lg flex items-center gap-2 border-b pb-2">
-                                            B. Bonus Skill (Modifier)
-                                        </h3>
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {SKILL_BONUSES.map((bonus) => (
-                                                <div key={bonus.id} className="flex items-center space-x-3 p-3 border rounded-md">
-                                                    <Checkbox 
-                                                        id={bonus.id} 
-                                                        onCheckedChange={(c) => setBonuses(prev => ({...prev, [bonus.id]: !!c}))}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <Label htmlFor={bonus.id} className="font-medium">{bonus.label}</Label>
-                                                    </div>
-                                                    <Badge variant="secondary">+{bonus.points}</Badge>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
                                 </div>
-
-                                {/* CATATAN */}
-                                <div className="space-y-2">
+                                <div className="space-y-2 mt-6">
                                     <Label>Catatan Verifikator</Label>
-                                    <Textarea 
-                                        placeholder={videoStatus === 'INVALID' ? "Jelaskan kenapa video tidak valid (misal: terpotong, resolusi rendah, dll)..." : "Contoh: Pemain memiliki Stamina & Mental nilai 5..."} 
-                                        className={videoStatus === 'INVALID' ? 'border-destructive focus-visible:ring-destructive' : ''}
-                                    />
+                                    <Textarea placeholder={videoStatus === 'INVALID' ? "Jelaskan kenapa video tidak valid..." : "Contoh: Pemain memiliki backhand smash..."} className={videoStatus === 'INVALID' ? 'border-destructive focus-visible:ring-destructive' : ''}/>
                                 </div>
                             </div>
                         </ScrollArea>
 
-                        {/* FOOTER: HASIL KALKULASI */}
-                        <div className="p-6 bg-secondary/30 border-t space-y-4">
-                            {videoStatus !== 'INVALID' && (
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>Subtotal Skor (A): <span className="font-bold">{totalScoreA}</span> / 35</div>
-                                    <div>Subtotal Bonus (B): <span className="font-bold">{totalBonusB}</span> / 17</div>
-                                </div>
-                            )}
-                            
+                        <div className="p-4 bg-secondary/30 border-t space-y-4">
                             <div className={`flex items-center justify-between p-4 rounded-lg border shadow-sm ${videoStatus === 'INVALID' ? 'bg-red-50 border-red-200' : 'bg-background'}`}>
                                 <div>
-                                    <div className="text-xs text-muted-foreground uppercase tracking-widest">Total Score</div>
-                                    <div className="text-3xl font-black font-mono">{videoStatus === 'INVALID' ? '-' : finalScore}</div>
+                                    <div className="text-xs text-muted-foreground uppercase tracking-widest">Skor Akhir: ({totalScoreA} x 2) + {totalBonusB}</div>
+                                    <div className="text-4xl font-black font-mono">{videoStatus === 'INVALID' ? '-' : finalScore}</div>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-xs text-muted-foreground uppercase tracking-widest">Hasil Level</div>
@@ -278,19 +187,12 @@ export function TpfAssessmentModal({ isOpen, onClose, player }: any) {
                                         {videoStatus === 'INVALID' && <AlertCircle className="w-6 h-6" />}
                                         {calculatedLevel}
                                     </div>
-                                    {videoStatus !== 'INVALID' && <div className="text-xs text-muted-foreground mt-1">Seeding: {seedingPoints} Poin</div>}
+                                    <div className="text-xs text-muted-foreground font-bold mt-1">{calculatedTier}</div>
                                 </div>
                             </div>
-
                             <div className="flex gap-3">
                                 <Button variant="outline" className="w-full" onClick={onClose}>Batal</Button>
-                                <Button 
-                                    className="w-full bg-primary hover:bg-primary/90" 
-                                    disabled={!videoStatus}
-                                >
-                                    <Save className="w-4 h-4 mr-2" /> 
-                                    {videoStatus === 'INVALID' ? 'Tolak Pemain' : 'Simpan Hasil'}
-                                </Button>
+                                <Button className="w-full bg-primary hover:bg-primary/90" disabled={!videoStatus}><Save className="w-4 h-4 mr-2" /> {videoStatus === 'INVALID' ? 'Tolak Pemain' : 'Simpan Hasil'}</Button>
                             </div>
                         </div>
                     </div>
