@@ -25,6 +25,7 @@ import { EmergencyButton } from '@/components/admin/emergency-button';
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
 import { NotificationBell } from "@/components/admin/notification-bell";
+import { DialogTitle } from '@/components/ui/dialog';
 
 // --- DEFINISI MENU ---
 const getMenusByRole = (role: string) => {
@@ -297,6 +298,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </SheetTrigger>
                   <SheetContent side="left" className="p-0 w-72 bg-card overflow-y-auto no-scrollbar">
                       <div className="p-6">
+                        <DialogTitle className="sr-only">BCC Admin Menu</DialogTitle>
                         <h1 className="font-headline font-black text-xl text-primary">BCC ADMIN</h1>
                       </div>
                       <nav className="p-4 space-y-2">
