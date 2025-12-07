@@ -79,3 +79,15 @@ export async function uploadResource(data: FormData) {
   });
   return { success: true, message: "File berhasil diunggah ke Repository." };
 }
+
+export async function createAnnouncement(data: { title: string; content: string; author: string }) {
+  await new Promise(r => setTimeout(r, 800));
+  const newAnnouncement: Announcement = {
+    ...data,
+    id: `A-${Date.now()}`,
+    date: new Date().toISOString().split('T')[0],
+    isImportant: true,
+  };
+  ANNOUNCEMENTS.unshift(newAnnouncement);
+  return { success: true, message: "Pengumuman berhasil diterbitkan." };
+}

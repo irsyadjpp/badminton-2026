@@ -8,32 +8,52 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { 
   Kanban, FolderOpen, Bell, CheckCircle2, 
-  Clock, AlertCircle, Download, Upload, Star, PlusCircle, Loader2 
+  Clock, AlertCircle, Download, Upload, Star, PlusCircle, Loader2, Megaphone 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getWorkspaceData, updateTaskStatus, uploadResource, createTask, type Task } from "./actions";
+import { getWorkspaceData, updateTaskStatus, uploadResource, createTask, createAnnouncement, type Task } from "./actions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+
+// Helper sederhana untuk mendapatkan sesi
+const getSession = () => {
+  if (typeof window === 'undefined') return null;
+  const sessionStr = sessionStorage.getItem('admin_session');
+  try {
+    return JSON.parse(sessionStr!);
+  } catch (e) {
+    return null;
+  }
+}
 
 export default function WorkspacePage() {
   const { toast } = useToast();
+  const [session, setSession] = useState<any>(null);
   const [data, setData] = useState<any>({ tasks: [], resources: [], announcements: [] });
   const [filterDiv, setFilterDiv] = useState("ALL");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form state untuk tugas baru
-  const [newTask, setNewTask] = useState({
-    title: "",
-    division: "",
-    pic: "",
-    deadline: "",
-    priority: "MEDIUM" as Task['priority']
+  // Modal States
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isAnnounceModalOpen, setIsAnnounceModalOpen] = useState(false);
+  
+  // Submission States
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+  const [isSubmittingAnnounce, setIsSubmittingAnnounce] = useState(false);
+
+  // Form states
+  const [newTask, setNewTask] = useState<Omit<Task, 'id' | 'status'>>({
+    title: "", division: "", pic: "", deadline: "", priority: "MEDIUM"
   });
+  const [newAnnouncement, setNewAnnouncement] = useState({ title: "", content: "" });
 
   useEffect(() => {
     loadData();
+    const adminSession = getSession();
+    if(adminSession) {
+      setSession(adminSession);
+    }
   }, []);
 
   const loadData = async () => {
@@ -60,17 +80,39 @@ export default function WorkspacePage() {
         toast({ title: "Error", description: "Judul dan PIC wajib diisi.", variant: "destructive" });
         return;
     }
-    setIsSubmitting(true);
+    setIsSubmittingTask(true);
     const result = await createTask(newTask);
-    setIsSubmitting(false);
+    setIsSubmittingTask(false);
 
     if (result.success) {
         toast({ title: "Tugas Ditambahkan", description: `Tugas "${newTask.title}" telah dibuat.` });
-        setIsModalOpen(false);
+        setIsTaskModalOpen(false);
         setNewTask({ title: "", division: "", pic: "", deadline: "", priority: "MEDIUM" });
         loadData();
     }
   };
+
+  const handleCreateAnnouncement = async () => {
+    if (!newAnnouncement.title || !newAnnouncement.content) {
+        toast({ title: "Error", description: "Judul dan isi pengumuman wajib diisi.", variant: "destructive" });
+        return;
+    }
+    setIsSubmittingAnnounce(true);
+    const result = await createAnnouncement({
+        ...newAnnouncement,
+        author: session?.name || "Project Director",
+    });
+    setIsSubmittingAnnounce(false);
+
+    if (result.success) {
+        toast({ title: "Pengumuman Diterbitkan", description: "Pengumuman baru akan tampil di paling atas.", className: "bg-green-600 text-white" });
+        setIsAnnounceModalOpen(false);
+        setNewAnnouncement({ title: "", content: "" });
+        loadData();
+    }
+  };
+
+  const isDirector = session?.role === 'DIRECTOR';
 
   return (
     <>
@@ -80,6 +122,11 @@ export default function WorkspacePage() {
               <h2 className="text-3xl font-bold font-headline text-primary">Workspace Panitia</h2>
               <p className="text-muted-foreground">Pusat kolaborasi, tugas, dan arsip dokumen.</p>
           </div>
+          {isDirector && (
+              <Button onClick={() => setIsAnnounceModalOpen(true)} className="bg-yellow-500 hover:bg-yellow-600 text-yellow-950">
+                  <Megaphone className="w-4 h-4 mr-2"/> Buat Pengumuman
+              </Button>
+          )}
         </div>
 
         {/* 1. PENGUMUMAN (NOTICE BOARD) */}
@@ -124,7 +171,7 @@ export default function WorkspacePage() {
                           </Badge>
                       ))}
                   </div>
-                   <Button size="sm" onClick={() => setIsModalOpen(true)}>
+                   <Button size="sm" onClick={() => setIsTaskModalOpen(true)}>
                       <PlusCircle className="w-4 h-4 mr-2"/> Tambah Tugas
                    </Button>
               </div>
@@ -223,7 +270,7 @@ export default function WorkspacePage() {
       </div>
 
        {/* MODAL TAMBAH TUGAS */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isTaskModalOpen} onOpenChange={setIsTaskModalOpen}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Tugas Baru</DialogTitle>
@@ -273,9 +320,37 @@ export default function WorkspacePage() {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleCreateTask} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : <PlusCircle className="mr-2" />}
+                    <Button onClick={handleCreateTask} disabled={isSubmittingTask}>
+                        {isSubmittingTask ? <Loader2 className="animate-spin mr-2" /> : <PlusCircle className="mr-2" />}
                         Buat Tugas
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        {/* MODAL BUAT PENGUMUMAN */}
+        <Dialog open={isAnnounceModalOpen} onOpenChange={setIsAnnounceModalOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Buat Pengumuman Baru</DialogTitle>
+                    <DialogDescription>
+                        Pengumuman ini akan tampil di bagian atas workspace untuk semua panitia.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label>Judul Pengumuman</Label>
+                        <Input placeholder="Cth: Rapat Penting Minggu Ini" value={newAnnouncement.title} onChange={e => setNewAnnouncement({...newAnnouncement, title: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Isi Pengumuman</Label>
+                        <Textarea placeholder="Detail pengumuman..." value={newAnnouncement.content} onChange={e => setNewAnnouncement({...newAnnouncement, content: e.target.value})} />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleCreateAnnouncement} disabled={isSubmittingAnnounce} className="bg-yellow-500 hover:bg-yellow-600 text-yellow-950">
+                        {isSubmittingAnnounce ? <Loader2 className="animate-spin mr-2" /> : <Megaphone className="mr-2" />}
+                        Terbitkan
                     </Button>
                 </DialogFooter>
             </DialogContent>
