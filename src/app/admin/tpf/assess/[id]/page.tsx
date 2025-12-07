@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { getPlayerById, submitVerificationResult, type PlayerVerification } from "../../actions";
 import { RUBRIC_GUIDELINES, ASSESSMENT_METHODS, COMPARISON_TABLE, RED_FLAGS } from "@/lib/tpf-data";
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 // Konstanta Bonus
@@ -37,7 +43,6 @@ export default function AssessmentPage() {
 
   // UI State
   const [activeTab, setActiveTab] = useState("visual");
-  const [showCheatSheet, setShowCheatSheet] = useState(false);
   const [manualStatus, setManualStatus] = useState<'VALID' | 'INVALID'>('VALID');
 
   // Scoring State
@@ -50,12 +55,10 @@ export default function AssessmentPage() {
 
   // Fetch Data
   useEffect(() => {
-    if (id) {
-        getPlayerById(id).then((data) => {
-            if (data) setPlayer(data);
-            setLoading(false);
-        });
-    }
+    getPlayerById(id).then((data) => {
+        if (data) setPlayer(data);
+        setLoading(false);
+    });
   }, [id]);
 
   // Real-time Calculation
@@ -157,19 +160,6 @@ export default function AssessmentPage() {
       {/* 1. VIDEO PLAYER (STICKY TOP) */}
       <div className="shrink-0 bg-black w-full relative group sticky top-[76px] z-10 rounded-lg overflow-hidden border shadow-lg">
         <iframe src={player.videoUrl} className="w-full aspect-video" allowFullScreen />
-        
-        {/* Toolbar Overlay di atas Video */}
-        <div className="absolute top-2 right-2 flex gap-2">
-             <Button 
-                size="sm" 
-                variant="secondary"
-                className="bg-black/50 text-white hover:bg-black/80 backdrop-blur-md border border-white/10"
-                onClick={() => setShowCheatSheet(!showCheatSheet)}
-            >
-                <BookOpen className="w-4 h-4 mr-2" />
-                {showCheatSheet ? "Tutup Panduan" : "Panduan Rubrik"}
-            </Button>
-        </div>
       </div>
 
       {/* 2. SCROLLABLE FORM AREA (BOTTOM) */}
@@ -193,22 +183,24 @@ export default function AssessmentPage() {
                         </button>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ScoreSelector disabled={isFormDisabled} label="1. Biomekanik (Grip)" desc="Pegangan raket kaku (Panci) vs Luwes (Salaman)?" val={scores.grip} setVal={(v) => setScores({...scores, grip: v})} />
-                  <ScoreSelector disabled={isFormDisabled} label="2. Footwork" desc="Lari berat vs Langkah geser/jinjit?" val={scores.footwork} setVal={(v) => setScores({...scores, footwork: v})} />
-                  <ScoreSelector disabled={isFormDisabled} label="3. Backhand" desc="Panik vs Clear sampai belakang?" val={scores.backhand} setVal={(v) => setScores({...scores, backhand: v})} />
-                  <ScoreSelector disabled={isFormDisabled} label="4. Attack Power" desc="Smash melambung vs Menukik tajam?" val={scores.attack} setVal={(v) => setScores({...scores, attack: v})} />
-                  <ScoreSelector disabled={isFormDisabled} label="5. Defense" desc="Buang muka vs Tembok tenang?" val={scores.defense} setVal={(v) => setScores({...scores, defense: v})} />
-                  <ScoreSelector disabled={isFormDisabled} label="6. Game IQ" desc="Tabrakan vs Saling mengisi rotasi?" val={scores.gameIq} setVal={(v) => setScores({...scores, gameIq: v})} />
-                  <ScoreSelector disabled={isFormDisabled} label="7. Fisik" desc="Ngos-ngosan vs Stabil Explosif?" val={scores.physique} setVal={(v) => setScores({...scores, physique: v})} />
-                </div>
+                <TooltipProvider>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[0]} label="1. Biomekanik (Grip)" desc="Pegangan raket kaku (Panci) vs Luwes (Salaman)?" val={scores.grip} setVal={(v) => setScores({...scores, grip: v})} />
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[1]} label="2. Footwork" desc="Lari berat vs Langkah geser/jinjit?" val={scores.footwork} setVal={(v) => setScores({...scores, footwork: v})} />
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[2]} label="3. Backhand" desc="Panik vs Clear sampai belakang?" val={scores.backhand} setVal={(v) => setScores({...scores, backhand: v})} />
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[3]} label="4. Attack Power" desc="Smash melambung vs Menukik tajam?" val={scores.attack} setVal={(v) => setScores({...scores, attack: v})} />
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[4]} label="5. Defense" desc="Buang muka vs Tembok tenang?" val={scores.defense} setVal={(v) => setScores({...scores, defense: v})} />
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[5]} label="6. Game IQ" desc="Tabrakan vs Saling mengisi rotasi?" val={scores.gameIq} setVal={(v) => setScores({...scores, gameIq: v})} />
+                    <ScoreSelector disabled={isFormDisabled} rubric={RUBRIC_GUIDELINES[6]} label="7. Fisik" desc="Ngos-ngosan vs Stabil Explosif?" val={scores.physique} setVal={(v) => setScores({...scores, physique: v})} />
+                    </div>
+                </TooltipProvider>
             </TabsContent>
             <TabsContent value="bonus" className="mt-0 space-y-6">
-                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded text-sm text-yellow-300 flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /><span>Centang <strong>hanya jika</strong> teknik terlihat jelas & sukses minimal 1x.</span></div>
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded text-sm text-yellow-300 flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /><span>Centang <strong>hanya jika</strong> teknik terlihat jelas &amp; sukses minimal 1x.</span></div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <SkillGroup disabled={isFormDisabled} title="A. Serangan" icon={<Zap className="w-4 h-4 text-red-400"/>} items={[ {id: 'jumpingSmash', l: 'Jumping Smash (+3)'}, {id: 'stickSmash', l: 'Stick Smash (+3)'}, {id: 'backhandSmash', l: 'Backhand Smash (+4)'}, {id: 'netKill', l: 'Net Kill (+2)'}, {id: 'flickServe', l: 'Flick Serve (+2)'} ]} state={skills} setState={setSkills} />
                 <SkillGroup disabled={isFormDisabled} title="B. Kontrol" icon={<Shield className="w-4 h-4 text-blue-400"/>} items={[ {id: 'spinningNet', l: 'Spinning Net (+3)'}, {id: 'crossNet', l: 'Cross Net (+3)'}, {id: 'backhandDrop', l: 'Backhand Drop (+3)'}, {id: 'backhandClear', l: 'Backhand Clear (+3)'}, {id: 'crossDefense', l: 'Cross Defense (+3)'} ]} state={skills} setState={setSkills} />
-                <SkillGroup disabled={isFormDisabled} title="C. IQ & Refleks" icon={<BrainCircuit className="w-4 h-4 text-purple-400"/>} items={[ {id: 'splitStep', l: 'Split Step (+4)'}, {id: 'divingDefense', l: 'Diving Defense (+3)'}, {id: 'deception', l: 'Deception / Hold (+4)'}, {id: 'intercept', l: 'Intercept (+3)'}, {id: 'judgement', l: 'Watch Line (+2)'} ]} state={skills} setState={setSkills} />
+                <SkillGroup disabled={isFormDisabled} title="C. IQ &amp; Refleks" icon={<BrainCircuit className="w-4 h-4 text-purple-400"/>} items={[ {id: 'splitStep', l: 'Split Step (+4)'}, {id: 'divingDefense', l: 'Diving Defense (+3)'}, {id: 'deception', l: 'Deception / Hold (+4)'}, {id: 'intercept', l: 'Intercept (+3)'}, {id: 'judgement', l: 'Watch Line (+2)'} ]} state={skills} setState={setSkills} />
               </div>
             </TabsContent>
             <TabsContent value="guide" className="mt-0 space-y-6 text-foreground">
@@ -234,32 +226,43 @@ export default function AssessmentPage() {
 }
 
 // SUB COMPONENTS
-function ScoreSelector({ label, desc, val, setVal, disabled }: any) {
-  return (
-    <div className={`bg-card p-4 rounded-xl border border-border shadow-sm space-y-4 transition-all ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-primary/30'}`}>
-      <div>
-        <Label className="text-base font-bold text-foreground">{label}</Label>
-        <p className="text-xs text-muted-foreground mt-1 h-8">{desc}</p>
+function ScoreSelector({ label, desc, val, setVal, disabled, rubric }: any) {
+    return (
+      <div className={`bg-card p-4 rounded-xl border border-border shadow-sm space-y-4 transition-all ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-primary/30'}`}>
+        <div>
+          <Label className="text-base font-bold text-foreground">{label}</Label>
+          <p className="text-xs text-muted-foreground mt-1 h-8">{desc}</p>
+        </div>
+        <div className="flex items-center justify-between bg-secondary/30 p-1 rounded-full">
+          {[1, 2, 3, 4, 5].map((score) => {
+            const scoreInfo = rubric.scores.find((s:any) => s.score === score);
+            return (
+              <Tooltip key={score}>
+                <TooltipTrigger asChild>
+                  <button
+                    key={score}
+                    onClick={() => setVal(score)}
+                    className={cn(
+                      "w-10 h-10 flex items-center justify-center rounded-full text-lg font-mono font-bold transition-all",
+                      val === score
+                        ? "bg-primary text-primary-foreground shadow-sm scale-110"
+                        : "text-muted-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {score}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="font-bold">{scoreInfo.name}</p>
+                  <p className="text-xs max-w-xs">{scoreInfo.desc}</p>
+                </TooltipContent>
+              </Tooltip>
+            )
+          })}
+        </div>
       </div>
-      <div className="flex items-center justify-between bg-secondary/30 p-1 rounded-full">
-        {[1, 2, 3, 4, 5].map((score) => (
-          <button
-            key={score}
-            onClick={() => setVal(score)}
-            className={cn(
-              "w-10 h-10 flex items-center justify-center rounded-full text-lg font-mono font-bold transition-all",
-              val === score
-                ? "bg-primary text-primary-foreground shadow-sm scale-110"
-                : "text-muted-foreground hover:bg-secondary"
-            )}
-          >
-            {score}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
 
 function SkillGroup({ title, icon, items, state, setState, disabled }: any) {
@@ -304,9 +307,12 @@ const RubricItem = ({ title, data }: { title: string, data: any[] }) => (
       {data.map((item, index) => (
         <div key={index} className="p-4 bg-card rounded-lg border">
           <p className="font-semibold text-foreground mb-2">{item.title}</p>
-          <ul className="space-y-1 text-xs text-muted-foreground">
+          <ul className="space-y-2 text-xs text-muted-foreground">
             {item.scores.map((score: any, i: number) => (
-              <li key={i}><strong>{score.score}:</strong> {score.desc}</li>
+              <li key={i} className="border-t pt-2">
+                <p className="font-bold text-sm text-foreground/90">({score.score}) {score.name}</p>
+                <p className="mt-1">{score.desc}</p>
+              </li>
             ))}
           </ul>
         </div>
@@ -367,5 +373,3 @@ const RedFlagItem = ({ title, data }: { title: string, data: string[] }) => (
     </ul>
   </SectionWrapper>
 );
-
-    
