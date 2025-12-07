@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useActionState, useRef, useState } from "react";
@@ -72,7 +71,7 @@ export default function ProfilePage() {
     try {
       // 1. Capture Element HTML jadi Gambar
       const canvas = await html2canvas(idCardRef.current, {
-        scale: 2, // Biar tajam (High Res)
+        scale: 3, // Biar tajam (High Res)
         backgroundColor: null,
         useCORS: true // Supaya gambar avatar dari URL luar bisa ke-load
       });
@@ -142,61 +141,49 @@ export default function ProfilePage() {
                         </Button>
                     </DialogTrigger>
                     
-                    {/* --- UPDATE BAGIAN INI: DIALOG CONTENT LEBIH LEBAR --- */}
-                    <DialogContent className="max-w-5xl w-full bg-zinc-950 border-zinc-800 p-0 overflow-hidden shadow-2xl">
+                    {/* MODAL DIPERBAIKI: Max Width lebih besar & Scrollable */}
+                    <DialogContent className="max-w-4xl w-full bg-zinc-950 border-zinc-800 p-0 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         
-                        {/* 1. Header Modal */}
-                        <div className="flex flex-row items-center justify-between p-6 border-b border-zinc-800 bg-black/40">
-                            <div>
+                        {/* Header Modal */}
+                        <div className="p-6 border-b border-zinc-800 bg-black/40 shrink-0">
+                             <DialogHeader>
                                 <DialogTitle className="text-xl font-headline font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                                    <CreditCard className="w-5 h-5 text-primary"/> Official ID Card Preview
+                                    <CreditCard className="w-5 h-5 text-primary"/> Official ID Card
                                 </DialogTitle>
                                 <DialogDescription className="text-zinc-400 mt-1">
-                                    Tampilan pratinjau sebelum dicetak. Pastikan foto dan data sudah benar.
+                                    Pratinjau tampilan cetak (Depan & Belakang).
                                 </DialogDescription>
-                            </div>
+                            </DialogHeader>
                         </div>
 
-                        {/* 2. Preview Area (Stage) */}
-                        <div className="relative bg-[url('/images/grid-pattern.png')] bg-zinc-900/50 p-8 md:p-12 flex items-center justify-center min-h-[600px] overflow-auto">
-                            
-                            {/* Visual Container dengan Efek Shadow Realistis */}
-                            <div className="relative transform transition-all hover:scale-[1.01] duration-500">
-                                {/* Glow Effect di belakang kartu */}
-                                <div className="absolute -inset-4 bg-primary/20 blur-2xl rounded-full opacity-50 pointer-events-none"></div>
-                                
-                                <div className="relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] border border-white/5 rounded-xl overflow-hidden bg-black">
-                                    <IdCardTemplate 
-                                        user={{
-                                            ...MOCK_USER,
-                                            photoUrl: avatarPreview || undefined
-                                        }} 
-                                    />
+                        {/* STAGE PREVIEW (Scrollable & Centered) */}
+                        <div className="flex-1 overflow-auto bg-[url('/images/grid-pattern.png')] bg-zinc-900/50 relative p-8 md:p-12">
+                            <div className="min-h-[500px] flex items-center justify-center">
+                                {/* Wrapper agar kartu tidak keluar batas (Scale Down on Mobile) */}
+                                <div className="relative transform md:scale-100 scale-[0.6] origin-top md:origin-center transition-all duration-500">
+                                    <div className="absolute -inset-10 bg-primary/20 blur-3xl rounded-full opacity-40 pointer-events-none"></div>
+                                    <div className="relative shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)] rounded-xl overflow-hidden bg-white ring-1 ring-white/10">
+                                        <IdCardTemplate 
+                                            user={{
+                                                ...MOCK_USER,
+                                                photoUrl: avatarPreview || undefined
+                                            }} 
+                                            className="w-[650px]" // Paksa lebar tetap
+                                        />
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Label Petunjuk Visual */}
-                            <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none opacity-50">
-                                <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500 uppercase tracking-widest border border-zinc-800 px-3 py-1 rounded-full bg-black/50 backdrop-blur">
-                                    <ZoomIn className="w-3 h-3" /> High Resolution Preview
-                                </span>
-                            </div>
                         </div>
 
-                        {/* 3. Footer Actions */}
-                        <div className="p-6 border-t border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                            <div className="text-xs text-zinc-500 max-w-md hidden md:block">
-                                *ID Card ini wajib dipakai selama bertugas. Jika hilang, segera lapor ke sekretariat.
+                        {/* Footer Actions */}
+                        <div className="p-6 border-t border-zinc-800 bg-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
+                            <div className="text-xs text-zinc-500 text-center md:text-left">
+                                <span className="text-primary font-bold">TIPS:</span> Gunakan kertas PVC atau Art Paper 260gr untuk hasil terbaik.
                             </div>
-                            <div className="flex gap-3 w-full md:w-auto">
-                                <Button variant="ghost" className="flex-1 md:flex-none text-zinc-400 hover:text-white hover:bg-zinc-800">
-                                    Tutup
-                                </Button>
-                                <Button onClick={handleDownloadIdCard} disabled={isGenerating} size="lg" className="flex-1 md:flex-none bg-primary hover:bg-red-700 text-white font-bold shadow-lg shadow-red-900/20">
-                                    {isGenerating ? <Loader2 className="animate-spin mr-2"/> : <Printer className="mr-2 w-4 h-4"/>}
-                                    {isGenerating ? "MEMPROSES..." : "DOWNLOAD PDF (SIAP CETAK)"}
-                                </Button>
-                            </div>
+                            <Button onClick={handleDownloadIdCard} disabled={isGenerating} size="lg" className="w-full md:w-auto bg-primary hover:bg-red-700 text-white font-bold shadow-lg shadow-red-900/20">
+                                {isGenerating ? <Loader2 className="animate-spin mr-2"/> : <Printer className="mr-2 w-4 h-4"/>}
+                                {isGenerating ? "GENERATING..." : "DOWNLOAD PDF"}
+                            </Button>
                         </div>
 
                     </DialogContent>
@@ -205,7 +192,7 @@ export default function ProfilePage() {
 
             {/* --- Hidden Template for PDF Generation --- */}
             <div className="fixed top-0 left-0 pointer-events-none opacity-0 z-[-1]">
-                 <div className="scale-[2] origin-top-left"> {/* Scale up agar PDF tajam */}
+                 <div className="scale-[2] origin-top-left"> 
                     <IdCardTemplate 
                         ref={idCardRef} 
                         user={{
@@ -373,5 +360,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
