@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,11 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   ArrowLeft, Zap, Shield, BrainCircuit, 
-  Info, CheckCircle2, XCircle, BookOpen, AlertTriangle, Loader2
+  Info, CheckCircle2, XCircle, BookOpen, AlertTriangle, Loader2, ChevronUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPlayerById, submitVerificationResult, type PlayerVerification } from "../../actions";
 import { RUBRIC_GUIDELINES, ASSESSMENT_METHODS, COMPARISON_TABLE, RED_FLAGS } from "@/lib/tpf-data";
+import { cn } from '@/lib/utils';
 
 
 // Konstanta Bonus
@@ -37,6 +37,7 @@ export default function AssessmentPage() {
 
   // UI State
   const [activeTab, setActiveTab] = useState("visual");
+  const [showCheatSheet, setShowCheatSheet] = useState(false);
   const [manualStatus, setManualStatus] = useState<'VALID' | 'INVALID'>('VALID');
 
   // Scoring State
@@ -70,32 +71,35 @@ export default function AssessmentPage() {
 
     let level = "REJECTED";
     let tier = "Over Spec / Joki";
-    let color = "bg-red-600 text-white border-red-800";
+    let color = "bg-destructive text-destructive-foreground border-destructive/50";
 
-    if (finalScore >= 14 && finalScore <= 36) {
-        level = "BEGINNER";
-        color = "bg-green-600 text-white border-green-800";
-        if (finalScore <= 24) tier = "Tier 3 (Newbie)";
-        else if (finalScore <= 30) tier = "Tier 2 (Rookie)";
-        else tier = "Tier 1 (Prospect)";
-    } else if (finalScore >= 37 && finalScore <= 62) {
-        level = "INTERMEDIATE";
-        color = "bg-blue-600 text-white border-blue-800";
-        if (finalScore <= 44) tier = "Tier 3 (Grinder)";
-        else if (finalScore <= 54) tier = "Tier 2 (Striker)";
-        else tier = "Tier 1 (Carry)";
-    } else if (finalScore >= 63 && finalScore <= 89) {
-        level = "ADVANCE";
-        color = "bg-purple-600 text-white border-purple-800";
-        if (finalScore <= 70) tier = "Tier 3 (Master)";
-        else if (finalScore <= 80) tier = "Tier 2 (Savage)";
-        else tier = "Tier 1 (Prime)";
+    if (manualStatus === 'VALID') {
+        if (finalScore >= 14 && finalScore <= 36) {
+            level = "BEGINNER";
+            color = "bg-green-600 text-white border-green-800";
+            if (finalScore <= 24) tier = "Tier 3 (Newbie)";
+            else if (finalScore <= 30) tier = "Tier 2 (Rookie)";
+            else tier = "Tier 1 (Prospect)";
+        } else if (finalScore >= 37 && finalScore <= 62) {
+            level = "INTERMEDIATE";
+            color = "bg-blue-600 text-white border-blue-800";
+            if (finalScore <= 44) tier = "Tier 3 (Grinder)";
+            else if (finalScore <= 54) tier = "Tier 2 (Striker)";
+            else tier = "Tier 1 (Carry)";
+        } else if (finalScore >= 63 && finalScore <= 89) {
+            level = "ADVANCE";
+            color = "bg-purple-600 text-white border-purple-800";
+            if (finalScore <= 70) tier = "Tier 3 (Master)";
+            else if (finalScore <= 80) tier = "Tier 2 (Savage)";
+            else tier = "Tier 1 (Prime)";
+        }
     }
+
 
     if (manualStatus === 'INVALID') {
         level = "REJECTED";
         tier = "Dibatalkan Manual (Invalid)";
-        color = "bg-red-600 text-white border-red-800";
+        color = "bg-destructive text-destructive-foreground border-destructive/50";
     }
 
     setFinalCalc({ scoreA: totalA, scoreB: totalB, total: finalScore, level, tier, color });
@@ -104,7 +108,7 @@ export default function AssessmentPage() {
   const handleSubmit = async () => {
       if (!player) return;
       if (manualStatus === 'INVALID' && !notes) {
-          return toast({ title: "Isi Catatan", description: "Jelaskan kenapa video dinyatakan invalid.", variant: "destructive" });
+          return toast({ title: "Isi Catatan", description: "Jelaskan alasan video invalid.", variant: "destructive" });
       }
       await submitVerificationResult(player.id, { 
           ...finalCalc, 
@@ -135,7 +139,7 @@ export default function AssessmentPage() {
             <p className="text-sm text-muted-foreground -mt-1">{player.team} | <span className="font-semibold text-primary">{player.category} (Klaim)</span></p>
           </div>
         </div>
-        <div className={`flex items-center gap-4 px-4 py-1.5 rounded-md shadow-sm border ${finalCalc.color}`}>
+        <div className={`flex items-center gap-4 px-4 py-1.5 rounded-lg shadow-sm border ${finalCalc.color}`}>
           <div className="flex gap-2 text-xs font-bold opacity-90">
             <span>A: {finalCalc.scoreA * 2}</span>
             <span>+</span>
@@ -153,6 +157,19 @@ export default function AssessmentPage() {
       {/* 1. VIDEO PLAYER (STICKY TOP) */}
       <div className="shrink-0 bg-black w-full relative group sticky top-[76px] z-10 rounded-lg overflow-hidden border shadow-lg">
         <iframe src={player.videoUrl} className="w-full aspect-video" allowFullScreen />
+        
+        {/* Toolbar Overlay di atas Video */}
+        <div className="absolute top-2 right-2 flex gap-2">
+             <Button 
+                size="sm" 
+                variant="secondary"
+                className="bg-black/50 text-white hover:bg-black/80 backdrop-blur-md border border-white/10"
+                onClick={() => setShowCheatSheet(!showCheatSheet)}
+            >
+                <BookOpen className="w-4 h-4 mr-2" />
+                {showCheatSheet ? "Tutup Panduan" : "Panduan Rubrik"}
+            </Button>
+        </div>
       </div>
 
       {/* 2. SCROLLABLE FORM AREA (BOTTOM) */}
@@ -165,7 +182,7 @@ export default function AssessmentPage() {
           </TabsList>
 
           <div className="p-6">
-            <TabsContent value="visual" className="mt-0 space-y-6">
+             <TabsContent value="visual" className="mt-0 space-y-6">
                 <div className="flex justify-center mb-6">
                     <div className="inline-flex bg-background p-1 rounded-lg border shadow-sm">
                         <button onClick={() => setManualStatus('VALID')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${manualStatus === 'VALID' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary'}`}>
@@ -177,21 +194,21 @@ export default function AssessmentPage() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ScoreSlider disabled={isFormDisabled} label="1. Biomekanik (Grip)" desc="Pegangan raket kaku (Panci) vs Luwes (Salaman)?" val={scores.grip} setVal={(v) => setScores({...scores, grip: v})} />
-                  <ScoreSlider disabled={isFormDisabled} label="2. Footwork" desc="Lari berat vs Langkah geser/jinjit?" val={scores.footwork} setVal={(v) => setScores({...scores, footwork: v})} />
-                  <ScoreSlider disabled={isFormDisabled} label="3. Backhand" desc="Panik vs Clear sampai belakang?" val={scores.backhand} setVal={(v) => setScores({...scores, backhand: v})} />
-                  <ScoreSlider disabled={isFormDisabled} label="4. Attack Power" desc="Smash melambung vs Menukik tajam?" val={scores.attack} setVal={(v) => setScores({...scores, attack: v})} />
-                  <ScoreSlider disabled={isFormDisabled} label="5. Defense" desc="Buang muka vs Tembok tenang?" val={scores.defense} setVal={(v) => setScores({...scores, defense: v})} />
-                  <ScoreSlider disabled={isFormDisabled} label="6. Game IQ" desc="Tabrakan vs Saling mengisi rotasi?" val={scores.gameIq} setVal={(v) => setScores({...scores, gameIq: v})} />
-                  <ScoreSlider disabled={isFormDisabled} label="7. Fisik" desc="Ngos-ngosan vs Stabil Explosif?" val={scores.physique} setVal={(v) => setScores({...scores, physique: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="1. Biomekanik (Grip)" desc="Pegangan raket kaku (Panci) vs Luwes (Salaman)?" val={scores.grip} setVal={(v) => setScores({...scores, grip: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="2. Footwork" desc="Lari berat vs Langkah geser/jinjit?" val={scores.footwork} setVal={(v) => setScores({...scores, footwork: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="3. Backhand" desc="Panik vs Clear sampai belakang?" val={scores.backhand} setVal={(v) => setScores({...scores, backhand: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="4. Attack Power" desc="Smash melambung vs Menukik tajam?" val={scores.attack} setVal={(v) => setScores({...scores, attack: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="5. Defense" desc="Buang muka vs Tembok tenang?" val={scores.defense} setVal={(v) => setScores({...scores, defense: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="6. Game IQ" desc="Tabrakan vs Saling mengisi rotasi?" val={scores.gameIq} setVal={(v) => setScores({...scores, gameIq: v})} />
+                  <ScoreSelector disabled={isFormDisabled} label="7. Fisik" desc="Ngos-ngosan vs Stabil Explosif?" val={scores.physique} setVal={(v) => setScores({...scores, physique: v})} />
                 </div>
             </TabsContent>
             <TabsContent value="bonus" className="mt-0 space-y-6">
                 <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded text-sm text-yellow-300 flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /><span>Centang <strong>hanya jika</strong> teknik terlihat jelas & sukses minimal 1x.</span></div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <SkillGroup disabled={isFormDisabled} title="A. Serangan" icon={<Zap className="w-4 h-4 text-red-400"/>} items={[ {id: 'jumpingSmash', l: 'Jumping Smash'}, {id: 'stickSmash', l: 'Stick Smash'}, {id: 'backhandSmash', l: 'Backhand Smash (+4)'}, {id: 'netKill', l: 'Net Kill'}, {id: 'flickServe', l: 'Flick Serve'} ]} state={skills} setState={setSkills} />
-                <SkillGroup disabled={isFormDisabled} title="B. Kontrol" icon={<Shield className="w-4 h-4 text-blue-400"/>} items={[ {id: 'spinningNet', l: 'Spinning Net'}, {id: 'crossNet', l: 'Cross Net'}, {id: 'backhandDrop', l: 'Backhand Drop'}, {id: 'backhandClear', l: 'Backhand Clear'}, {id: 'crossDefense', l: 'Cross Defense'} ]} state={skills} setState={setSkills} />
-                <SkillGroup disabled={isFormDisabled} title="C. IQ & Refleks" icon={<BrainCircuit className="w-4 h-4 text-purple-400"/>} items={[ {id: 'splitStep', l: 'Split Step (+4)'}, {id: 'divingDefense', l: 'Diving Defense'}, {id: 'deception', l: 'Deception / Hold (+4)'}, {id: 'intercept', l: 'Intercept'}, {id: 'judgement', l: 'Watch Line'} ]} state={skills} setState={setSkills} />
+                <SkillGroup disabled={isFormDisabled} title="A. Serangan" icon={<Zap className="w-4 h-4 text-red-400"/>} items={[ {id: 'jumpingSmash', l: 'Jumping Smash (+3)'}, {id: 'stickSmash', l: 'Stick Smash (+3)'}, {id: 'backhandSmash', l: 'Backhand Smash (+4)'}, {id: 'netKill', l: 'Net Kill (+2)'}, {id: 'flickServe', l: 'Flick Serve (+2)'} ]} state={skills} setState={setSkills} />
+                <SkillGroup disabled={isFormDisabled} title="B. Kontrol" icon={<Shield className="w-4 h-4 text-blue-400"/>} items={[ {id: 'spinningNet', l: 'Spinning Net (+3)'}, {id: 'crossNet', l: 'Cross Net (+3)'}, {id: 'backhandDrop', l: 'Backhand Drop (+3)'}, {id: 'backhandClear', l: 'Backhand Clear (+3)'}, {id: 'crossDefense', l: 'Cross Defense (+3)'} ]} state={skills} setState={setSkills} />
+                <SkillGroup disabled={isFormDisabled} title="C. IQ & Refleks" icon={<BrainCircuit className="w-4 h-4 text-purple-400"/>} items={[ {id: 'splitStep', l: 'Split Step (+4)'}, {id: 'divingDefense', l: 'Diving Defense (+3)'}, {id: 'deception', l: 'Deception / Hold (+4)'}, {id: 'intercept', l: 'Intercept (+3)'}, {id: 'judgement', l: 'Watch Line (+2)'} ]} state={skills} setState={setSkills} />
               </div>
             </TabsContent>
             <TabsContent value="guide" className="mt-0 space-y-6 text-foreground">
@@ -217,31 +234,44 @@ export default function AssessmentPage() {
 }
 
 // SUB COMPONENTS
-function ScoreSlider({ label, desc, val, setVal, disabled }: any) {
+function ScoreSelector({ label, desc, val, setVal, disabled }: any) {
   return (
-    <div className={`p-4 rounded-lg border space-y-3 transition-all ${disabled ? 'opacity-40 pointer-events-none' : 'hover:bg-secondary/20'} bg-card`}>
-      <div className="flex justify-between items-center">
+    <div className={`bg-card p-4 rounded-xl border border-border shadow-sm space-y-4 transition-all ${disabled ? 'opacity-50 pointer-events-none' : 'hover:border-primary/30'}`}>
+      <div>
         <Label className="text-base font-bold text-foreground">{label}</Label>
-        <Badge variant="outline" className="text-lg font-mono w-10 h-10 flex items-center justify-center bg-background text-foreground rounded-lg">
-          {val}
-        </Badge>
+        <p className="text-xs text-muted-foreground mt-1 h-8">{desc}</p>
       </div>
-      <p className="text-sm text-muted-foreground h-5">{desc}</p>
-      <Slider value={[val]} min={1} max={5} step={1} onValueChange={(v) => setVal(v[0])} className="py-2" disabled={disabled} />
+      <div className="flex items-center justify-between bg-secondary/30 p-1 rounded-full">
+        {[1, 2, 3, 4, 5].map((score) => (
+          <button
+            key={score}
+            onClick={() => setVal(score)}
+            className={cn(
+              "w-10 h-10 flex items-center justify-center rounded-full text-lg font-mono font-bold transition-all",
+              val === score
+                ? "bg-primary text-primary-foreground shadow-sm scale-110"
+                : "text-muted-foreground hover:bg-secondary"
+            )}
+          >
+            {score}
+          </button>
+        ))}
+      </div>
     </div>
-  )
+  );
 }
+
 
 function SkillGroup({ title, icon, items, state, setState, disabled }: any) {
   return (
-    <div className={`p-4 rounded-lg border ${disabled ? 'opacity-40 pointer-events-none' : ''} bg-card`}>
-      <h4 className="font-bold text-base mb-3 flex items-center gap-2 text-foreground border-b pb-2">
+    <div className={`bg-card p-5 rounded-xl border border-border shadow-sm ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+      <h4 className="font-bold text-base mb-4 flex items-center gap-2 text-foreground border-b pb-2">
         {icon} {title}
       </h4>
-      <div className="grid grid-cols-1 gap-3">
+      <div className="space-y-3">
         {items.map((i: any) => (
           <div key={i.id} 
-            className={`flex items-center space-x-2 p-2 rounded-md border transition-all cursor-pointer ${state[i.id] ? 'bg-primary/10 border-primary/30' : `bg-secondary/20 border-transparent ${!disabled && 'hover:bg-secondary/50'}`}`}
+            className={`flex items-center space-x-3 p-2 rounded-lg border cursor-pointer transition-all ${state[i.id] ? 'bg-primary/5 border-primary/40' : `bg-secondary/20 border-transparent ${!disabled && 'hover:bg-secondary/50'}`}`}
             onClick={() => !disabled && setState({...state, [i.id]: !state[i.id]})}
           >
             <Checkbox 
@@ -249,6 +279,7 @@ function SkillGroup({ title, icon, items, state, setState, disabled }: any) {
               checked={state[i.id] || false}
               onCheckedChange={(c) => !disabled && setState({...state, [i.id]: !!c})} 
               disabled={disabled}
+              className="border-muted-foreground"
             />
             <label className={`text-sm font-semibold select-none leading-tight ${!disabled && 'cursor-pointer'}`}>
               {i.l}
