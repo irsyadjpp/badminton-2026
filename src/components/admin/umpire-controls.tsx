@@ -15,7 +15,7 @@ export function UmpireControls({ onFault, onOverrule }: any) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 mt-4">
+    <div className="grid grid-cols-2 gap-2">
         {/* FAULT CONTROLS */}
         <div className="space-y-2">
             <p className="text-[10px] text-muted-foreground uppercase font-bold text-center">Service Faults</p>
@@ -45,4 +45,3 @@ export function UmpireControls({ onFault, onOverrule }: any) {
   );
 }
 
-    
