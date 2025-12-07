@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,6 +20,13 @@ type ReimbursementItem = {
   total: string;
 }
 
+// SIMULASI DATA DARI SESSION
+const MOCK_USER_SESSION = {
+    name: "Teri Taufiq Mulyadi",
+    division: "OPERATIONS",
+    phone: "081233334444"
+};
+
 export default function SubmitReimbursementPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +39,17 @@ export default function SubmitReimbursementPage() {
   const [items, setItems] = useState<ReimbursementItem[]>([]);
   const [newItem, setNewItem] = useState({ desc: "", cat: "", qty: "", price: "", total: "" });
 
+  // -- BARU: EFEK UNTUK MENGISI DATA DIRI OTOMATIS --
+  useEffect(() => {
+    // Di aplikasi nyata, data ini akan diambil dari session login
+    setApplicant(prev => ({
+        ...prev,
+        name: MOCK_USER_SESSION.name,
+        division: MOCK_USER_SESSION.division,
+        phone: MOCK_USER_SESSION.phone
+    }));
+  }, []);
+  
   // Efek untuk kalkulasi otomatis
   useEffect(() => {
     const qty = parseFloat(newItem.qty);
@@ -75,10 +92,10 @@ export default function SubmitReimbursementPage() {
     await submitReimbursement(payload);
     setIsSubmitting(false);
     toast({ title: "Terkirim!", description: "Klaim Anda sedang direview Bendahara.", className: "bg-green-600 text-white" });
-    // Reset form
+    // Reset form (kecuali data diri)
     setItems([]);
-    setApplicant({ name: "", division: "", phone: "", date: "" });
     setBank({ name: "Bank BJB", number: "", holder: "" });
+    setApplicant(prev => ({ ...prev, date: "" }));
   };
   
   const StepIndicator = ({ number, title }: { number: number, title: string }) => (
@@ -114,24 +131,15 @@ export default function SubmitReimbursementPage() {
                     <CardTitle className="text-base">Data Diri Pemohon</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5"><Label>Nama Lengkap</Label><Input placeholder="Nama Anda" value={applicant.name} onChange={e => setApplicant({...applicant, name: e.target.value})} /></div>
-                        <div className="space-y-1.5"><Label>Divisi</Label>
-                            <Select value={applicant.division} onValueChange={v => setApplicant({...applicant, division: v})}>
-                                <SelectTrigger><SelectValue placeholder="Pilih Divisi" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="OPERATIONS">Operasional</SelectItem>
-                                    <SelectItem value="MATCH_CONTROL">Pertandingan</SelectItem>
-                                    <SelectItem value="BUSINESS">Komersial</SelectItem>
-                                    <SelectItem value="SECRETARY">Sekretariat</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <div className="space-y-1.5">
+                        <Label>Nama Lengkap (Otomatis)</Label>
+                        <Input value={applicant.name} readOnly className="font-bold bg-secondary/50"/>
                     </div>
                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5"><Label>Tanggal Belanja</Label><Input type="date" value={applicant.date} onChange={e => setApplicant({...applicant, date: e.target.value})} /></div>
-                        <div className="space-y-1.5"><Label>No. WhatsApp</Label><Input type="tel" value={applicant.phone} onChange={e => setApplicant({...applicant, phone: e.target.value})} /></div>
+                        <div className="space-y-1.5"><Label>Divisi (Otomatis)</Label><Input value={applicant.division} readOnly className="font-bold bg-secondary/50"/></div>
+                        <div className="space-y-1.5"><Label>No. WhatsApp (Otomatis)</Label><Input type="tel" value={applicant.phone} readOnly className="font-bold bg-secondary/50" /></div>
                     </div>
+                    <div className="space-y-1.5"><Label>Tanggal Belanja</Label><Input type="date" value={applicant.date} onChange={e => setApplicant({...applicant, date: e.target.value})} /></div>
                 </CardContent>
             </Card>
 
