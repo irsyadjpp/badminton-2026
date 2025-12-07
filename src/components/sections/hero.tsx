@@ -5,31 +5,33 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CalendarClock, ArrowRight, FileDown } from 'lucide-react';
 import { Countdown } from '@/components/countdown';
+import { CourtLines } from '@/components/ui/court-lines';
 
 export function HeroSection() {
   
   return (
-    // PERUBAHAN 1: Ubah bg-background (putih) menjadi bg-black (hitam)
     <section className="relative bg-black text-white overflow-hidden">
       
-      {/* BACKGROUND IMAGE DENGAN EFEK ZOOM */}
+      {/* BACKGROUND IMAGE & ANIMATION */}
       <div className="absolute inset-0 z-0">
+        {/* Latar Belakang Gambar Stadion */}
         <div className="relative h-full w-full animate-zoom-slow">
             <Image
             src="/images/gor-koni.jpg"
             alt="GOR KONI Bandung"
             fill
             priority
-            // PERUBAHAN 2: Opacity dikurangi agar lebih 'dark' dan teks lebih pop-up
             className="object-cover opacity-50" 
             />
         </div>
         
-        {/* PERUBAHAN 3: Hapus warna putih (from-background). Ganti dengan gradasi Hitam Pekat */}
-        {/* Ini membuat efek "Vignette" stadion yang dramatis */}
+        {/* Overlay Gradasi Hitam */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/40" />
         
-        {/* Efek Partikel/Debu Stadion (Opsional) */}
+        {/* Animasi Garis Lapangan & Shuttlecock */}
+        <CourtLines />
+
+        {/* Efek Partikel/Debu Stadion */}
         <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
       </div>
       
