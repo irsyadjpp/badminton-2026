@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { 
   Minus, Plus, RefreshCw, MonitorPlay, 
-  ArrowLeftRight, AlertTriangle, MapPin, Gavel, Coins
+  ArrowLeftRight, AlertTriangle, MapPin, Gavel, Coins, Eraser, Package, Ambulance
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger
@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UmpireControls } from '@/components/admin/umpire-controls';
+import { requestService } from '@/app/admin/match-control/service/actions';
 
 type MatchMode = 'GROUP' | 'KNOCKOUT';
 type MatchStatus = 'PRE_MATCH' | 'IN_PROGRESS' | 'FINISHED';
@@ -76,6 +77,7 @@ export default function MatchControlPage() {
   // --- MOCK DATA ---
   const matchData = {
     id: matchId,
+    court: "1", // Hardcode court number
     category: "MD Intermediate",
     teamA: "PB Djarum",
     playersA: "Kevin Sanjaya / Marcus Gideon",
@@ -324,6 +326,12 @@ export default function MatchControlPage() {
     }
   };
 
+  const handleServiceRequest = async (type: 'MOP' | 'SHUTTLE' | 'MEDIC') => {
+      toast({title: "Request Sent", description: `Memanggil petugas ${type}...`});
+      await requestService(matchData.court, type);
+      toast({title: "Petugas Merespon", description: `Tim ${type} sedang menuju ke lapangan ${matchData.court}.`, className: "bg-blue-600 text-white"});
+  }
+
 
   if (status === 'PRE_MATCH') {
       return (
@@ -475,6 +483,26 @@ export default function MatchControlPage() {
          </div>
       </div>
       
+       {/* Court Service Request Buttons */}
+      <Card className="mt-4">
+        <CardContent className="p-3">
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="outline" className="h-16 flex-col gap-1" onClick={() => handleServiceRequest('MOP')}>
+                <Eraser className="w-5 h-5 text-blue-500" />
+                <span className="text-xs">Mop / Lap</span>
+            </Button>
+            <Button variant="outline" className="h-16 flex-col gap-1" onClick={() => handleServiceRequest('SHUTTLE')}>
+                <Package className="w-5 h-5 text-yellow-500" />
+                <span className="text-xs">Kok Baru</span>
+            </Button>
+            <Button variant="destructive" className="h-16 flex-col gap-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20" onClick={() => handleServiceRequest('MEDIC')}>
+                <Ambulance className="w-5 h-5" />
+                <span className="text-xs">Medis</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {status === 'FINISHED' && (
              <Button className="w-full h-14 bg-green-600 hover:bg-green-500 mt-4" onClick={() => window.location.href='/admin/referee'}>
                  <MonitorPlay className="w-4 h-4 mr-1" /> SELESAI & KIRIM HASIL
@@ -484,4 +512,3 @@ export default function MatchControlPage() {
     </div>
   );
 }
-
