@@ -1,19 +1,23 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription 
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Network, Users, Crown, Zap, Shield, 
-  Briefcase, ChevronRight, Target, LayoutGrid 
+  Briefcase, ChevronRight, Target, LayoutGrid, UserPlus, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { getUnassignedStaff, assignStaffToDivision } from "./actions";
 
 // --- MOCK DATA (BERDASARKAN BUKU PANDUAN) ---
 const CORE_TEAM = [
@@ -133,7 +137,40 @@ const DIVISIONS = [
 ];
 
 export default function StructurePage() {
+  const { toast } = useToast();
   const [selectedDiv, setSelectedDiv] = useState<typeof DIVISIONS[0] | null>(null);
+  
+  // State untuk Assignment Modal
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [staffList, setStaffList] = useState<any[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState("");
+  const [selectedRole, setSelectedRole] = useState("STAFF");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load Unassigned Staff saat modal dibuka
+  useEffect(() => {
+    if (isAssignOpen) {
+      getUnassignedStaff().then(setStaffList);
+    }
+  }, [isAssignOpen]);
+
+  const handleAssign = async () => {
+    if (!selectedStaff || !selectedDiv) return;
+    
+    setIsSubmitting(true);
+    const res = await assignStaffToDivision(selectedStaff, selectedDiv.alias, selectedRole);
+    setIsSubmitting(false);
+
+    if (res.success) {
+      toast({ 
+        title: "Penugasan Berhasil", 
+        description: `Staff baru ditambahkan ke ${selectedDiv.name}`,
+        className: "bg-green-600 text-white" 
+      });
+      setIsAssignOpen(false);
+      // Opsional: Refresh data divisi jika perlu
+    }
+  };
 
   return (
     <div className="space-y-10 p-4 md:p-8 font-body pb-24">
@@ -163,11 +200,8 @@ export default function StructurePage() {
          <div className="flex flex-wrap justify-center gap-6">
             {CORE_TEAM.map((person) => (
                <div key={person.id} className="group relative w-full md:w-[300px]">
-                  {/* Card Shape */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent rounded-[32px] translate-y-2 blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="relative bg-zinc-900 border border-zinc-800 rounded-[32px] p-6 flex flex-col items-center text-center hover:border-zinc-600 transition-all hover:-translate-y-1 shadow-2xl">
-                     
-                     {/* Avatar with Status Ring */}
                      <div className="relative mb-4">
                         <div className={cn("absolute inset-0 rounded-full blur opacity-50", person.id === 'SC1' ? "bg-primary" : "bg-zinc-500")}></div>
                         <Avatar className="w-24 h-24 border-4 border-zinc-900 relative z-10">
@@ -179,7 +213,6 @@ export default function StructurePage() {
                            person.status === 'ONLINE' ? "bg-green-500" : "bg-zinc-600"
                         )}></div>
                      </div>
-
                      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-1">{person.name}</h3>
                      <Badge className="bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border-none px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
                         {person.role}
@@ -210,9 +243,7 @@ export default function StructurePage() {
                      "h-full rounded-[32px] bg-zinc-900 border-2 transition-all duration-300 hover:shadow-2xl relative overflow-hidden",
                      "border-zinc-800 hover:border-primary/50"
                   )}>
-                     {/* Hover Glow */}
                      <div className={cn("absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-40 transition-opacity", div.bg)}></div>
-
                      <CardHeader className="p-6 pb-2">
                         <div className="flex justify-between items-start">
                            <div className={cn("p-3 rounded-2xl mb-4", div.bg, div.color)}>
@@ -229,12 +260,10 @@ export default function StructurePage() {
                            {div.alias}
                         </CardDescription>
                      </CardHeader>
-                     
                      <CardContent className="p-6 pt-2">
                         <p className="text-zinc-400 text-sm line-clamp-2 leading-relaxed mb-4">
                            {div.description}
                         </p>
-                        
                         <div className="flex items-center justify-between border-t border-zinc-800 pt-4 mt-auto">
                            <div className="flex items-center gap-2">
                               <Avatar className="w-8 h-8 border border-zinc-700">
@@ -261,11 +290,9 @@ export default function StructurePage() {
          <SheetContent className="w-full sm:max-w-md md:max-w-lg bg-zinc-950 border-l border-zinc-800 p-0 overflow-y-auto">
             {selectedDiv && (
                <>
-                  {/* Sheet Header Visual */}
                   <div className={cn("h-48 relative p-8 flex flex-col justify-end overflow-hidden", selectedDiv.bg)}>
                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent"></div>
                      <selectedDiv.icon className={cn("absolute -right-6 -top-6 w-48 h-48 opacity-10 rotate-12", selectedDiv.color)} />
-                     
                      <div className="relative z-10">
                         <Badge className="bg-black/50 backdrop-blur text-white border-none mb-2">{selectedDiv.alias}</Badge>
                         <SheetTitle className="text-3xl font-black font-headline uppercase text-white leading-none">
@@ -273,10 +300,7 @@ export default function StructurePage() {
                         </SheetTitle>
                      </div>
                   </div>
-
                   <div className="p-6 space-y-8">
-                     
-                     {/* Section 1: Leadership */}
                      <div className="flex items-center gap-4 bg-zinc-900/50 p-4 rounded-[24px] border border-zinc-800">
                         <Avatar className="w-14 h-14 border-2 border-primary">
                            <AvatarFallback className="bg-zinc-800 font-bold text-lg">{selectedDiv.head.charAt(0)}</AvatarFallback>
@@ -286,8 +310,6 @@ export default function StructurePage() {
                            <p className="text-lg font-black text-white">{selectedDiv.head}</p>
                         </div>
                      </div>
-
-                     {/* Section 2: Key Responsibilities (SOP) */}
                      <div>
                         <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                            <Target className="w-4 h-4 text-primary" /> Key Responsibilities
@@ -303,17 +325,24 @@ export default function StructurePage() {
                            ))}
                         </div>
                         <p className="text-xs text-zinc-500 mt-2 italic px-2">
-                           *Mengacu pada Buku Panduan Kerja &amp; SOP Panitia Bab 3 (Job Description).
+                           *Mengacu pada Buku Panduan Kerja & SOP Panitia Bab 3 (Job Description).
                         </p>
                      </div>
-
-                     {/* Section 3: Squad List (Preview) */}
                      <div>
-                        <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                           <Users className="w-4 h-4 text-primary" /> Active Squad ({selectedDiv.members})
-                        </h4>
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                               <Users className="w-4 h-4 text-primary" /> Active Squad ({selectedDiv.members})
+                            </h4>
+                            <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="h-8 text-xs border-dashed border-zinc-700 hover:border-primary hover:text-primary"
+                                onClick={() => setIsAssignOpen(true)}
+                            >
+                                <UserPlus className="w-3 h-3 mr-2" /> Add Member
+                            </Button>
+                        </div>
                         <div className="grid grid-cols-4 gap-2">
-                           {/* Mock Avatars */}
                            {Array.from({ length: 8 }).map((_, i) => (
                               <div key={i} className="aspect-square bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 hover:border-zinc-600 transition-colors cursor-pointer">
                                  <span className="text-xs font-bold text-zinc-600">M{i+1}</span>
@@ -324,19 +353,66 @@ export default function StructurePage() {
                            </div>
                         </div>
                      </div>
-
                      <div className="pt-4">
-                        <Button className="w-full h-14 rounded-full font-bold text-lg bg-white text-black hover:bg-zinc-200">
-                           Manage Division Roster
+                        <Button 
+                            className="w-full h-14 rounded-full font-bold text-lg bg-white text-black hover:bg-zinc-200"
+                            onClick={() => window.location.href = '/admin/director/roster'}
+                        >
+                           Lihat Full Roster Divisi Ini
                         </Button>
                      </div>
-
                   </div>
                </>
             )}
          </SheetContent>
       </Sheet>
 
+      {/* --- MODAL ASSIGNMENT (POP UP) --- */}
+      <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white rounded-[32px] max-w-sm">
+            <DialogHeader>
+                <DialogTitle>Tambah Anggota Tim</DialogTitle>
+                <DialogDescription>
+                    Menambahkan personil ke divisi <span className="text-primary font-bold">{selectedDiv?.name}</span>.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-500 uppercase">Pilih Personil (Unassigned)</label>
+                    <Select onValueChange={setSelectedStaff}>
+                        <SelectTrigger className="bg-black border-zinc-700 h-12 rounded-xl">
+                            <SelectValue placeholder="Pilih nama..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            {staffList.map(s => (
+                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-500 uppercase">Peran / Jabatan</label>
+                    <Select defaultValue="STAFF" onValueChange={setSelectedRole}>
+                        <SelectTrigger className="bg-black border-zinc-700 h-12 rounded-xl">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectItem value="HEAD">Head of Division</SelectItem>
+                            <SelectItem value="STAFF">Staff / Officer</SelectItem>
+                            <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Button 
+                    onClick={handleAssign} 
+                    disabled={isSubmitting || !selectedStaff}
+                    className="w-full h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground mt-4"
+                >
+                    {isSubmitting ? <Loader2 className="animate-spin w-5 h-5"/> : "KONFIRMASI PENUGASAN"}
+                </Button>
+            </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
