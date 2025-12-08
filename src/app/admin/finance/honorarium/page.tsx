@@ -9,8 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Edit3, Coins, Save, BookOpen, TrendingUp, Users, Wallet, Trophy, Target } from "lucide-react";
+import { Edit3, Coins, Save, BookOpen, TrendingUp, Users, Wallet, Trophy, Target, Star } from "lucide-react";
 import { getStaffEvaluations, saveEvaluation, type StaffEvaluation } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -108,62 +107,77 @@ export default function HonorariumPage() {
       }
   };
 
-  // --- MD3 STYLED COMPONENTS ---
-  
-  // Custom Slider (Thicker & Colored)
+  // --- NEW: MD3 RATING INPUT (NO SLIDER) ---
   const ScoreInput = ({ id, label }: { id: string, label: string }) => {
     const score = tempScores?.[id] || 0;
-    // Dynamic color based on score
-    const scoreColor = score <= 2 ? 'bg-red-500' : score === 3 ? 'bg-yellow-500' : 'bg-green-500';
     
     return (
-        <div className="mb-6 p-4 bg-secondary/20 rounded-2xl border border-transparent hover:border-primary/20 transition-all">
-            <div className="flex justify-between items-center mb-4">
-                <Label className="text-sm font-bold text-foreground/80">{id} • {label}</Label>
-                <div className={`w-8 h-8 rounded-full ${scoreColor} text-white flex items-center justify-center font-bold shadow-sm`}>
-                    {score}
-                </div>
+        <div className="mb-4 p-5 bg-secondary/10 hover:bg-secondary/20 rounded-[20px] transition-colors">
+            <div className="flex justify-between items-center mb-3">
+                <Label className="text-sm font-bold text-foreground/70 tracking-wide uppercase">{id} • {label}</Label>
+                {score > 0 && (
+                    <Badge variant={score >= 4 ? 'default' : score === 3 ? 'secondary' : 'destructive'} className="rounded-full px-3">
+                        {score === 5 ? 'Sempurna' : score === 4 ? 'Baik' : score === 3 ? 'Cukup' : 'Kurang'}
+                    </Badge>
+                )}
             </div>
-            <Slider 
-                value={[score]} 
-                max={5} 
-                step={1} 
-                onValueChange={(v) => handleScoreChange(id, v[0])}
-                className="py-2"
-            />
-            <div className="flex justify-between mt-2 text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
-                <span>Buruk</span>
-                <span>Sempurna</span>
+            
+            {/* SEGMENTED BUTTONS REPLACEMENT */}
+            <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((val) => {
+                    const isSelected = score === val;
+                    // Dynamic Color Logic
+                    let activeClass = "";
+                    if (val <= 2) activeClass = "bg-red-500 hover:bg-red-600 text-white ring-red-200";
+                    else if (val === 3) activeClass = "bg-yellow-500 hover:bg-yellow-600 text-white ring-yellow-200";
+                    else activeClass = "bg-green-600 hover:bg-green-700 text-white ring-green-200";
+
+                    return (
+                        <button
+                            key={val}
+                            type="button"
+                            onClick={() => handleScoreChange(id, val)}
+                            className={cn(
+                                "flex-1 h-12 rounded-xl font-black text-lg transition-all duration-200 transform active:scale-95",
+                                isSelected 
+                                    ? `${activeClass} shadow-lg scale-105` 
+                                    : "bg-white dark:bg-zinc-800 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-transparent hover:border-border"
+                            )}
+                        >
+                            {val}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
   };
   
-  // MD3 Color System Simulation
+  // MD3 Color System
   const colorVariants = {
     blue: {
-      container: "bg-blue-100 text-blue-900 border-none",
-      iconBg: "bg-blue-200 text-blue-800",
+      container: "bg-blue-100/50 text-blue-900",
+      iconBg: "bg-blue-200 text-blue-700",
       label: "text-blue-700"
     },
     cyan: {
-      container: "bg-cyan-100 text-cyan-900 border-none",
-      iconBg: "bg-cyan-200 text-cyan-800",
+      container: "bg-cyan-100/50 text-cyan-900",
+      iconBg: "bg-cyan-200 text-cyan-700",
       label: "text-cyan-700"
     },
-    primary: { // Replaces green
-      container: "bg-primary/10 text-primary-foreground border-none", // Pakai warna primary theme
+    primary: { 
+      container: "bg-primary/5 text-primary-foreground border-primary/10 border",
       iconBg: "bg-primary/20 text-primary",
       label: "text-primary"
     },
     purple: {
-      container: "bg-purple-100 text-purple-900 border-none",
-      iconBg: "bg-purple-200 text-purple-800",
+      container: "bg-purple-100/50 text-purple-900",
+      iconBg: "bg-purple-200 text-purple-700",
       label: "text-purple-700"
     },
     orange: {
-      container: "bg-orange-100 text-orange-900 border-none",
-      iconBg: "bg-orange-200 text-orange-800",
+      container: "bg-orange-100/50 text-orange-900",
+      iconBg: "bg-orange-200 text-orange-700",
       label: "text-orange-700"
     }
   };
@@ -171,21 +185,20 @@ export default function HonorariumPage() {
   const AllocationCard = ({ title, amount, color, description, icon: Icon }: { title:string, amount:number, color:keyof typeof colorVariants, description?:string, icon: any}) => {
     const variants = colorVariants[color];
     return (
-      <Card className={cn("rounded-[24px] shadow-sm hover:shadow-md transition-all duration-300", variants.container)}>
+      <Card className={cn("rounded-[28px] border-none shadow-sm", variants.container)}>
           <CardContent className="p-6 flex flex-col justify-between h-full">
               <div className="flex justify-between items-start mb-4">
-                  <div className={cn("p-3 rounded-2xl", variants.iconBg)}>
+                  <div className={cn("p-4 rounded-[20px]", variants.iconBg)}>
                       <Icon className="w-6 h-6" />
                   </div>
-                  {/* Chip Style for percentage/desc */}
                   {description && (
-                      <span className={cn("text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-white/50", variants.label)}>
+                      <span className={cn("text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/60", variants.label)}>
                           {description}
                       </span>
                   )}
               </div>
               <div>
-                  <p className={cn("text-xs font-bold uppercase tracking-widest opacity-80 mb-1", variants.label)}>{title}</p>
+                  <p className={cn("text-xs font-bold uppercase tracking-widest opacity-70 mb-1", variants.label)}>{title}</p>
                   <h3 className="text-2xl font-black tracking-tight">Rp {amount.toLocaleString('id-ID', {notation: "compact"})}</h3>
               </div>
           </CardContent>
@@ -194,31 +207,32 @@ export default function HonorariumPage() {
   };
 
   return (
-    <div className="space-y-8 font-body">
+    <div className="space-y-10 font-body pb-20">
       
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-border/50">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-            <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="rounded-full px-4 py-1 border-primary text-primary font-bold">FINANCE MODULE</Badge>
-                <span className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Updated: Today</span>
+            <div className="flex items-center gap-2 mb-3">
+                <Badge className="rounded-full px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold border-none">
+                    FINANCE • PROFIT SHARING
+                </Badge>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black font-headline text-foreground uppercase tracking-tighter">
-                Profit <span className="text-primary">Sharing.</span>
+            <h2 className="text-5xl font-black font-headline text-foreground uppercase tracking-tighter leading-none">
+                Profit <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Distribution</span>
             </h2>
-            <p className="text-lg text-muted-foreground mt-2 max-w-2xl">
-                Transparansi distribusi keuangan untuk seluruh stakeholder BCC 2026.
+            <p className="text-lg text-muted-foreground mt-3 max-w-2xl font-medium">
+                Sistem pembagian honorarium berbasis kinerja poin (P1-P16) yang transparan dan adil.
             </p>
         </div>
         
         {/* TOTAL PROFIT PILL */}
-        <div className="bg-zinc-900 text-white pl-6 pr-8 py-4 rounded-full flex items-center gap-4 shadow-xl">
-            <div className="p-2 bg-green-500 rounded-full animate-pulse">
-                <TrendingUp className="w-5 h-5 text-black" />
+        <div className="bg-zinc-950 text-white pl-2 pr-8 py-2 rounded-full flex items-center gap-4 shadow-2xl border border-zinc-800">
+            <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+                <TrendingUp className="w-6 h-6 text-black" />
             </div>
             <div>
-                <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Net Profit</p>
-                <div className="font-black text-2xl">
+                <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-0.5">Net Profit</p>
+                <div className="font-black text-2xl font-mono">
                     Rp {totalProfit.toLocaleString('id-ID', { notation: "compact" })}
                 </div>
             </div>
@@ -226,34 +240,37 @@ export default function HonorariumPage() {
       </div>
 
       {/* BENTO GRID ALLOCATION */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
          <div className="lg:col-span-2">
              <AllocationCard title="Inisiator Aktif" description="30% Share" amount={honorInisiatorActive} color="blue" icon={Target}/>
          </div>
-         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
             <AllocationCard title="Pasif" description="10%" amount={honorInisiatorPassive} color="cyan" icon={Wallet}/>
             <AllocationCard title="Komunitas" description="5% Kas" amount={honorKomunitas} color="purple" icon={Users}/>
             <AllocationCard title="Kontributor" description="5%" amount={budgetNP} color="orange" icon={BookOpen}/>
          </div>
          {/* Main Card for Panitia */}
          <div className="lg:col-span-5">
-            <Card className="rounded-[32px] bg-primary text-primary-foreground border-none shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-                    <div className="flex items-center gap-6">
-                        <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                            <Trophy className="w-10 h-10 text-white" />
+            <Card className="rounded-[40px] bg-gradient-to-br from-zinc-900 to-black text-white border-none shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none group-hover:bg-primary/30 transition-all duration-1000"></div>
+                <CardContent className="p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                    <div className="flex items-center gap-8">
+                        <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-md border border-white/10">
+                            <Trophy className="w-10 h-10 text-yellow-400 drop-shadow-lg" />
                         </div>
                         <div>
-                            <h3 className="text-3xl font-black uppercase tracking-tight">Panitia (50%)</h3>
-                            <p className="text-primary-foreground/80 font-medium">Alokasi terbesar untuk eksekutor lapangan.</p>
+                            <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-4xl font-black uppercase tracking-tight">Panitia</h3>
+                                <Badge className="bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-3">50% POOL</Badge>
+                            </div>
+                            <p className="text-zinc-400 font-medium max-w-md">Alokasi terbesar diberikan kepada tim eksekutor lapangan berdasarkan akumulasi poin kinerja.</p>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <p className="text-sm font-bold uppercase opacity-80 mb-1">Total Budget</p>
-                        <div className="text-5xl font-black">Rp {budgetPanitia.toLocaleString('id-ID', {notation: "compact"})}</div>
-                        <div className="mt-2 inline-block bg-black/20 px-4 py-1 rounded-full text-xs font-mono font-bold">
-                            Rate: Rp {Math.round(nilaiPerPoinPanitia).toLocaleString()}/poin
+                    <div className="text-right bg-white/5 p-6 rounded-3xl border border-white/5 backdrop-blur-sm">
+                        <p className="text-xs font-bold uppercase text-zinc-500 mb-1">Total Budget Pool</p>
+                        <div className="text-5xl font-black text-white mb-2">Rp {budgetPanitia.toLocaleString('id-ID', {notation: "compact"})}</div>
+                        <div className="inline-flex items-center gap-2 text-green-400 font-mono font-bold bg-green-900/30 px-4 py-2 rounded-full text-sm">
+                            <Coins className="w-4 h-4" /> Rate: Rp {Math.round(nilaiPerPoinPanitia).toLocaleString()}/poin
                         </div>
                     </div>
                 </CardContent>
@@ -263,12 +280,12 @@ export default function HonorariumPage() {
 
       {/* TABS SECTION */}
       <Tabs defaultValue="panitia" className="w-full mt-8">
-        <div className="flex justify-center mb-8">
-            <TabsList className="bg-muted/50 p-1 rounded-full h-14 w-full max-w-md">
-                <TabsTrigger value="panitia" className="rounded-full h-12 w-1/2 font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg transition-all">
+        <div className="flex justify-center mb-10">
+            <TabsList className="bg-muted/50 p-1.5 rounded-full h-16 w-full max-w-lg shadow-inner">
+                <TabsTrigger value="panitia" className="rounded-full h-full w-1/2 font-bold text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg transition-all duration-300">
                     PANITIA INTI
                 </TabsTrigger>
-                <TabsTrigger value="kontributor" className="rounded-full h-12 w-1/2 font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg transition-all">
+                <TabsTrigger value="kontributor" className="rounded-full h-full w-1/2 font-bold text-base data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg transition-all duration-300">
                     KONTRIBUTOR
                 </TabsTrigger>
             </TabsList>
@@ -276,14 +293,14 @@ export default function HonorariumPage() {
         
         {/* TAB PANITIA */}
         <TabsContent value="panitia">
-            <Card className="rounded-[32px] border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
-                <CardHeader className="bg-muted/30 p-8">
+            <Card className="rounded-[40px] border-none shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
+                <CardHeader className="bg-muted/30 p-10 pb-6 border-b border-border/50">
                     <div className="flex justify-between items-center">
                         <div>
-                            <CardTitle className="text-2xl font-black uppercase">Evaluasi Kinerja</CardTitle>
-                            <CardDescription>Klik tombol edit untuk menilai performa panitia.</CardDescription>
+                            <CardTitle className="text-3xl font-black uppercase tracking-tight">Tabel Evaluasi</CardTitle>
+                            <CardDescription className="text-base mt-2">Daftar staf dan kalkulasi honorarium otomatis.</CardDescription>
                         </div>
-                        <Button variant="outline" className="rounded-full border-2 font-bold" onClick={() => (document.getElementById('guide-trigger') as HTMLElement)?.click()}>
+                        <Button variant="outline" className="rounded-full h-12 px-6 border-2 font-bold bg-white hover:bg-zinc-50" onClick={() => (document.getElementById('guide-trigger') as HTMLElement)?.click()}>
                             <BookOpen className="w-4 h-4 mr-2"/> Panduan P1-P16
                         </Button>
                     </div>
@@ -291,39 +308,39 @@ export default function HonorariumPage() {
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-muted/50 hover:bg-muted/50 border-none">
-                                <TableHead className="pl-8 h-14 font-bold text-foreground">NAMA STAFF</TableHead>
-                                <TableHead className="font-bold text-foreground">JABATAN</TableHead>
-                                <TableHead className="text-center font-bold text-foreground">TOTAL POIN</TableHead>
-                                <TableHead className="text-right pr-8 font-bold text-foreground">HONORARIUM</TableHead>
-                                <TableHead className="w-[80px]"></TableHead>
+                            <TableRow className="hover:bg-transparent border-b border-border/60">
+                                <TableHead className="pl-10 h-16 font-black text-xs uppercase tracking-widest text-muted-foreground">NAMA STAFF</TableHead>
+                                <TableHead className="font-black text-xs uppercase tracking-widest text-muted-foreground">JABATAN</TableHead>
+                                <TableHead className="text-center font-black text-xs uppercase tracking-widest text-muted-foreground">POIN (P1-16)</TableHead>
+                                <TableHead className="text-right pr-10 font-black text-xs uppercase tracking-widest text-muted-foreground">TAKE HOME PAY</TableHead>
+                                <TableHead className="w-[100px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {listPanitia.map((staff, idx) => (
-                                <TableRow key={staff.id} className="hover:bg-muted/30 border-b border-border/50 transition-colors">
-                                    <TableCell className="pl-8 py-4">
-                                        <div className="font-bold text-base">{staff.name}</div>
-                                        <div className="text-xs text-muted-foreground">ID: {staff.id}</div>
+                                <TableRow key={staff.id} className="hover:bg-primary/5 border-b border-border/40 transition-all group cursor-pointer" onClick={() => openEvaluation(staff)}>
+                                    <TableCell className="pl-10 py-5">
+                                        <div className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">{staff.name}</div>
+                                        <div className="text-xs font-mono text-muted-foreground opacity-60">ID: {staff.id}</div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant="secondary" className="rounded-lg px-3 py-1 font-bold text-xs uppercase tracking-wider">
+                                        <Badge variant="secondary" className="rounded-lg px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                                             {staff.jabatan}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <div className="inline-block bg-primary/10 text-primary font-black text-xl px-4 py-2 rounded-xl min-w-[60px]">
+                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 font-black text-xl text-zinc-700 dark:text-zinc-300 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                                             {staff.rawScore}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right pr-8">
-                                        <div className="font-mono font-bold text-lg text-green-600">
+                                    <TableCell className="text-right pr-10">
+                                        <div className="font-mono font-black text-xl text-green-600 dark:text-green-400 group-hover:scale-105 origin-right transition-transform">
                                             Rp {Math.round(staff.rawScore * nilaiPerPoinPanitia).toLocaleString('id-ID')}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="pr-4">
-                                        <Button size="icon" className="rounded-full w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-black shadow-sm" onClick={() => openEvaluation(staff)}>
-                                            <Edit3 className="w-4 h-4" />
+                                    <TableCell className="pr-6 text-center">
+                                        <Button size="icon" variant="ghost" className="rounded-full w-12 h-12 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all">
+                                            <Edit3 className="w-5 h-5" />
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -336,30 +353,34 @@ export default function HonorariumPage() {
 
         {/* TAB KONTRIBUTOR */}
         <TabsContent value="kontributor">
-             <Card className="rounded-[32px] border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+             <Card className="rounded-[40px] border-none shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-muted/50 hover:bg-muted/50 border-none">
-                                <TableHead className="pl-8 h-14 font-bold text-foreground">NAMA</TableHead>
-                                <TableHead className="font-bold text-foreground">PERAN</TableHead>
-                                <TableHead className="text-center font-bold text-foreground">TOTAL POIN</TableHead>
-                                <TableHead className="text-right pr-8 font-bold text-foreground">HONOR</TableHead>
+                            <TableRow className="hover:bg-transparent border-b border-border/60">
+                                <TableHead className="pl-10 h-16 font-black text-xs uppercase tracking-widest text-muted-foreground">NAMA</TableHead>
+                                <TableHead className="font-black text-xs uppercase tracking-widest text-muted-foreground">PERAN</TableHead>
+                                <TableHead className="text-center font-black text-xs uppercase tracking-widest text-muted-foreground">POIN (NP1-4)</TableHead>
+                                <TableHead className="text-right pr-10 font-black text-xs uppercase tracking-widest text-muted-foreground">HONOR</TableHead>
                                 <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {listNonPanitia.map((staff) => (
-                                <TableRow key={staff.id} className="hover:bg-muted/30 border-b border-border/50">
-                                    <TableCell className="pl-8 py-4 font-bold">{staff.name}</TableCell>
+                                <TableRow key={staff.id} className="hover:bg-orange-50/50 border-b border-border/40 transition-all group cursor-pointer" onClick={() => openEvaluation(staff)}>
+                                    <TableCell className="pl-10 py-5 font-bold text-lg">{staff.name}</TableCell>
                                     <TableCell><Badge variant="outline" className="rounded-lg">{staff.jabatan}</Badge></TableCell>
-                                    <TableCell className="text-center font-black text-xl text-orange-500">{staff.rawScore}</TableCell>
-                                    <TableCell className="text-right pr-8 font-mono font-bold text-lg">
+                                    <TableCell className="text-center">
+                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 font-black text-xl">
+                                            {staff.rawScore}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right pr-10 font-mono font-black text-xl text-orange-600">
                                         Rp {Math.round(staff.rawScore * nilaiPerPoinNP).toLocaleString('id-ID')}
                                     </TableCell>
-                                    <TableCell>
-                                        <Button size="icon" className="rounded-full w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-black" onClick={() => openEvaluation(staff)}>
-                                            <Edit3 className="w-4 h-4" />
+                                    <TableCell className="pr-6 text-center">
+                                        <Button size="icon" variant="ghost" className="rounded-full w-12 h-12 hover:bg-orange-100 text-orange-600">
+                                            <Edit3 className="w-5 h-5" />
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -382,6 +403,7 @@ export default function HonorariumPage() {
                 <DialogDescription className="text-lg">Parameter P1-P16 untuk objektivitas honorarium.</DialogDescription>
             </div>
             <ScrollArea className="flex-grow p-8">
+                {/* ... (Konten Panduan sama seperti sebelumnya) ... */}
                 <div className="grid grid-cols-1 gap-8">
                     <div className="space-y-4">
                         <Accordion type="single" collapsible className="w-full space-y-2">
@@ -411,19 +433,26 @@ export default function HonorariumPage() {
       </Dialog>
 
 
-      {/* MODAL PENILAIAN (MD3 STYLE) */}
+      {/* MODAL PENILAIAN (REVISI: CHUNKY UI) */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-background rounded-[32px] border-none p-0 shadow-2xl">
-            <div className="p-6 border-b bg-muted/30 shrink-0">
-                <DialogTitle className="text-2xl font-black uppercase flex items-center gap-2">
-                    <Edit3 className="w-6 h-6 text-primary" /> Evaluasi Kinerja
-                </DialogTitle>
-                <DialogDescription className="text-base font-medium text-foreground/60">
-                    Menilai: <span className="text-primary font-bold">{selectedStaff?.name}</span> ({selectedStaff?.jabatan})
-                </DialogDescription>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col bg-background rounded-[40px] border-none p-0 shadow-2xl">
+            <div className="p-8 border-b bg-muted/20 shrink-0">
+                <div className="flex items-center gap-4 mb-2">
+                    <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                        <Star className="w-6 h-6 fill-primary" />
+                    </div>
+                    <div>
+                        <DialogTitle className="text-3xl font-black uppercase tracking-tight text-foreground">
+                            Lembar Evaluasi
+                        </DialogTitle>
+                        <DialogDescription className="text-lg">
+                            Menilai: <span className="font-bold text-primary">{selectedStaff?.name}</span>
+                        </DialogDescription>
+                    </div>
+                </div>
             </div>
             
-            <ScrollArea className="flex-grow p-6 md:p-8">
+            <ScrollArea className="flex-grow p-8 bg-muted/5">
                 {selectedStaff?.type === 'PANITIA' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                       <ScoreInput id="p1" label="Kehadiran & Disiplin" />
@@ -444,22 +473,26 @@ export default function HonorariumPage() {
                       <ScoreInput id="p16" label="Peran Strategis" />
                     </div>
                 ) : (
-                    <div className="p-6 rounded-3xl bg-orange-50 dark:bg-orange-950/20 border-2 border-orange-200 dark:border-orange-900">
-                        <h4 className="font-black text-orange-700 dark:text-orange-400 mb-6 text-lg uppercase tracking-widest">PARAMETER KONTRIBUTOR</h4>
-                        <ScoreInput id="np1" label="Kontribusi Strategis" />
-                        <ScoreInput id="np2" label="Dampak Jaringan" />
-                        <ScoreInput id="np3" label="Komitmen Waktu" />
-                        <ScoreInput id="np4" label="Efektivitas Saran" />
+                    <div className="p-8 rounded-[32px] bg-orange-50/50 border-2 border-orange-100">
+                        <h4 className="font-black text-orange-700 mb-8 text-xl uppercase tracking-widest flex items-center gap-3">
+                            <BookOpen className="w-6 h-6"/> Parameter Kontributor
+                        </h4>
+                        <div className="grid gap-4">
+                            <ScoreInput id="np1" label="Kontribusi Strategis" />
+                            <ScoreInput id="np2" label="Dampak Jaringan" />
+                            <ScoreInput id="np3" label="Komitmen Waktu" />
+                            <ScoreInput id="np4" label="Efektivitas Saran" />
+                        </div>
                     </div>
                 )}
             </ScrollArea>
 
-            <div className="p-6 border-t bg-muted/30 shrink-0 flex justify-end gap-3">
-                <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-full px-6 font-bold h-12 hover:bg-zinc-200">
-                    BATAL
+            <div className="p-6 border-t bg-background shrink-0 flex justify-end gap-4">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-full px-8 font-bold h-14 text-lg hover:bg-zinc-100 text-zinc-500">
+                    Batal
                 </Button>
-                <Button onClick={handleSave} className="rounded-full px-8 font-bold h-12 bg-primary hover:bg-primary/90 text-lg shadow-lg shadow-primary/20">
-                    <Save className="w-5 h-5 mr-2" /> SIMPAN SKOR
+                <Button onClick={handleSave} className="rounded-full px-10 font-bold h-14 text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all active:scale-95">
+                    <Save className="w-6 h-6 mr-2" /> Simpan Penilaian
                 </Button>
             </div>
         </DialogContent>
@@ -467,4 +500,3 @@ export default function HonorariumPage() {
     </div>
   );
 }
-
