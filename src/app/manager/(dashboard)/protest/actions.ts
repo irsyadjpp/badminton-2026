@@ -1,8 +1,9 @@
+
 'use server';
 
 import { protestFormSchema, type ProtestFormValues } from '@/lib/schemas/protest';
 
-// Mock Database Protes
+// MOCK Database Protes
 const MOCK_PROTESTS: any[] = [];
 let protestCounter = 0;
 
@@ -41,7 +42,7 @@ export async function submitProtest(formData: ProtestFormValues) {
   };
 }
 
-export async function getProtestList() {
+export async function getProtests() {
     await new Promise(r => setTimeout(r, 500));
     return MOCK_PROTESTS;
 }
@@ -55,12 +56,12 @@ export async function confirmDeposit(protestId: string) {
     return { success: true, message: `Deposit untuk ${protestId} telah dikonfirmasi.` };
 }
 
-export async function processRefereeDecision(protestId: string, decision: 'ACCEPTED' | 'REJECTED', reason: string) {
-    const protest = MOCK_PROTESTS.find(p => p.id === protestId);
+export async function resolveProtest(id: string, decision: 'ACCEPTED' | 'REJECTED', verdict: string) {
+    const protest = MOCK_PROTESTS.find(p => p.id === id);
     if (protest) {
-        protest.status = decision === 'ACCEPTED' ? 'ACCEPTED_PAID_BACK' : 'REJECTED_FEE_BURNED';
-        protest.refereeDecision = { decision, reason };
+        protest.status = decision === 'ACCEPTED' ? 'ACCEPTED' : 'REJECTED';
+        protest.verdict = verdict;
     }
     await new Promise(r => setTimeout(r, 1000));
-    return { success: true, message: `Keputusan untuk ${protestId} telah disimpan.` };
+    return { success: true, message: `Keputusan untuk ${id} telah disimpan.` };
 }

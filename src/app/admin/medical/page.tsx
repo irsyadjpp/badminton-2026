@@ -29,11 +29,11 @@ export default function MedicalDashboard() {
   // Form State
   const [formData, setFormData] = useState({
     patientName: "",
-    role: "ATLET",
+    role: "ATLET" as MedicalLog['role'],
     court: "",
     injuryType: "",
     actionTaken: "",
-    status: "RECOVERED",
+    status: "RECOVERED" as MedicalLog['status'],
     medicInCharge: "Nanda" // Auto-filled dari session login
   });
 
@@ -87,7 +87,7 @@ export default function MedicalDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Kategori Pasien</Label>
-                            <Select onValueChange={(v) => setFormData({...formData, role: v})} defaultValue="ATLET">
+                            <Select onValueChange={(v: MedicalLog['role']) => setFormData({...formData, role: v})} defaultValue="ATLET">
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="ATLET">Atlet / Pemain</SelectItem>
@@ -119,7 +119,7 @@ export default function MedicalDashboard() {
 
                     <div className="space-y-2">
                         <Label>Status Akhir</Label>
-                        <Select onValueChange={(v:any) => setFormData({...formData, status: v})} defaultValue="RECOVERED">
+                        <Select onValueChange={(v: MedicalLog['status']) => setFormData({...formData, status: v})} defaultValue="RECOVERED">
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="RECOVERED">Dapat Melanjutkan (Recovered)</SelectItem>
