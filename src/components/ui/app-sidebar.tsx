@@ -1,19 +1,19 @@
-
 'use client';
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image" // Import Image dari Next.js
 import { usePathname } from "next/navigation"
 import { 
-  LayoutDashboard, User, Briefcase, CalendarRange, // UTAMA
-  Activity, Users, Network, CheckSquare, // DIRECTOR
-  PieChart, FileCheck, Stamp, Receipt, Store, Wallet, Coins, // KEUANGAN
-  Trophy, CalendarDays, FilePenLine, ShieldAlert, Mic2, LifeBuoy, ClipboardList, Gavel, MonitorPlay, ClipboardCheck, // PERTANDINGAN
-  QrCode, Stethoscope, Package, Box, Database, Utensils, Gift, Upload, Layers, // OPERASIONAL
-  Timer, // ACARA
-  BarChart3, Megaphone, Image, // BISNIS
-  Mail, FileSignature, Award, // SEKRETARIAT
-  Tags, UserCog, Handshake, Newspaper, Settings, ChevronRight, LogOut // MASTER
+  LayoutDashboard, User, Briefcase, CalendarRange, 
+  Activity, Users, Network, CheckSquare, 
+  PieChart, FileCheck, Stamp, Receipt, Store, Wallet, Coins, 
+  Trophy, CalendarDays, FileText, ShieldAlert, Mic2, LifeBuoy, ClipboardList, Gavel, MonitorPlay, ClipboardCheck, 
+  QrCode, Stethoscope, Package, Box, Database, Utensils, Gift, Upload, Layers, 
+  Timer, 
+  BarChart3, Megaphone, Image as ImageIcon, 
+  Mail, FileSignature, Award, 
+  Tags, UserCog, Handshake, Newspaper, Settings, ChevronRight, LogOut 
 } from "lucide-react"
 
 import {
@@ -49,9 +49,9 @@ const data = {
   // 2. DIRECTOR'S OFFICE
   navDirector: [
     { title: "Live Monitor", url: "/admin/director/monitor", icon: Activity },
-    { title: "Master Roster", url: "/admin/director/roster", icon: Users },
-    { title: "Struktur Panitia", url: "/admin/director/committee", icon: Network },
-    { title: "Surat Tugas TPF", url: "/admin/director/assignments", icon: CheckSquare },
+    { title: "Master Roster Panitia", url: "/admin/director/roster", icon: Users },
+    { title: "Struktur & Penugasan", url: "/admin/director/committee", icon: Network },
+    { title: "Penugasan Digital", url: "/admin/director/assignments", icon: CheckSquare },
   ],
   // 3. KEUANGAN
   navFinance: [
@@ -65,7 +65,7 @@ const data = {
   navMatch: [
     { title: "Penugasan Match", url: "/admin/match-control/assignment", icon: Trophy },
     { title: "Editor Jadwal", url: "/admin/match-control/schedule-editor", icon: CalendarDays },
-    { title: "Berita Acara Hasil", url: "/admin/matches/result-sheet", icon: FilePenLine },
+    { title: "Berita Acara Hasil", url: "/admin/matches/result-sheet", icon: FileText },
     { title: "Verifikasi TPF", url: "/admin/tpf", icon: ShieldAlert },
     { title: "MLO: Dashboard", url: "/admin/mlo/dashboard", icon: Mic2 },
     { title: "MLO: Helpdesk", url: "/admin/mlo/helpdesk", icon: LifeBuoy },
@@ -94,9 +94,9 @@ const data = {
   // 7. BISNIS & MEDIA
   navBiz: [
     { title: "Data Pengunjung", url: "/admin/visitors", icon: BarChart3 },
-    { title: "Laporan Sponsor", url: "/admin/analytics", icon: BarChart3 },
     { title: "Sponsorship CRM", url: "/admin/business/partners", icon: Handshake },
-    { title: "Manajemen Media", url: "/admin/media", icon: Image },
+    { title: "Laporan Sponsor", url: "/admin/analytics", icon: BarChart3 },
+    { title: "Manajemen Media", url: "/admin/media", icon: ImageIcon },
     { title: "Tulis Berita", url: "/admin/media/news", icon: Newspaper },
   ],
   // 8. SEKRETARIAT
@@ -123,9 +123,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* 1. HEADER (LOGO) */}
       <SidebarHeader className="h-20 flex justify-center border-b border-white/5 bg-zinc-950/50">
         <div className="flex items-center gap-3 px-2 group-data-[collapsible=icon]:justify-center">
-          <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black text-xl shadow-[0_0_15px_rgba(220,38,38,0.5)]">
-            B
+          
+          {/* LOGO IMAGE */}
+          <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-black/50 border border-white/10 shadow-[0_0_15px_rgba(220,38,38,0.3)] overflow-hidden p-1">
+            <Image 
+              src="/images/logo.png" 
+              alt="BCC 2026 Logo" 
+              width={40} 
+              height={40} 
+              className="w-full h-full object-contain"
+            />
           </div>
+
           <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-black font-headline text-lg tracking-tight text-white">BCC 2026</span>
             <span className="truncate text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Official Admin</span>
