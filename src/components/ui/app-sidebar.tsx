@@ -1,14 +1,19 @@
+
 'use client';
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  LayoutDashboard, Users, Trophy, Wallet, 
-  Settings, Megaphone, ShieldAlert, LogOut, 
-  Briefcase, ChevronRight, Store, Box,
-  ClipboardList, CircleUser, FileText,
-  Gavel, Activity, Video, BarChart2
+  LayoutDashboard, User, Briefcase, CalendarRange, // UTAMA
+  Activity, Users, Network, CheckSquare, // DIRECTOR
+  PieChart, FileCheck, Stamp, Receipt, Store, Wallet, Coins, // KEUANGAN
+  Trophy, CalendarDays, FilePenLine, ShieldAlert, Mic2, LifeBuoy, ClipboardList, Gavel, MonitorPlay, ClipboardCheck, // PERTANDINGAN
+  QrCode, Stethoscope, Package, Box, Database, Utensils, Gift, Upload, Layers, // OPERASIONAL
+  Timer, // ACARA
+  BarChart3, Megaphone, Image, // BISNIS
+  Mail, FileSignature, Award, // SEKRETARIAT
+  Tags, UserCog, Handshake, Newspaper, Settings, ChevronRight, LogOut // MASTER
 } from "lucide-react"
 
 import {
@@ -27,35 +32,85 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-// DATA MENU
+// --- DATA MENU LENGKAP ---
 const data = {
   user: {
     name: "Irsyad Jamal",
     role: "Project Director",
     avatar: "/avatars/irsyad.jpg",
   },
-  navDirector: [
+  // 1. UTAMA
+  navMain: [
     { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
-    { title: "Live Monitor", url: "/admin/director/monitor", icon: Activity },
+    { title: "Profil Saya", url: "/admin/profile", icon: User },
     { title: "Workspace", url: "/admin/workspace", icon: Briefcase },
-    { title: "Struktur Panitia", url: "/admin/director/committee", icon: Users },
-    { title: "Surat Tugas", url: "/admin/director/assignments", icon: FileText },
-    { title: "Laporan Sponsor", url: "/admin/analytics", icon: BarChart2 },
+    { title: "RKA & Planning", url: "/admin/planning", icon: CalendarRange },
   ],
-  navOperations: [
-    { title: "Penugasan Match", url: "/admin/match-control/assignment", icon: Trophy },
-    { title: "Verifikasi Atlet (TPF)", url: "/admin/tpf", icon: Gavel },
-    { title: "Gate Control", url: "/admin/gate", icon: ShieldAlert },
-    { title: "MLO & Lineup", url: "/admin/mlo/dashboard", icon: ClipboardList },
-    { title: "Media & Streaming", url: "/admin/media", icon: Video },
+  // 2. DIRECTOR'S OFFICE
+  navDirector: [
+    { title: "Live Monitor", url: "/admin/director/monitor", icon: Activity },
+    { title: "Master Roster", url: "/admin/director/roster", icon: Users },
+    { title: "Struktur Panitia", url: "/admin/director/committee", icon: Network },
+    { title: "Surat Tugas TPF", url: "/admin/director/assignments", icon: CheckSquare },
   ],
+  // 3. KEUANGAN
   navFinance: [
-    { title: "Keuangan & RAB", url: "/admin/finance", icon: Wallet },
-    { title: "Sponsorship CRM", url: "/admin/business/partners", icon: Megaphone },
+    { title: "Dashboard Keuangan", url: "/admin/finance", icon: PieChart },
+    { title: "Approval Reimbursement", url: "/admin/finance/reimbursement-approval", icon: Stamp },
+    { title: "Tagihan Sponsor", url: "/admin/finance/invoices", icon: Receipt },
+    { title: "Skema Honorarium", url: "/admin/finance/honorarium", icon: Wallet },
+    { title: "Kas Kecil (Petty Cash)", url: "/admin/finance/petty-cash", icon: Coins },
   ],
-  navSettings: [
-    { title: "Master Roster", url: "/admin/director/roster", icon: CircleUser },
-    { title: "Pengaturan Akun", url: "/admin/settings/users", icon: Settings },
+  // 4. PERTANDINGAN
+  navMatch: [
+    { title: "Penugasan Match", url: "/admin/match-control/assignment", icon: Trophy },
+    { title: "Editor Jadwal", url: "/admin/match-control/schedule-editor", icon: CalendarDays },
+    { title: "Berita Acara Hasil", url: "/admin/matches/result-sheet", icon: FilePenLine },
+    { title: "Verifikasi TPF", url: "/admin/tpf", icon: ShieldAlert },
+    { title: "MLO: Dashboard", url: "/admin/mlo/dashboard", icon: Mic2 },
+    { title: "MLO: Helpdesk", url: "/admin/mlo/helpdesk", icon: LifeBuoy },
+    { title: "MLO: Verifikasi Line-Up", url: "/admin/mlo/lineups", icon: ClipboardList },
+    { title: "Keputusan Protes", url: "/admin/protests", icon: Gavel },
+    { title: "Papan Skor Wasit", url: "/admin/referee/match/1", icon: MonitorPlay },
+    { title: "Checklist Venue", url: "/admin/referee/checklist", icon: ClipboardCheck },
+    { title: "Dispatch Service", url: "/admin/match-control/service", icon: Megaphone },
+  ],
+  // 5. OPERASIONAL
+  navOps: [
+    { title: "Gate Check-in", url: "/admin/gate", icon: QrCode },
+    { title: "Log Medis", url: "/admin/medical", icon: Stethoscope },
+    { title: "Kontrol Shuttlecock", url: "/admin/logistics/shuttlecock", icon: Package },
+    { title: "Inventaris Umum", url: "/admin/logistics/inventory", icon: Box },
+    { title: "Database Volunteer", url: "/admin/hr/volunteers", icon: Database },
+    { title: "Absensi & Konsumsi", url: "/admin/hr/meals", icon: Utensils },
+    { title: "Undian Doorprize", url: "/admin/raffle", icon: Gift },
+    { title: "Pengajuan Reimbursement", url: "/admin/reimbursement/submit", icon: Upload },
+    { title: "Logistik Habis Pakai", url: "/admin/logistics/consumables", icon: Layers },
+  ],
+  // 6. ACARA & PENUTUPAN
+  navEvent: [
+    { title: "Master Rundown", url: "/admin/event/rundown", icon: Timer },
+  ],
+  // 7. BISNIS & MEDIA
+  navBiz: [
+    { title: "Data Pengunjung", url: "/admin/visitors", icon: BarChart3 },
+    { title: "Laporan Sponsor", url: "/admin/analytics", icon: BarChart3 },
+    { title: "Sponsorship CRM", url: "/admin/business/partners", icon: Handshake },
+    { title: "Manajemen Media", url: "/admin/media", icon: Image },
+    { title: "Tulis Berita", url: "/admin/media/news", icon: Newspaper },
+  ],
+  // 8. SEKRETARIAT
+  navSecretariat: [
+    { title: "E-Office / Surat", url: "/admin/secretary/correspondence", icon: Mail },
+    { title: "Notulensi Rapat", url: "/admin/secretary/minutes", icon: FileSignature },
+    { title: "Generator Sertifikat", url: "/admin/secretary/cert-gen", icon: Award },
+  ],
+  // 9. MASTER DATA
+  navMaster: [
+    { title: "Verifikasi Pendaftaran Tim", url: "/admin/teams", icon: FileCheck },
+    { title: "Master Tim/Pemain", url: "/admin/master/teams", icon: Users },
+    { title: "Master Kategori", url: "/admin/master/categories", icon: Tags },
+    { title: "Manajemen User", url: "/admin/settings/users", icon: UserCog },
   ]
 }
 
@@ -78,13 +133,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
 
-      {/* 2. CONTENT (MENU ITEMS) */}
-      <SidebarContent className="px-3 py-4 space-y-6 bg-zinc-950/50 scrollbar-none">
+      {/* 2. CONTENT (MENU ITEMS) - Scrollable */}
+      <SidebarContent className="px-3 py-4 space-y-6 bg-zinc-950/50 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
         
-        <NavGroup label="DIRECTOR" items={data.navDirector} currentPath={pathname} />
-        <NavGroup label="OPERATIONS" items={data.navOperations} currentPath={pathname} />
-        <NavGroup label="FINANCE & BIZ" items={data.navFinance} currentPath={pathname} />
-        <NavGroup label="MASTER DATA" items={data.navSettings} currentPath={pathname} />
+        <NavGroup label="UTAMA" items={data.navMain} currentPath={pathname} />
+        <NavGroup label="DIRECTOR'S OFFICE" items={data.navDirector} currentPath={pathname} />
+        <NavGroup label="KEUANGAN" items={data.navFinance} currentPath={pathname} />
+        <NavGroup label="PERTANDINGAN" items={data.navMatch} currentPath={pathname} />
+        <NavGroup label="OPERASIONAL" items={data.navOps} currentPath={pathname} />
+        <NavGroup label="ACARA" items={data.navEvent} currentPath={pathname} />
+        <NavGroup label="BISNIS & MEDIA" items={data.navBiz} currentPath={pathname} />
+        <NavGroup label="SEKRETARIAT" items={data.navSecretariat} currentPath={pathname} />
+        <NavGroup label="MASTER DATA" items={data.navMaster} currentPath={pathname} />
 
       </SidebarContent>
 
@@ -125,16 +185,16 @@ function NavGroup({ label, items, currentPath }: { label: string, items: any[], 
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton asChild tooltip={item.title} 
                                 className={cn(
-                                    "h-12 rounded-full px-4 transition-all duration-300 font-medium text-sm group/btn relative overflow-hidden",
+                                    "h-10 rounded-full px-4 transition-all duration-300 font-medium text-sm group/btn relative overflow-hidden",
                                     isActive 
-                                        ? "bg-primary text-primary-foreground shadow-[0_4px_20px_-5px_rgba(220,38,38,0.5)] font-bold hover:bg-primary" 
+                                        ? "bg-primary text-primary-foreground shadow-[0_2px_10px_-5px_rgba(220,38,38,0.5)] font-bold hover:bg-primary" 
                                         : "text-zinc-400 hover:text-white hover:bg-white/5"
                                 )}
                             >
                                 <Link href={item.url} className="flex items-center w-full">
-                                    <item.icon className={cn("size-5 mr-3 transition-transform duration-300 group-hover/btn:scale-110", isActive && "animate-pulse-slow")} />
-                                    <span className="flex-1">{item.title}</span>
-                                    {isActive && <ChevronRight className="size-4 opacity-50 ml-auto" />}
+                                    <item.icon className={cn("size-4 mr-3 transition-transform duration-300 group-hover/btn:scale-110", isActive && "animate-pulse-slow")} />
+                                    <span className="flex-1 truncate">{item.title}</span>
+                                    {isActive && <ChevronRight className="size-3 opacity-50 ml-auto" />}
                                     
                                     {/* Active Indicator Glow */}
                                     {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] animate-shimmer" />}
