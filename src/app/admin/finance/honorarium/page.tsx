@@ -405,14 +405,21 @@ export default function HonorariumPage() {
 
             {/* FOOTER (FIXED/STICKY) */}
             <div className="p-6 border-t bg-background shrink-0 flex justify-end gap-4 z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-full px-8 font-bold h-14 text-lg hover:bg-zinc-100 text-zinc-500">
+                <Button 
+                    variant="ghost" 
+                    onClick={() => setIsModalOpen(false)} 
+                    className="rounded-full px-8 font-bold h-14 text-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                >
                     Batal
                 </Button>
-                <Button onClick={handleSave} className="rounded-full px-10 font-bold h-14 text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all active:scale-95">
+                
+                <Button 
+                    onClick={handleSave} 
+                    className="rounded-full px-10 font-bold h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/20 transition-all active:scale-95"
+                >
                     <Save className="w-6 h-6 mr-2" /> Simpan Penilaian
                 </Button>
             </div>
-
         </DialogContent>
       </Dialog>
     </div>
