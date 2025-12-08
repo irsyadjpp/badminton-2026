@@ -24,6 +24,7 @@ import { IntegrityPactModal } from '@/components/admin/integrity-pact-modal';
 import { EmergencyButton } from '@/components/admin/emergency-button';
 import { Toaster } from "@/components/ui/toaster";
 import { DialogTitle } from '@/components/ui/dialog';
+import { NotificationBell } from '@/components/admin/notification-bell';
 
 // --- DEFINISI MENU ---
 const getMenusByRole = (role: string) => {
