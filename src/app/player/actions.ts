@@ -1,7 +1,9 @@
+
 'use server';
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 // MOCK DB
 let PLAYERS_DB: any[] = [];
@@ -42,7 +44,39 @@ export async function joinTeam(playerEmail: string, teamCode: string) {
   return { success: true, teamName: team.name };
 }
 
+// --- TAMBAHAN BARU: LOGIN GOOGLE BYPASS ---
+export async function loginPlayerGoogle() {
+  // Simulasi delay jaringan sebentar
+  await new Promise(r => setTimeout(r, 800));
+
+  // Buat Sesi Dummy (Development Mode)
+  const devSession = {
+    id: `P-DEV-${Date.now()}`,
+    email: "atlet.dev@gmail.com",
+    name: "Atlet Development", // Nama default
+    role: "PLAYER",
+    teamId: null, // Anggap belum punya tim
+    isLoggedIn: true,
+    provider: "GOOGLE_DEV"
+  };
+
+  // Set Cookie
+  cookies().set('bcc_player_session', JSON.stringify(devSession), {
+    httpOnly: true,
+    path: '/',
+    maxAge: 60 * 60 * 24, // 1 Hari
+  });
+
+  return { success: true };
+}
+
+// Update Helper Session
 export async function getPlayerSession() {
-  // Ambil dari cookie
-  return { email: "player@example.com", name: "Kevin", teamId: null }; 
+  const session = cookies().get('bcc_player_session');
+  if (!session) return null;
+  try {
+      return JSON.parse(session.value);
+  } catch (e) {
+      return null;
+  }
 }
