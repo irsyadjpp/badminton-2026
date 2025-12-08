@@ -51,7 +51,6 @@ const data = {
     { title: "Live Monitor", url: "/admin/director/monitor", icon: Activity },
     { title: "Master Roster Panitia", url: "/admin/director/roster", icon: Users },
     { title: "Struktur & Penugasan", url: "/admin/director/committee", icon: Network },
-    { title: "Penugasan Digital", url: "/admin/director/assignments", icon: CheckSquare },
   ],
   // 3. KEUANGAN
   navFinance: [
@@ -103,8 +102,8 @@ const data = {
   // 8. SEKRETARIAT
   navSecretariat: [
     { title: "E-Office / Surat", url: "/admin/secretary/correspondence", icon: Mail },
+    { title: "E-Mandate (Surat Tugas)", url: "/admin/secretary/assignments", icon: FileCheck },
     { title: "Notulensi Rapat", url: "/admin/secretary/minutes", icon: FileSignature },
-    { title: "Penugasan (E-Mandate)", url: "/admin/secretary/assignments", icon: CheckSquare },
     { title: "Generator Sertifikat", url: "/admin/secretary/cert-gen", icon: Award },
   ],
   // 9. MASTER DATA

@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Download, FileSignature } from "lucide-react";
-import { ROLE_DEFINITIONS } from "@/lib/data/role-definitions";
-import Image from "next/image";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FileCheck, Plus, Search, ShieldCheck, Eye, Trash2 } from "lucide-react";
+import { ROLE_DEFINITIONS } from "@/lib/data/role-definitions"; 
+import { useToast } from "@/hooks/use-toast";
 
-// Mock Data Personil (Dari Master Roster)
+// Mock Data Personil (Unassigned)
 const STAFF_LIST = [
   { id: "S1", name: "Faiz Azilla Syaehon", role: "Koordinator TPF" },
   { id: "S2", name: "Anindiffa Pandu Prayuda", role: "Anggota TPF" },
@@ -20,7 +23,16 @@ const STAFF_LIST = [
   { id: "S5", name: "Sidiq", role: "Koordinator Keamanan" },
 ];
 
-export default function AssignmentLetterPage() {
+// Mock Data Mandat Aktif
+const ACTIVE_MANDATES = [
+  { id: "SPT-001", no: "001/SPT-UMPIRE/BCC/XII/2025", type: "MATCH_CONTROL", issuedTo: 12, date: "08 Des 2025", status: "ACTIVE" }
+];
+
+export default function DigitalMandatePage() {
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<'LIST' | 'CREATE'>('LIST');
+  
+  // State Form
   const [selectedCategory, setSelectedCategory] = useState<keyof typeof ROLE_DEFINITIONS>("TPF");
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [letterNumber, setLetterNumber] = useState("002/SPT-TPF/BCC/XII/2025");
@@ -35,186 +47,192 @@ export default function AssignmentLetterPage() {
     }
   };
 
+  const handlePublish = () => {
+    toast({ 
+        title: "Mandat Diterbitkan!", 
+        description: `${selectedStaff.length} personil kini memiliki wewenang digital resmi.`,
+        className: "bg-green-600 text-white"
+    });
+    setActiveTab('LIST');
+    // Logic simpan ke DB...
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-zinc-950 text-white overflow-hidden">
+    <div className="space-y-8 p-4 md:p-8 font-body pb-24">
       
-      {/* --- SIDEBAR KIRI: KONTROL --- */}
-      <div className="w-full lg:w-[400px] bg-zinc-900 border-r border-zinc-800 flex flex-col h-full z-20 shadow-2xl">
-        <div className="p-6 border-b border-zinc-800">
-          <h1 className="text-2xl font-black font-headline uppercase tracking-tight flex items-center gap-2">
-            <FileSignature className="w-6 h-6 text-primary"/> E-Mandate
-          </h1>
-          <p className="text-zinc-400 text-sm mt-1">Generator Surat Perintah Tugas (SPT).</p>
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div>
+            <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="rounded-full px-3 py-1 border-primary text-primary bg-primary/10 backdrop-blur-md">
+                    <ShieldCheck className="w-3 h-3 mr-2" /> SEKRETARIAT
+                </Badge>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black font-headline uppercase tracking-tighter text-white">
+                E-Mandate <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">System</span>
+            </h1>
+            <p className="text-zinc-400 mt-2 max-w-xl text-lg">
+                Penerbitan surat tugas & wewenang panitia secara digital (Paperless).
+            </p>
         </div>
 
-        <ScrollArea className="flex-1 p-6 space-y-6">
-          
-          {/* 1. Pilih Divisi (Template) */}
-          <div className="space-y-3">
-            <label className="text-xs font-bold uppercase text-zinc-500">1. Divisi / Bidang</label>
-            <Select value={selectedCategory} onValueChange={(v:any) => {
-                setSelectedCategory(v); 
-                setSelectedStaff([]); // Reset staff saat ganti divisi
-            }}>
-              <SelectTrigger className="h-12 bg-black border-zinc-700 rounded-xl"><SelectValue/></SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                <SelectItem value="TPF">Tim Pencari Fakta (TPF)</SelectItem>
-                <SelectItem value="MEDIS">Tim Medis</SelectItem>
-                <SelectItem value="KEAMANAN">Keamanan (Security)</SelectItem>
-                <SelectItem value="MATCH_CONTROL">Match Control & Referee</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* 2. Nomor Surat */}
-          <div className="space-y-3 mt-6">
-            <label className="text-xs font-bold uppercase text-zinc-500">2. Nomor Surat</label>
-            <Input 
-                value={letterNumber} 
-                onChange={(e) => setLetterNumber(e.target.value)}
-                className="h-12 bg-black border-zinc-700 rounded-xl font-mono text-sm" 
-            />
-          </div>
-
-          {/* 3. Pilih Personil */}
-          <div className="space-y-3 mt-6">
-            <div className="flex justify-between items-center">
-                <label className="text-xs font-bold uppercase text-zinc-500">3. Personil Ditugaskan</label>
-                <Badge variant="secondary">{selectedStaff.length} Terpilih</Badge>
-            </div>
-            
-            <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden">
-                {STAFF_LIST.map((staff) => (
-                    <div key={staff.id} className="flex items-center gap-3 p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 cursor-pointer" onClick={() => handleToggleStaff(staff.name)}>
-                        <Checkbox checked={selectedStaff.includes(staff.name)} className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:text-black" />
-                        <div className="flex-1">
-                            <div className="text-sm font-bold">{staff.name}</div>
-                            <div className="text-xs text-zinc-500">{staff.role}</div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-          </div>
-
-        </ScrollArea>
-
-        <div className="p-6 border-t border-zinc-800 bg-zinc-900">
-            <Button className="w-full h-14 rounded-full font-bold text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20">
-                <Download className="w-5 h-5 mr-2"/> TERBITKAN SURAT (PDF)
+        {activeTab === 'LIST' && (
+            <Button onClick={() => setActiveTab('CREATE')} className="h-14 rounded-full px-8 bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-xl">
+                <Plus className="mr-2 h-6 w-6" /> BUAT SURAT TUGAS
             </Button>
-        </div>
+        )}
       </div>
 
-      {/* --- AREA KANAN: LIVE PREVIEW SURAT --- */}
-      <div className="flex-1 bg-zinc-950 relative flex items-center justify-center p-8 overflow-hidden">
-        
-        <div className="absolute inset-0 bg-[url('/images/grid-pattern.png')] opacity-10 pointer-events-none"></div>
-
-        {/* PAPER CONTAINER (A4 Aspect Ratio) */}
-        <div className="bg-white text-black w-full max-w-[210mm] h-full max-h-[297mm] shadow-2xl rounded-sm overflow-y-auto p-[20mm] relative font-serif text-sm leading-relaxed scale-95 origin-center">
-            
-            {/* KOP SURAT */}
-            <div className="flex items-center gap-4 border-b-4 border-double border-black pb-4 mb-6">
-                <div className="w-20 h-20 relative flex items-center justify-center">
-                    <Image src="/images/logo.png" width={80} height={80} alt="Logo" className="object-contain" />
-                </div>
-                <div className="flex-1 text-center uppercase">
-                    <h2 className="text-lg font-bold tracking-wider">Panitia Pelaksana</h2>
-                    <h1 className="text-2xl font-black font-sans tracking-tight mb-1">Bandung Community Championship (BCC) 2026</h1>
-                    <p className="text-xs font-normal normal-case">Sekretariat: GOR BBR, Jl. Komp. Buah Batu Regency • Email: admin@bccbandung.com</p>
-                </div>
-            </div>
-
-            {/* JUDUL SURAT */}
-            <div className="text-center mb-6">
-                <h3 className="text-xl font-bold underline decoration-2 underline-offset-4">SURAT PERINTAH TUGAS</h3>
-                <p className="text-sm mt-1">Nomor: {letterNumber}</p>
-            </div>
-
-            {/* DASAR & MENIMBANG */}
-            <div className="space-y-4 mb-6">
-                <div className="flex gap-2">
-                    <span className="font-bold w-24 shrink-0">DASAR</span>
-                    <span>: Surat Keputusan Project Director Nomor 001/SK/BCC/XII/2025 tentang Pembentukan Panitia Pelaksana.</span>
-                </div>
-                <div className="flex gap-2">
-                    <span className="font-bold w-24 shrink-0">MENIMBANG</span>
-                    <span className="text-justify">: {template.menimbang}</span>
-                </div>
-            </div>
-
-            <div className="text-center font-bold my-4">MEMBERI TUGAS KEPADA:</div>
-
-            {/* TABEL PERSONIL */}
-            <div className="mb-6">
-                <table className="w-full border-collapse border border-black text-sm">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="border border-black p-2 text-center w-10">NO</th>
-                            <th className="border border-black p-2 text-left">NAMA</th>
-                            <th className="border border-black p-2 text-left">JABATAN</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {selectedStaff.length === 0 && (
-                            <tr><td colSpan={3} className="border border-black p-4 text-center italic text-gray-500">Pilih personil di panel kiri...</td></tr>
-                        )}
-                        {selectedStaff.map((name, idx) => (
-                            <tr key={idx}>
-                                <td className="border border-black p-2 text-center">{idx + 1}.</td>
-                                <td className="border border-black p-2 font-bold">{name}</td>
-                                <td className="border border-black p-2">Anggota {template.title}</td>
-                            </tr>
+      {/* --- MODE: LIST MANDAT AKTIF --- */}
+      {activeTab === 'LIST' && (
+        <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] overflow-hidden">
+            <CardHeader className="p-8 border-b border-zinc-800">
+                <CardTitle className="text-2xl font-black uppercase">Daftar Mandat Aktif</CardTitle>
+                <CardDescription>Surat tugas yang sedang berlaku untuk operasional.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+                <Table>
+                    <TableHeader>
+                        <TableRow className="bg-zinc-950/50 hover:bg-zinc-950/50 border-b border-zinc-800">
+                            <TableHead className="pl-8 h-16 text-white font-bold">NOMOR SURAT</TableHead>
+                            <TableHead className="text-white font-bold">DIVISI / BIDANG</TableHead>
+                            <TableHead className="text-center text-white font-bold">PERSONIL</TableHead>
+                            <TableHead className="text-white font-bold">TGL TERBIT</TableHead>
+                            <TableHead className="text-right pr-8 text-white font-bold">STATUS</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {ACTIVE_MANDATES.map((m) => (
+                            <TableRow key={m.id} className="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors">
+                                <TableCell className="pl-8 font-mono text-zinc-400">{m.no}</TableCell>
+                                <TableCell className="font-bold text-white">{m.type}</TableCell>
+                                <TableCell className="text-center">
+                                    <Badge variant="secondary" className="bg-zinc-800 text-white">{m.issuedTo} Orang</Badge>
+                                </TableCell>
+                                <TableCell className="text-zinc-400">{m.date}</TableCell>
+                                <TableCell className="text-right pr-8">
+                                    <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30 border-none uppercase">
+                                        {m.status}
+                                    </Badge>
+                                </TableCell>
+                            </TableRow>
                         ))}
-                    </tbody>
-                </table>
-            </div>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+      )}
 
-            <div className="font-bold mb-2">UNTUK:</div>
-
-            {/* BAGIAN 1: JOB DESC */}
-            <div className="mb-4">
-                <div className="font-bold underline mb-1">A. URAIAN TUGAS (JOB DESCRIPTION)</div>
-                <ol className="list-decimal ml-5 space-y-1 text-justify">
-                    {template.jobDescriptions.map((desc, i) => (
-                        <li key={`job-${i}`}>{desc}</li>
-                    ))}
-                </ol>
-            </div>
-
-            {/* BAGIAN 2: SOP */}
-            <div className="mb-6">
-                <div className="font-bold underline mb-1">B. PEDOMAN & SOP PELAKSANAAN</div>
-                <ul className="list-disc ml-5 space-y-1 text-justify">
-                    {template.sops.map((sop, i) => (
-                        <li key={`sop-${i}`}>{sop}</li>
-                    ))}
-                    <li>Melaksanakan perintah ini dengan penuh tanggung jawab dan melaporkan hasilnya kepada Project Director.</li>
-                </ul>
-            </div>
-
-            <div className="text-justify mb-8 text-xs italic">
-                *Surat tugas ini berlaku terhitung mulai tanggal ditetapkan hingga berakhirnya kegiatan BCC 2026.
-            </div>
-
-            {/* TANDA TANGAN */}
-            <div className="flex justify-end mt-8">
-                <div className="text-center w-64">
-                    <p>Ditetapkan di: Bandung</p>
-                    <p className="mb-4">Pada Tanggal: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                    <p className="font-bold uppercase text-xs mb-16">PROJECT DIRECTOR,</p>
-                    
-                    <div className="relative inline-block">
-                        <div className="absolute -top-12 -left-8 w-24 h-24 border-4 border-red-600/50 rounded-full flex items-center justify-center rotate-[-15deg] pointer-events-none">
-                            <span className="text-[10px] font-bold text-red-600/50 uppercase text-center leading-tight">Panitia<br/>BCC 2026<br/>OFFICIAL</span>
+      {/* --- MODE: BUAT MANDAT BARU --- */}
+      {activeTab === 'CREATE' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* KOLOM KIRI: FORM DATA */}
+            <div className="lg:col-span-2 space-y-6">
+                <Card className="bg-zinc-900 border-zinc-800 rounded-[32px]">
+                    <CardHeader className="p-8 pb-4">
+                        <CardTitle className="text-xl font-bold uppercase">1. Detail Penugasan</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Divisi (Template SOP)</label>
+                                <Select value={selectedCategory} onValueChange={(v:any) => { setSelectedCategory(v); setSelectedStaff([]); }}>
+                                    <SelectTrigger className="h-12 bg-black border-zinc-700 rounded-xl"><SelectValue/></SelectTrigger>
+                                    <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                        {Object.keys(ROLE_DEFINITIONS).map((key) => (
+                                            <SelectItem key={key} value={key}>{ROLE_DEFINITIONS[key as keyof typeof ROLE_DEFINITIONS].title}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Nomor Surat</label>
+                                <Input value={letterNumber} onChange={(e) => setLetterNumber(e.target.value)} className="h-12 bg-black border-zinc-700 rounded-xl font-mono" />
+                            </div>
                         </div>
-                        <p className="font-bold underline text-sm uppercase">Irsyad Jamal Pratama Putra</p>
-                    </div>
-                </div>
+
+                        {/* PREVIEW SOP (READ ONLY) */}
+                        <div className="bg-black/30 p-6 rounded-2xl border border-zinc-800/50 space-y-4">
+                            <div>
+                                <h4 className="text-xs font-bold text-primary uppercase mb-2">A. Uraian Tugas (Job Desc)</h4>
+                                <ul className="list-disc ml-4 text-sm text-zinc-400 space-y-1">
+                                    {template.jobDescriptions.map((jd, i) => <li key={i}>{jd}</li>)}
+                                </ul>
+                            </div>
+                            <div className="h-[1px] bg-zinc-800 w-full"></div>
+                            <div>
+                                <h4 className="text-xs font-bold text-primary uppercase mb-2">B. Protokol & SOP</h4>
+                                <ul className="list-disc ml-4 text-sm text-zinc-400 space-y-1">
+                                    {template.sops.map((sop, i) => <li key={i}>{sop}</li>)}
+                                </ul>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-zinc-900 border-zinc-800 rounded-[32px]">
+                    <CardHeader className="p-8 pb-4 flex flex-row justify-between items-center">
+                        <CardTitle className="text-xl font-bold uppercase">2. Pilih Personil</CardTitle>
+                        <Badge variant="outline" className="border-primary text-primary">{selectedStaff.length} Dipilih</Badge>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0">
+                        <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden max-h-[300px] overflow-y-auto">
+                            {STAFF_LIST.map((staff) => (
+                                <div key={staff.id} className="flex items-center gap-4 p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-900 cursor-pointer" onClick={() => handleToggleStaff(staff.name)}>
+                                    <Checkbox checked={selectedStaff.includes(staff.name)} className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:text-black w-6 h-6 rounded-md" />
+                                    <div className="flex-1">
+                                        <div className="font-bold text-white">{staff.name}</div>
+                                        <div className="text-xs text-zinc-500">{staff.role}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* KOLOM KANAN: SUMMARY & ACTION */}
+            <div className="space-y-6">
+                <Card className="bg-gradient-to-br from-zinc-800 to-zinc-900 border-zinc-700 rounded-[32px] shadow-2xl sticky top-24">
+                    <CardHeader className="p-8 pb-4">
+                        <CardTitle className="text-xl font-black uppercase text-white">Konfirmasi Penerbitan</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0 space-y-6">
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-zinc-400">Total Personil</span>
+                                <span className="font-bold text-white">{selectedStaff.length} Orang</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-zinc-400">Tipe Mandat</span>
+                                <span className="font-bold text-white">Digital (App)</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-zinc-400">Otorisasi</span>
+                                <span className="font-bold text-primary">Project Director</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl text-xs text-yellow-500 leading-relaxed">
+                            <strong>Perhatian:</strong> Dengan menerbitkan mandat ini, personil terkait akan mendapatkan akses digital ke fitur panitia sesuai divisinya.
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <Button onClick={handlePublish} disabled={selectedStaff.length === 0} className="h-14 rounded-full font-black text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                                TERBITKAN MANDAT <FileCheck className="ml-2 w-5 h-5"/>
+                            </Button>
+                            <Button variant="ghost" onClick={() => setActiveTab('LIST')} className="h-12 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800">
+                                Batal
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
         </div>
-      </div>
+      )}
+
     </div>
   );
 }
