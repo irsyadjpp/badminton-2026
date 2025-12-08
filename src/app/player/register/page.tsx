@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from "react-hook-form";
@@ -10,11 +11,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { registerPlayer } from "../actions";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 export default function PlayerRegisterPage() {
   const { toast } = useToast();
@@ -39,95 +41,115 @@ export default function PlayerRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
-      <Card className="w-full max-w-lg border-zinc-800 bg-zinc-900 text-white">
-        <CardHeader>
-          <CardTitle className="text-2xl font-black text-primary uppercase">BCC Player ID</CardTitle>
-          <CardDescription>Buat akun atlet resmi. Data NIK & Pribadi Anda aman terenkripsi.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              
-              {/* AKUN */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField control={form.control} name="email" render={({ field }) => (
-                  <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="password" render={({ field }) => (
-                  <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                )} />
-              </div>
+    <div className="min-h-screen w-full flex bg-zinc-950">
+      
+      {/* KIRI: FORM REGISTRASI (SCROLLABLE) */}
+      <div className="w-full lg:w-[50%] p-6 md:p-12 overflow-y-auto h-screen bg-zinc-900 no-scrollbar">
+         <div className="max-w-lg mx-auto space-y-8">
+            <div>
+               <h2 className="text-3xl font-black font-headline text-white mb-2">Join the League.</h2>
+               <p className="text-zinc-400">Buat akun atlet resmi BCC 2026.</p>
+            </div>
 
-              {/* IDENTITAS (SENSITIF) */}
-              <div className="p-4 border border-zinc-700 rounded-lg bg-zinc-950/50 space-y-4">
-                 <div className="flex items-center gap-2 text-xs text-green-500 font-bold uppercase mb-2">
-                    <ShieldCheck className="w-4 h-4"/> Data Terenkripsi (Hanya Admin)
-                 </div>
-                 <FormField control={form.control} name="nik" render={({ field }) => (
-                    <FormItem><FormLabel>NIK (KTP/KK)</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                 )} />
-                 <FormField control={form.control} name="fullName" render={({ field }) => (
-                    <FormItem><FormLabel>Nama Lengkap (Sesuai KTP)</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                 )} />
-                 <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="birthDate" render={({ field }) => (
-                        <FormItem><FormLabel>Tgl Lahir</FormLabel><FormControl><Input type="date" {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
+            <Form {...form}>
+               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  
+                  {/* Section Akun */}
+                  <div className="space-y-4">
+                     <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2">1. Akun Login</h3>
+                     <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="email" render={({field}) => (
+                           <FormItem><FormLabel className="text-zinc-300">Email</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-800"/></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="password" render={({field}) => (
+                           <FormItem><FormLabel className="text-zinc-300">Password</FormLabel><FormControl><Input type="password" {...field} className="bg-black border-zinc-800"/></FormControl><FormMessage /></FormItem>
+                        )} />
+                     </div>
+                  </div>
+
+                  {/* Section Data Pribadi */}
+                  <div className="space-y-4">
+                     <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2 flex items-center gap-2">
+                        2. Data Pribadi <ShieldCheck className="w-4 h-4 text-green-500"/>
+                     </h3>
+                     <FormField control={form.control} name="nik" render={({field}) => (
+                        <FormItem><FormLabel className="text-zinc-300">NIK (Sesuai KTP)</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-800"/></FormControl><FormMessage /></FormItem>
+                     )} />
+                     <FormField control={form.control} name="fullName" render={({field}) => (
+                        <FormItem><FormLabel className="text-zinc-300">Nama Lengkap</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-800"/></FormControl><FormMessage /></FormItem>
+                     )} />
+                     <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="birthDate" render={({ field }) => (
+                            <FormItem><FormLabel>Tgl Lahir</FormLabel><FormControl><Input type="date" {...field} className="bg-black border-zinc-800" /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="gender" render={({ field }) => (
+                          <FormItem><FormLabel>Jenis Kelamin</FormLabel>
+                            <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex pt-2">
+                                <FormItem className="flex items-center space-x-2">
+                                    <FormControl><RadioGroupItem value="Laki-laki" id="male" /></FormControl>
+                                    <Label htmlFor="male" className="font-normal text-white">Laki-laki</Label>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-2">
+                                    <FormControl><RadioGroupItem value="Perempuan" id="female" /></FormControl>
+                                    <Label htmlFor="female" className="font-normal text-white">Perempuan</Label>
+                                </FormItem>
+                            </RadioGroup>
+                          <FormMessage /></FormItem>
+                        )} />
+                     </div>
+                     <FormField control={form.control} name="phone" render={({ field }) => (
+                      <FormItem><FormLabel>No. WhatsApp</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-800" /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="gender" render={({ field }) => (
-                      <FormItem><FormLabel>Jenis Kelamin</FormLabel>
-                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex pt-2">
-                            <FormItem className="flex items-center space-x-2">
-                                <FormControl><RadioGroupItem value="Laki-laki" id="male" /></FormControl>
-                                <Label htmlFor="male" className="font-normal">Laki-laki</Label>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-2">
-                                <FormControl><RadioGroupItem value="Perempuan" id="female" /></FormControl>
-                                <Label htmlFor="female" className="font-normal">Perempuan</Label>
-                            </FormItem>
-                        </RadioGroup>
-                      <FormMessage /></FormItem>
+                    <FormField control={form.control} name="address" render={({ field }) => (
+                        <FormItem><FormLabel>Alamat Domisili</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-800" /></FormControl><FormMessage /></FormItem>
                     )} />
-                 </div>
-                  <FormField control={form.control} name="phone" render={({ field }) => (
-                      <FormItem><FormLabel>No. WhatsApp</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                  )} />
-                 <FormField control={form.control} name="address" render={({ field }) => (
-                    <FormItem><FormLabel>Alamat Domisili</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                 )} />
-              </div>
+                  </div>
+                  
+                  {/* Section Profil Publik */}
+                   <div className="space-y-4">
+                     <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2">3. Profil Publik</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                         <FormField control={form.control} name="nickname" render={({ field }) => (
+                            <FormItem><FormLabel>Nama Punggung/Panggilan</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-800" /></FormControl><FormMessage /></FormItem>
+                         )} />
+                         <FormField control={form.control} name="jerseySize" render={({ field }) => (
+                            <FormItem>
+                               <FormLabel>Ukuran Jersey</FormLabel>
+                               <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl><SelectTrigger className="bg-black border-zinc-800"><SelectValue placeholder="Pilih" /></SelectTrigger></FormControl>
+                                  <SelectContent>
+                                     {["S", "M", "L", "XL", "XXL"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                  </SelectContent>
+                               </Select>
+                               <FormMessage />
+                            </FormItem>
+                         )} />
+                      </div>
+                  </div>
 
-              {/* PROFIL PUBLIK */}
-              <div className="grid grid-cols-2 gap-4">
-                 <FormField control={form.control} name="nickname" render={({ field }) => (
-                    <FormItem><FormLabel>Nama Punggung/Panggilan</FormLabel><FormControl><Input {...field} className="bg-black border-zinc-700" /></FormControl><FormMessage /></FormItem>
-                 )} />
-                 <FormField control={form.control} name="jerseySize" render={({ field }) => (
-                    <FormItem>
-                       <FormLabel>Ukuran Jersey</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger className="bg-black border-zinc-700"><SelectValue placeholder="Pilih" /></SelectTrigger></FormControl>
-                          <SelectContent>
-                             {["S", "M", "L", "XL", "XXL"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                          </SelectContent>
-                       </Select>
-                       <FormMessage />
-                    </FormItem>
-                 )} />
-              </div>
+                  <Button type="submit" className="w-full h-14 text-lg font-bold bg-primary hover:bg-red-700 mt-8" disabled={isSubmitting}>
+                     {isSubmitting ? <Loader2 className="animate-spin"/> : "DAFTAR SEKARANG"}
+                  </Button>
 
-              <Button type="submit" className="w-full font-bold text-lg h-12 mt-4" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="animate-spin"/> : "BUAT AKUN PEMAIN"}
-              </Button>
-              
-              <div className="text-center text-sm text-zinc-500">
-                Sudah punya akun? <Link href="/player/login" className="text-primary hover:underline">Login di sini</Link>
-              </div>
+                  <div className="text-center text-sm text-zinc-500">
+                     Sudah punya akun? <Link href="/player/login" className="text-primary font-bold hover:underline">Login</Link>
+                  </div>
+               </form>
+            </Form>
+         </div>
+      </div>
 
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+      {/* KANAN: VISUAL (STICKY) */}
+      <div className="hidden lg:flex w-[50%] bg-black relative items-center justify-center h-screen sticky top-0">
+         <div className="absolute inset-0 bg-[url('/images/gor-koni.jpg')] bg-cover bg-center opacity-30 mix-blend-luminosity"></div>
+         <div className="relative z-10 text-center p-12">
+            <h1 className="text-6xl font-black text-white mb-4">BE THE<br/>NEXT CHAMPION</h1>
+            <p className="text-xl text-zinc-400 max-w-md mx-auto">
+               Bergabung dengan 1.500+ atlet lainnya di turnamen komunitas terbesar.
+            </p>
+         </div>
+      </div>
+
     </div>
   );
 }
