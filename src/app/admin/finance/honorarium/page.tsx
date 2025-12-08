@@ -10,14 +10,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Edit3, Coins, Save, BookOpen } from "lucide-react";
+import { Edit3, Coins, Save, BookOpen, TrendingUp, Users, Wallet, Trophy, Target } from "lucide-react";
 import { getStaffEvaluations, saveEvaluation, type StaffEvaluation } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
-
+// --- DATA PARAMETER (Sama seperti sebelumnya) ---
 const parameterDetails = [
     { id: "P1", title: "P1 — Kehadiran & Kedisiplinan", description: "Mengukur seberapa konsisten hadir, tepat waktu, dan mengikuti agenda kerja.", scores: [ "1: Sering absen / sering terlambat.", "2: Hadir tapi cukup sering terlambat.", "3: Kehadiran cukup baik, kadang terlambat.", "4: Jarang absen, disiplin.", "5: Sangat disiplin, selalu hadir dan tepat waktu." ] },
     { id: "P2", title: "P2 — Komitmen terhadap Tugas", description: "Mengukur keseriusan menjalankan tugas hingga selesai.", scores: [ "1: Banyak tugas tidak selesai.", "2: Sering terlambat menyelesaikan tugas.", "3: Tugas selesai meski kadang lewat deadline.", "4: Hampir semua tugas selesai tepat waktu.", "5: Sangat berkomitmen, selalu selesai sebelum deadline." ] },
@@ -47,7 +47,7 @@ const generalScores = [
 
 export default function HonorariumPage() {
   const { toast } = useToast();
-  const [totalProfit, setTotalProfit] = useState(100000000); // Default 100 Juta
+  const [totalProfit, setTotalProfit] = useState(100000000); 
   const [staffList, setStaffList] = useState<StaffEvaluation[]>([]);
   
   // Modal State
@@ -64,7 +64,7 @@ export default function HonorariumPage() {
     setStaffList(data);
   };
 
-  // --- LOGIKA PEMBAGIAN KEUNTUNGAN (REVISI) ---
+  // --- LOGIKA PEMBAGIAN KEUNTUNGAN ---
   const SHARE = {
     inisiatorActive: 0.30,
     inisiatorPassive: 0.10,
@@ -73,24 +73,15 @@ export default function HonorariumPage() {
     nonPanitia: 0.05,
   };
 
-  // 1. Pisahkan Data
   const listPanitia = staffList.filter(s => s.type === 'PANITIA');
   const listNonPanitia = staffList.filter(s => s.type === 'NON_PANITIA');
 
-  // 2. Hitung Total Poin
   const totalPoinPanitia = listPanitia.reduce((acc, curr) => acc + curr.rawScore, 0);
   const totalPoinNP = listNonPanitia.reduce((acc, curr) => acc + curr.rawScore, 0);
 
-  // 3. Hitung Nilai Per Poin
-  const nilaiPerPoinPanitia = totalPoinPanitia > 0 
-    ? (totalProfit * SHARE.panitia) / totalPoinPanitia 
-    : 0;
-    
-  const nilaiPerPoinNP = totalPoinNP > 0
-    ? (totalProfit * SHARE.nonPanitia) / totalPoinNP
-    : 0;
+  const nilaiPerPoinPanitia = totalPoinPanitia > 0 ? (totalProfit * SHARE.panitia) / totalPoinPanitia : 0;
+  const nilaiPerPoinNP = totalPoinNP > 0 ? (totalProfit * SHARE.nonPanitia) / totalPoinNP : 0;
 
-  // 4. Alokasi Global
   const honorInisiatorActive = totalProfit * SHARE.inisiatorActive;
   const honorInisiatorPassive = totalProfit * SHARE.inisiatorPassive;
   const honorKomunitas = totalProfit * SHARE.komunitas;
@@ -98,7 +89,6 @@ export default function HonorariumPage() {
   const budgetNP = totalProfit * SHARE.nonPanitia;
 
   // --- HANDLERS ---
-
   const openEvaluation = (staff: StaffEvaluation) => {
       setSelectedStaff(staff);
       setTempScores({ ...staff.scores });
@@ -106,9 +96,7 @@ export default function HonorariumPage() {
   };
 
   const handleScoreChange = (key: string, val: number) => {
-      if (tempScores) {
-          setTempScores({ ...tempScores, [key]: val });
-      }
+      if (tempScores) setTempScores({ ...tempScores, [key]: val });
   };
 
   const handleSave = async () => {
@@ -116,144 +104,225 @@ export default function HonorariumPage() {
           await saveEvaluation(selectedStaff.id, tempScores);
           toast({ title: "Penilaian Disimpan", description: `Skor ${selectedStaff.name} diperbarui.` });
           setIsModalOpen(false);
-          loadData(); // Refresh
+          loadData(); 
       }
   };
 
-  // --- HELPER COMPONENT ---
-  const ScoreInput = ({ id, label }: { id: string, label: string }) => (
-    <div className="mb-4">
-        <div className="flex justify-between mb-1">
-            <Label className="text-xs font-medium text-muted-foreground">{id.toUpperCase()} - {label}</Label>
-            <span className="text-xs font-bold">{tempScores?.[id] || 0} / 5</span>
-        </div>
-        <Slider 
-            value={[tempScores?.[id] || 0]} 
-            max={5} 
-            step={1} 
-            onValueChange={(v) => handleScoreChange(id, v[0])}
-            className="py-1"
-        />
-    </div>
-  );
+  // --- MD3 STYLED COMPONENTS ---
   
+  // Custom Slider (Thicker & Colored)
+  const ScoreInput = ({ id, label }: { id: string, label: string }) => {
+    const score = tempScores?.[id] || 0;
+    // Dynamic color based on score
+    const scoreColor = score <= 2 ? 'bg-red-500' : score === 3 ? 'bg-yellow-500' : 'bg-green-500';
+    
+    return (
+        <div className="mb-6 p-4 bg-secondary/20 rounded-2xl border border-transparent hover:border-primary/20 transition-all">
+            <div className="flex justify-between items-center mb-4">
+                <Label className="text-sm font-bold text-foreground/80">{id} • {label}</Label>
+                <div className={`w-8 h-8 rounded-full ${scoreColor} text-white flex items-center justify-center font-bold shadow-sm`}>
+                    {score}
+                </div>
+            </div>
+            <Slider 
+                value={[score]} 
+                max={5} 
+                step={1} 
+                onValueChange={(v) => handleScoreChange(id, v[0])}
+                className="py-2"
+            />
+            <div className="flex justify-between mt-2 text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                <span>Buruk</span>
+                <span>Sempurna</span>
+            </div>
+        </div>
+    );
+  };
+  
+  // MD3 Color System Simulation
   const colorVariants = {
     blue: {
-      card: "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-500/30",
-      title: "text-blue-700 dark:text-blue-400",
-      amount: "text-blue-900 dark:text-blue-300",
-      sub: "text-blue-700 dark:text-blue-500"
+      container: "bg-blue-100 text-blue-900 border-none",
+      iconBg: "bg-blue-200 text-blue-800",
+      label: "text-blue-700"
     },
     cyan: {
-      card: "bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-500/30",
-      title: "text-cyan-700 dark:text-cyan-400",
-      amount: "text-cyan-900 dark:text-cyan-300",
-      sub: "text-cyan-700 dark:text-cyan-500"
+      container: "bg-cyan-100 text-cyan-900 border-none",
+      iconBg: "bg-cyan-200 text-cyan-800",
+      label: "text-cyan-700"
     },
-    green: {
-      card: "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-500/30",
-      title: "text-green-700 dark:text-green-400",
-      amount: "text-green-900 dark:text-green-300",
-      sub: "text-green-700 dark:text-green-500"
+    primary: { // Replaces green
+      container: "bg-primary/10 text-primary-foreground border-none", // Pakai warna primary theme
+      iconBg: "bg-primary/20 text-primary",
+      label: "text-primary"
     },
     purple: {
-      card: "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-500/30",
-      title: "text-purple-700 dark:text-purple-400",
-      amount: "text-purple-900 dark:text-purple-300",
-      sub: "text-purple-700 dark:text-purple-500"
+      container: "bg-purple-100 text-purple-900 border-none",
+      iconBg: "bg-purple-200 text-purple-800",
+      label: "text-purple-700"
     },
     orange: {
-      card: "bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-500/30",
-      title: "text-orange-700 dark:text-orange-400",
-      amount: "text-orange-900 dark:text-orange-300",
-      sub: "text-orange-700 dark:text-orange-500"
+      container: "bg-orange-100 text-orange-900 border-none",
+      iconBg: "bg-orange-200 text-orange-800",
+      label: "text-orange-700"
     }
   };
 
-  const AllocationCard = ({ title, amount, color, description, subDescription }: { title:string, amount:number, color:keyof typeof colorVariants, description?:string, subDescription?:string}) => {
+  const AllocationCard = ({ title, amount, color, description, icon: Icon }: { title:string, amount:number, color:keyof typeof colorVariants, description?:string, icon: any}) => {
     const variants = colorVariants[color];
     return (
-      <Card className={variants.card}>
-          <CardHeader className="pb-2">
-              <CardTitle className={cn("text-xs uppercase font-bold", variants.title)}>{title}</CardTitle>
-              {description && <CardDescription className="text-xs">{description}</CardDescription>}
-          </CardHeader>
-          <CardContent>
-              <div className={cn("text-xl font-bold", variants.amount)}>Rp {amount.toLocaleString('id-ID')}</div>
-              {subDescription && <div className={cn("text-xs mt-1", variants.sub)}>{subDescription}</div>}
+      <Card className={cn("rounded-[24px] shadow-sm hover:shadow-md transition-all duration-300", variants.container)}>
+          <CardContent className="p-6 flex flex-col justify-between h-full">
+              <div className="flex justify-between items-start mb-4">
+                  <div className={cn("p-3 rounded-2xl", variants.iconBg)}>
+                      <Icon className="w-6 h-6" />
+                  </div>
+                  {/* Chip Style for percentage/desc */}
+                  {description && (
+                      <span className={cn("text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-white/50", variants.label)}>
+                          {description}
+                      </span>
+                  )}
+              </div>
+              <div>
+                  <p className={cn("text-xs font-bold uppercase tracking-widest opacity-80 mb-1", variants.label)}>{title}</p>
+                  <h3 className="text-2xl font-black tracking-tight">Rp {amount.toLocaleString('id-ID', {notation: "compact"})}</h3>
+              </div>
           </CardContent>
       </Card>
     );
   };
 
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-8 font-body">
+      
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-border/50">
         <div>
-            <h2 className="text-3xl font-bold font-headline text-primary">Skema Profit Sharing</h2>
-            <p className="text-muted-foreground">Distribusi keuntungan untuk Inisiator, Komunitas, Panitia & Kontributor.</p>
+            <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="rounded-full px-4 py-1 border-primary text-primary font-bold">FINANCE MODULE</Badge>
+                <span className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Updated: Today</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black font-headline text-foreground uppercase tracking-tighter">
+                Profit <span className="text-primary">Sharing.</span>
+            </h2>
+            <p className="text-lg text-muted-foreground mt-2 max-w-2xl">
+                Transparansi distribusi keuangan untuk seluruh stakeholder BCC 2026.
+            </p>
         </div>
         
-        {/* TOTAL PROFIT LABEL */}
-        <Card className="w-full md:w-auto bg-card">
-            <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full"><Coins className="w-6 h-6" /></div>
-                <div>
-                    <p className="text-xs text-muted-foreground uppercase font-bold">Total Keuntungan (Net)</p>
-                    <div className="font-bold text-xl text-foreground">
-                        Rp {totalProfit.toLocaleString('id-ID')}
-                    </div>
+        {/* TOTAL PROFIT PILL */}
+        <div className="bg-zinc-900 text-white pl-6 pr-8 py-4 rounded-full flex items-center gap-4 shadow-xl">
+            <div className="p-2 bg-green-500 rounded-full animate-pulse">
+                <TrendingUp className="w-5 h-5 text-black" />
+            </div>
+            <div>
+                <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Net Profit</p>
+                <div className="font-black text-2xl">
+                    Rp {totalProfit.toLocaleString('id-ID', { notation: "compact" })}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
       </div>
 
-      {/* RINGKASAN ALOKASI (PIE CHART SIMULATION) */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-         <AllocationCard title="Inisiator Aktif (30%)" description="(75% dari porsi 40%)" amount={honorInisiatorActive} color="blue"/>
-         <AllocationCard title="Inisiator Pasif (10%)" description="(25% dari porsi 40%)" amount={honorInisiatorPassive} color="cyan"/>
-         <AllocationCard title="Panitia (50%)" description="Dibagi sesuai poin kinerja" amount={budgetPanitia} color="green" subDescription={`Rate: Rp ${Math.round(nilaiPerPoinPanitia).toLocaleString()}/poin`}/>
-         <AllocationCard title="Komunitas (5%)" description="Kas Komunitas Dayminton" amount={honorKomunitas} color="purple"/>
-         <AllocationCard title="Kontributor (5%)" description="Apresiasi Eksternal" amount={budgetNP} color="orange" subDescription={`Rate: Rp ${Math.round(nilaiPerPoinNP).toLocaleString()}/poin`}/>
+      {/* BENTO GRID ALLOCATION */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+         <div className="lg:col-span-2">
+             <AllocationCard title="Inisiator Aktif" description="30% Share" amount={honorInisiatorActive} color="blue" icon={Target}/>
+         </div>
+         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <AllocationCard title="Pasif" description="10%" amount={honorInisiatorPassive} color="cyan" icon={Wallet}/>
+            <AllocationCard title="Komunitas" description="5% Kas" amount={honorKomunitas} color="purple" icon={Users}/>
+            <AllocationCard title="Kontributor" description="5%" amount={budgetNP} color="orange" icon={BookOpen}/>
+         </div>
+         {/* Main Card for Panitia */}
+         <div className="lg:col-span-5">
+            <Card className="rounded-[32px] bg-primary text-primary-foreground border-none shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-6">
+                        <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                            <Trophy className="w-10 h-10 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-3xl font-black uppercase tracking-tight">Panitia (50%)</h3>
+                            <p className="text-primary-foreground/80 font-medium">Alokasi terbesar untuk eksekutor lapangan.</p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm font-bold uppercase opacity-80 mb-1">Total Budget</p>
+                        <div className="text-5xl font-black">Rp {budgetPanitia.toLocaleString('id-ID', {notation: "compact"})}</div>
+                        <div className="mt-2 inline-block bg-black/20 px-4 py-1 rounded-full text-xs font-mono font-bold">
+                            Rate: Rp {Math.round(nilaiPerPoinPanitia).toLocaleString()}/poin
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+         </div>
       </div>
 
-      {/* TABS UNTUK PANITIA & KONTRIBUTOR */}
-      <Tabs defaultValue="panitia" className="w-full">
-        <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="panitia">Panitia (P1-P16)</TabsTrigger>
-            <TabsTrigger value="kontributor">Kontributor (NP1-NP4)</TabsTrigger>
-        </TabsList>
+      {/* TABS SECTION */}
+      <Tabs defaultValue="panitia" className="w-full mt-8">
+        <div className="flex justify-center mb-8">
+            <TabsList className="bg-muted/50 p-1 rounded-full h-14 w-full max-w-md">
+                <TabsTrigger value="panitia" className="rounded-full h-12 w-1/2 font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg transition-all">
+                    PANITIA INTI
+                </TabsTrigger>
+                <TabsTrigger value="kontributor" className="rounded-full h-12 w-1/2 font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-lg transition-all">
+                    KONTRIBUTOR
+                </TabsTrigger>
+            </TabsList>
+        </div>
         
         {/* TAB PANITIA */}
         <TabsContent value="panitia">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Distribusi Honor Panitia ({listPanitia.length} Orang)</CardTitle>
-                    <CardDescription>Total Poin Terkumpul: {totalPoinPanitia} | Estimasi Rate: Rp {Math.round(nilaiPerPoinPanitia).toLocaleString()}/poin</CardDescription>
+            <Card className="rounded-[32px] border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                <CardHeader className="bg-muted/30 p-8">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="text-2xl font-black uppercase">Evaluasi Kinerja</CardTitle>
+                            <CardDescription>Klik tombol edit untuk menilai performa panitia.</CardDescription>
+                        </div>
+                        <Button variant="outline" className="rounded-full border-2 font-bold" onClick={() => (document.getElementById('guide-trigger') as HTMLElement)?.click()}>
+                            <BookOpen className="w-4 h-4 mr-2"/> Panduan P1-P16
+                        </Button>
+                    </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Nama</TableHead>
-                                <TableHead>Jabatan</TableHead>
-                                <TableHead className="text-center">Total Poin (P1-P16)</TableHead>
-                                <TableHead className="text-right">Honor Diterima</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                            <TableRow className="bg-muted/50 hover:bg-muted/50 border-none">
+                                <TableHead className="pl-8 h-14 font-bold text-foreground">NAMA STAFF</TableHead>
+                                <TableHead className="font-bold text-foreground">JABATAN</TableHead>
+                                <TableHead className="text-center font-bold text-foreground">TOTAL POIN</TableHead>
+                                <TableHead className="text-right pr-8 font-bold text-foreground">HONORARIUM</TableHead>
+                                <TableHead className="w-[80px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {listPanitia.map((staff) => (
-                                <TableRow key={staff.id}>
-                                    <TableCell className="font-medium">{staff.name}</TableCell>
-                                    <TableCell><Badge variant="outline">{staff.jabatan}</Badge></TableCell>
-                                    <TableCell className="text-center font-mono text-lg font-bold">{staff.rawScore}</TableCell>
-                                    <TableCell className="text-right font-bold text-green-600 dark:text-green-400">
-                                        Rp {Math.round(staff.rawScore * nilaiPerPoinPanitia).toLocaleString('id-ID')}
+                            {listPanitia.map((staff, idx) => (
+                                <TableRow key={staff.id} className="hover:bg-muted/30 border-b border-border/50 transition-colors">
+                                    <TableCell className="pl-8 py-4">
+                                        <div className="font-bold text-base">{staff.name}</div>
+                                        <div className="text-xs text-muted-foreground">ID: {staff.id}</div>
                                     </TableCell>
                                     <TableCell>
-                                        <Button size="icon" variant="ghost" onClick={() => openEvaluation(staff)}>
+                                        <Badge variant="secondary" className="rounded-lg px-3 py-1 font-bold text-xs uppercase tracking-wider">
+                                            {staff.jabatan}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="inline-block bg-primary/10 text-primary font-black text-xl px-4 py-2 rounded-xl min-w-[60px]">
+                                            {staff.rawScore}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right pr-8">
+                                        <div className="font-mono font-bold text-lg text-green-600">
+                                            Rp {Math.round(staff.rawScore * nilaiPerPoinPanitia).toLocaleString('id-ID')}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="pr-4">
+                                        <Button size="icon" className="rounded-full w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-black shadow-sm" onClick={() => openEvaluation(staff)}>
                                             <Edit3 className="w-4 h-4" />
                                         </Button>
                                     </TableCell>
@@ -267,33 +336,29 @@ export default function HonorariumPage() {
 
         {/* TAB KONTRIBUTOR */}
         <TabsContent value="kontributor">
-             <Card>
-                <CardHeader>
-                    <CardTitle>Distribusi Honor Kontributor</CardTitle>
-                    <CardDescription>Total Poin Terkumpul: {totalPoinNP} | Estimasi Rate: Rp {Math.round(nilaiPerPoinNP).toLocaleString()}/poin</CardDescription>
-                </CardHeader>
-                <CardContent>
+             <Card className="rounded-[32px] border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Nama</TableHead>
-                                <TableHead>Peran</TableHead>
-                                <TableHead className="text-center">Total Poin (NP1-NP4)</TableHead>
-                                <TableHead className="text-right">Honor Diterima</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                            <TableRow className="bg-muted/50 hover:bg-muted/50 border-none">
+                                <TableHead className="pl-8 h-14 font-bold text-foreground">NAMA</TableHead>
+                                <TableHead className="font-bold text-foreground">PERAN</TableHead>
+                                <TableHead className="text-center font-bold text-foreground">TOTAL POIN</TableHead>
+                                <TableHead className="text-right pr-8 font-bold text-foreground">HONOR</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {listNonPanitia.map((staff) => (
-                                <TableRow key={staff.id}>
-                                    <TableCell className="font-medium">{staff.name}</TableCell>
-                                    <TableCell><Badge variant="secondary">{staff.jabatan}</Badge></TableCell>
-                                    <TableCell className="text-center font-mono text-lg font-bold">{staff.rawScore}</TableCell>
-                                    <TableCell className="text-right font-bold text-orange-600 dark:text-orange-400">
+                                <TableRow key={staff.id} className="hover:bg-muted/30 border-b border-border/50">
+                                    <TableCell className="pl-8 py-4 font-bold">{staff.name}</TableCell>
+                                    <TableCell><Badge variant="outline" className="rounded-lg">{staff.jabatan}</Badge></TableCell>
+                                    <TableCell className="text-center font-black text-xl text-orange-500">{staff.rawScore}</TableCell>
+                                    <TableCell className="text-right pr-8 font-mono font-bold text-lg">
                                         Rp {Math.round(staff.rawScore * nilaiPerPoinNP).toLocaleString('id-ID')}
                                     </TableCell>
                                     <TableCell>
-                                        <Button size="icon" variant="ghost" onClick={() => openEvaluation(staff)}>
+                                        <Button size="icon" className="rounded-full w-10 h-10 bg-zinc-100 hover:bg-zinc-200 text-black" onClick={() => openEvaluation(staff)}>
                                             <Edit3 className="w-4 h-4" />
                                         </Button>
                                     </TableCell>
@@ -306,79 +371,61 @@ export default function HonorariumPage() {
         </TabsContent>
       </Tabs>
       
-      {/* PANDUAN PENILAIAN */}
-      <div className="text-center">
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                    <BookOpen className="w-4 h-4 text-primary" /> Lihat Panduan Penilaian
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl h-[90vh] flex flex-col bg-background">
-                <DialogHeader className="flex-shrink-0">
-                    <DialogTitle>Panduan Parameter Penilaian (P1-P16)</DialogTitle>
-                    <DialogDescription>Gunakan pedoman ini untuk memberikan penilaian yang objektif.</DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="flex-grow">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pr-6">
-                        <div className="space-y-4">
-                            <h4 className="font-bold mb-2">Makna Umum Skor 1-5</h4>
-                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[80px]">Skor</TableHead>
-                                        <TableHead>Makna Ringkas</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {generalScores.map(s => (
-                                        <TableRow key={s.score}>
-                                            <TableCell className="font-bold text-lg">{s.score}</TableCell>
-                                            <TableCell>{s.meaning}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                        <div className="space-y-4">
-                             <h4 className="font-bold mb-2">Detail Parameter Penilaian</h4>
-                            <Accordion type="single" collapsible className="w-full">
-                                {parameterDetails.map((param) => (
-                                    <AccordionItem value={param.id} key={param.id}>
-                                        <AccordionTrigger className="font-bold text-left hover:no-underline">{param.title}</AccordionTrigger>
-                                        <AccordionContent className="space-y-2">
-                                            <p className="text-muted-foreground italic mb-3">{param.description}</p>
-                                            <ul className="space-y-1 text-sm">
-                                                {param.scores.map((score, i) => (
-                                                    <li key={i} className="flex gap-2">
-                                                        <span className="font-semibold">{score.charAt(0)}:</span> 
-                                                        <span className="text-muted-foreground">{score.slice(2)}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        </div>
+      {/* HIDDEN TRIGGER FOR GUIDE */}
+      <Dialog>
+        <DialogTrigger asChild>
+            <span id="guide-trigger" className="hidden"></span>
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col bg-background rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
+            <div className="p-8 border-b bg-muted/30">
+                <DialogTitle className="text-3xl font-black uppercase tracking-tighter text-primary">Panduan Penilaian</DialogTitle>
+                <DialogDescription className="text-lg">Parameter P1-P16 untuk objektivitas honorarium.</DialogDescription>
+            </div>
+            <ScrollArea className="flex-grow p-8">
+                <div className="grid grid-cols-1 gap-8">
+                    <div className="space-y-4">
+                        <Accordion type="single" collapsible className="w-full space-y-2">
+                            {parameterDetails.map((param) => (
+                                <AccordionItem value={param.id} key={param.id} className="border-none bg-secondary/10 rounded-2xl px-4">
+                                    <AccordionTrigger className="font-bold text-left hover:no-underline py-4 text-base">{param.title}</AccordionTrigger>
+                                    <AccordionContent className="pb-4">
+                                        <p className="text-muted-foreground italic mb-4 text-sm">{param.description}</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {param.scores.map((score, i) => (
+                                                <div key={i} className="flex gap-3 items-center bg-background p-2 rounded-lg border text-sm">
+                                                    <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                                                        {score.charAt(0)}
+                                                    </div>
+                                                    <span className="text-foreground/80">{score.slice(3)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
                     </div>
-                </ScrollArea>
-            </DialogContent>
-        </Dialog>
-      </div>
+                </div>
+            </ScrollArea>
+        </DialogContent>
+      </Dialog>
 
 
-      {/* MODAL PENILAIAN DINAMIS */}
+      {/* MODAL PENILAIAN (MD3 STYLE) */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background">
-            <DialogHeader>
-                <DialogTitle>Evaluasi: {selectedStaff?.name}</DialogTitle>
-                <DialogDescription>Isi nilai 1-5 untuk setiap parameter.</DialogDescription>
-            </DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-background rounded-[32px] border-none p-0 shadow-2xl">
+            <div className="p-6 border-b bg-muted/30 shrink-0">
+                <DialogTitle className="text-2xl font-black uppercase flex items-center gap-2">
+                    <Edit3 className="w-6 h-6 text-primary" /> Evaluasi Kinerja
+                </DialogTitle>
+                <DialogDescription className="text-base font-medium text-foreground/60">
+                    Menilai: <span className="text-primary font-bold">{selectedStaff?.name}</span> ({selectedStaff?.jabatan})
+                </DialogDescription>
+            </div>
             
-            <div className="py-4">
+            <ScrollArea className="flex-grow p-6 md:p-8">
                 {selectedStaff?.type === 'PANITIA' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                       <ScoreInput id="p1" label="Kehadiran & Disiplin" />
                       <ScoreInput id="p2" label="Komitmen Tugas" />
                       <ScoreInput id="p3" label="Kualitas Output" />
@@ -397,23 +444,27 @@ export default function HonorariumPage() {
                       <ScoreInput id="p16" label="Peran Strategis" />
                     </div>
                 ) : (
-                    <div className="border p-4 rounded-lg bg-orange-50 dark:bg-card">
-                        {/* Parameter Non-Panitia NP1-NP4 */}
-                        <h4 className="font-bold text-orange-700 dark:text-orange-400 mb-4">PARAMETER KONTRIBUTOR (NP)</h4>
+                    <div className="p-6 rounded-3xl bg-orange-50 dark:bg-orange-950/20 border-2 border-orange-200 dark:border-orange-900">
+                        <h4 className="font-black text-orange-700 dark:text-orange-400 mb-6 text-lg uppercase tracking-widest">PARAMETER KONTRIBUTOR</h4>
                         <ScoreInput id="np1" label="Kontribusi Strategis" />
                         <ScoreInput id="np2" label="Dampak Jaringan" />
                         <ScoreInput id="np3" label="Komitmen Waktu" />
                         <ScoreInput id="np4" label="Efektivitas Saran" />
                     </div>
                 )}
-            </div>
+            </ScrollArea>
 
-            <DialogFooter>
-                <Button variant="outline" onClick={() => setIsModalOpen(false)}>Batal</Button>
-                <Button onClick={handleSave} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Simpan Penilaian</Button>
-            </DialogFooter>
+            <div className="p-6 border-t bg-muted/30 shrink-0 flex justify-end gap-3">
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-full px-6 font-bold h-12 hover:bg-zinc-200">
+                    BATAL
+                </Button>
+                <Button onClick={handleSave} className="rounded-full px-8 font-bold h-12 bg-primary hover:bg-primary/90 text-lg shadow-lg shadow-primary/20">
+                    <Save className="w-5 h-5 mr-2" /> SIMPAN SKOR
+                </Button>
+            </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
+
