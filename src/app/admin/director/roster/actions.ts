@@ -9,7 +9,7 @@ let COMMITTEE_ROSTER: CommitteeMember[] = [
   { id: "aris_i", name: "Aris Indro", phone: "081-...", email: "aris@example.com", expertise: "Penasihat Senior", role: "ADVISOR" },
   
   // Panitia Inti
-  { id: "irsyad_j", name: "Irsyad Jamal Pratama Putra", phone: "081-...", email: "irsyad@example.com", expertise: "IT & Project Management", photoUrl: "https://placehold.co/100x100?text=IJ", role: "DIRECTOR" },
+  { id: "irsyad_j", name: "Irsyad Jamal Pratama Putra", phone: "081-...", email: "irsyad@example.com", expertise: "IT & Project Management", photoUrl: "https://github.com/shadcn.png", role: "DIRECTOR" },
   { id: "rizki_k", name: "Rizki Karami", phone: "081-...", email: "rizki.k@example.com", expertise: "Sekretariat & Acara", role: "STAFF" },
   { id: "annisa_s", name: "Annisa Syafira", phone: "081-...", email: "annisa@example.com", expertise: "Administrasi", role: "STAFF" },
   { id: "selvi_y", name: "Selvi Yulia", phone: "081-...", email: "selvi@example.com", expertise: "Keuangan", role: "STAFF" },

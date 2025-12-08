@@ -1,314 +1,293 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { MoreHorizontal, PlusCircle, Trash2, Edit, GraduationCap, Briefcase, UserRound, Phone, UserPlus, Check, ChevronsUpDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { getCommitteeRoster, addCommitteeMember, updateCommitteeMember, deleteCommitteeMember } from './actions';
-import { type CommitteeMember, committeeMemberSchema } from '@/lib/schemas/committee';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { VOLUNTEER_DIVISIONS } from '@/lib/schemas/volunteer';
-import { Textarea } from '@/components/ui/textarea';
-import Link from 'next/link';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Command, CommandInput, CommandList, CommandItem, CommandEmpty, CommandGroup } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { assignUserRole } from "./actions"; // Assuming this action exists
-import { Label } from '@/components/ui/label';
+import { 
+  Check, ChevronsUpDown, UserPlus, Search, 
+  Filter, Shield, Users, Briefcase, Zap, MoreVertical 
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// Data dummy user yang sudah daftar tapi UNASSIGNED (Didapat dari Server Action)
-const unassignedUsers = [
-  { id: "1", name: "Budi Calon Panitia", email: "new.staff@gmail.com" },
-  { id: "2", name: "Siti Volunteer", email: "siti@gmail.com" },
+// --- MOCK DATA ---
+const DIVISIONS = ["ALL", "MATCH CONTROL", "MEDIA", "LOGISTICS", "SECURITY", "MEDICAL", "FINANCE"];
+
+const MOCK_ROSTER = [
+  { id: "1", name: "Kevin Sanjaya", role: "HEAD OF DIVISION", division: "MATCH CONTROL", email: "kevin@bcc.com", status: "ACTIVE", avatar: "https://github.com/shadcn.png" },
+  { id: "2", name: "Marcus Gideon", role: "STAFF", division: "MATCH CONTROL", email: "marcus@bcc.com", status: "ACTIVE", avatar: "" },
+  { id: "3", name: "Fajar Alfian", role: "HEAD OF DIVISION", division: "MEDIA", email: "fajar@bcc.com", status: "ON LEAVE", avatar: "" },
+  { id: "4", name: "Rian Ardianto", role: "STAFF", division: "LOGISTICS", email: "rian@bcc.com", status: "ACTIVE", avatar: "" },
+  { id: "5", name: "Hendra Setiawan", role: "DIRECTOR", division: "INTI", email: "hendra@bcc.com", status: "ACTIVE", avatar: "" },
+];
+
+const UNASSIGNED_USERS = [
+  { id: "U1", name: "Budi Santoso", email: "budi.new@gmail.com" },
+  { id: "U2", name: "Siti Aminah", email: "siti.vol@gmail.com" },
 ];
 
 export default function RosterPage() {
-  const { toast } = useToast();
-  const [roster, setRoster] = useState<CommitteeMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<CommitteeMember | null>(null);
-
+  const [filterDiv, setFilterDiv] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // State untuk Modal Assign
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
-  const form = useForm<CommitteeMember>({
-    resolver: zodResolver(committeeMemberSchema),
-    defaultValues: {
-        name: "", phone: "", email: "", expertise: "", photoUrl: "",
-        education: undefined, status: undefined, division1: undefined, division2: undefined, reason: ""
-    },
+  // Filter Logic
+  const filteredRoster = MOCK_ROSTER.filter(staff => {
+    const matchesDiv = filterDiv === "ALL" || staff.division === filterDiv;
+    const matchesSearch = staff.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesDiv && matchesSearch;
   });
 
-  const loadRoster = async () => {
-    setIsLoading(true);
-    const data = await getCommitteeRoster();
-    setRoster(data);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    loadRoster();
-  }, []);
-
-  const handleOpenModal = (member: CommitteeMember | null = null) => {
-    setEditingMember(member);
-    form.reset(member || { 
-        name: "", phone: "", email: "", expertise: "", photoUrl: "",
-        education: undefined, status: undefined, division1: undefined, division2: undefined, reason: ""
-    });
-    setIsModalOpen(true);
-  };
-
-  const onSubmit = async (data: CommitteeMember) => {
-    const action = editingMember ? updateCommitteeMember(editingMember.id!, data) : addCommitteeMember(data);
-    const result = await action;
-    
-    toast({
-        title: result.success ? "Sukses!" : "Gagal",
-        description: result.message,
-        variant: result.success ? "default" : "destructive",
-        className: result.success ? "bg-green-600 text-white" : ""
-    });
-
-    if (result.success) {
-        setIsModalOpen(false);
-        loadRoster();
-    }
-  };
-  
-  const handleDelete = async (id: string) => {
-      if(confirm("Yakin ingin menghapus anggota ini dari roster? Tindakan ini tidak bisa dibatalkan.")){
-          const result = await deleteCommitteeMember(id);
-          toast({ title: result.success ? "Terhapus" : "Gagal", description: result.message });
-          if(result.success) loadRoster();
-      }
-  }
-
-  const getDivisionFromExpertise = (expertise: string | undefined) => {
-    if (!expertise) return 'N/A';
-    const mapping: Record<string, string> = { 'Penasihat Senior': 'Pimpinan', 'IT & Project Management': 'IT & Digital', 'Sekretariat & Acara': 'Sekretariat', 'Administrasi': 'Sekretariat', 'Keuangan': 'Keuangan', 'Match Control': 'Pertandingan', 'MLO': 'Pertandingan', 'TPF': 'Pertandingan', 'Business': 'Komersial', 'Sponsorship': 'Komersial', 'Tenant Relations': 'Komersial', 'Media & Sosmed': 'Media', 'Content Creator': 'Media', 'Dokumentasi': 'Media', 'Operasional': 'Operasional', 'Keamanan': 'Operasional', 'Medis': 'Operasional', 'Registrasi': 'Operasional', 'Logistik': 'Operasional', 'Legal': 'Legal' };
-    return mapping[expertise] || 'Lainnya';
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-            <h2 className="text-3xl font-bold font-headline">Master Roster Panitia</h2>
-            <p className="text-muted-foreground">Database pusat untuk semua anggota tim inti dan pelaksana.</p>
+    <div className="min-h-screen bg-zinc-950 text-white font-body relative pb-24">
+      
+      {/* BACKGROUND ACCENTS */}
+      <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-zinc-900 to-zinc-950 -z-10"></div>
+      <div className="fixed top-[-100px] right-[-100px] w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] -z-10"></div>
+
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+        
+        {/* --- HEADER SECTION --- */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+                <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="rounded-full px-3 py-1 border-zinc-700 text-zinc-400 bg-zinc-900/50 backdrop-blur-md">
+                        <Shield className="w-3 h-3 mr-2 text-primary" /> COMMITTEE DATABASE
+                    </Badge>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black font-headline uppercase tracking-tighter text-white">
+                    Master Roster
+                </h1>
+                <p className="text-zinc-400 mt-2 max-w-xl text-lg">
+                    Kelola struktur organisasi, delegasi tugas, dan manajemen personil turnamen.
+                </p>
+            </div>
+
+            {/* STATS PILLS (MD3 Chips) */}
+            <div className="flex gap-3 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
+                <div className="flex items-center gap-3 bg-zinc-900 px-5 py-3 rounded-[20px] border border-zinc-800 min-w-fit">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
+                        <Users className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-bold text-zinc-500 uppercase">Total Staff</div>
+                        <div className="text-xl font-black text-white">{MOCK_ROSTER.length}</div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3 bg-zinc-900 px-5 py-3 rounded-[20px] border border-zinc-800 min-w-fit">
+                    <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500">
+                        <Briefcase className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <div className="text-xs font-bold text-zinc-500 uppercase">Divisi</div>
+                        <div className="text-xl font-black text-white">{DIVISIONS.length - 1}</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button><UserPlus className="mr-2 h-4 w-4"/> Assign Panitia Baru</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Pilih Personil</DialogTitle>
-            </DialogHeader>
-            <form action={async (formData) => { await assignUserRole(formData); }} className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <Label className="text-sm font-medium">Cari Akun Google Terdaftar</Label>
-                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between">
-                      {selectedUser ? unassignedUsers.find((u) => u.id === selectedUser)?.name : "Pilih user..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Cari nama atau email..." />
-                      <CommandList>
-                        <CommandEmpty>User tidak ditemukan. Minta mereka login dulu.</CommandEmpty>
-                        <CommandGroup>
-                          {unassignedUsers.map((user) => (
-                            <CommandItem
-                              key={user.id}
-                              value={user.name}
-                              onSelect={() => { setSelectedUser(user.id); setOpenCombobox(false); }}
-                            >
-                              <Check className={`mr-2 h-4 w-4 ${selectedUser === user.id ? "opacity-100" : "opacity-0"}`} />
-                              <div className="flex flex-col">
-                                <span>{user.name}</span>
-                                <span className="text-xs text-gray-500">{user.email}</span>
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <input type="hidden" name="userId" value={selectedUser || ""} />
-              </div>
-              <Button type="submit" disabled={!selectedUser}>Simpan Assignment</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+
+        {/* --- TOOLBAR (SEARCH & FILTER) --- */}
+        <div className="sticky top-4 z-30 bg-zinc-950/80 backdrop-blur-xl p-2 rounded-[24px] border border-zinc-800 flex flex-col md:flex-row gap-2 shadow-2xl">
+            {/* Search Bar */}
+            <div className="relative flex-grow">
+                <Search className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500" />
+                <Input 
+                    placeholder="Cari nama personil..." 
+                    className="h-12 bg-zinc-900 border-none rounded-full pl-12 text-white focus-visible:ring-1 focus-visible:ring-primary placeholder:text-zinc-600"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+            
+            {/* Division Filter (Scrollable Chips) */}
+            <div className="flex items-center gap-2 overflow-x-auto px-2 py-1 md:py-0 no-scrollbar max-w-full md:max-w-2xl">
+                {DIVISIONS.map((div) => (
+                    <button
+                        key={div}
+                        onClick={() => setFilterDiv(div)}
+                        className={cn(
+                            "px-5 h-10 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300",
+                            filterDiv === div 
+                                ? "bg-white text-black shadow-lg scale-105" 
+                                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                        )}
+                    >
+                        {div}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {/* --- ROSTER GRID (CARDS) --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* ADD NEW CARD (Dashed) */}
+            <button 
+                onClick={() => setIsAssignOpen(true)}
+                className="group h-[200px] border-2 border-dashed border-zinc-800 rounded-[32px] flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
+            >
+                <div className="w-16 h-16 rounded-full bg-zinc-900 group-hover:bg-primary group-hover:text-white flex items-center justify-center text-zinc-500 transition-colors">
+                    <UserPlus className="w-8 h-8" />
+                </div>
+                <div className="text-zinc-500 font-bold group-hover:text-primary">ASSIGN NEW STAFF</div>
+            </button>
+
+            {/* STAFF CARDS */}
+            {filteredRoster.map((staff) => (
+                <div key={staff.id} className="group relative bg-zinc-900 rounded-[32px] p-6 border border-zinc-800 hover:border-zinc-700 transition-all hover:-translate-y-1 hover:shadow-2xl">
+                    
+                    {/* Role Badge */}
+                    <div className="absolute top-6 right-6">
+                        <Badge className={cn(
+                            "rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border-none",
+                            staff.role.includes("HEAD") || staff.role.includes("DIRECTOR") 
+                                ? "bg-primary text-white" 
+                                : "bg-zinc-800 text-zinc-400"
+                        )}>
+                            {staff.role}
+                        </Badge>
+                    </div>
+
+                    <div className="flex items-start gap-5">
+                        <Avatar className="w-16 h-16 rounded-[20px] border-2 border-zinc-800 group-hover:border-white/20 transition-colors">
+                            <AvatarImage src={staff.avatar} />
+                            <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold rounded-[20px]">
+                                {staff.name.charAt(0)}
+                            </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="space-y-1">
+                            <h3 className="text-lg font-bold text-white leading-tight group-hover:text-primary transition-colors">
+                                {staff.name}
+                            </h3>
+                            <div className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+                                <Briefcase className="w-3 h-3" /> {staff.division}
+                            </div>
+                            <div className="text-xs text-zinc-600 font-mono pt-1">
+                                {staff.email}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <div className={cn("w-2 h-2 rounded-full", staff.status === 'ACTIVE' ? "bg-green-500" : "bg-yellow-500")}></div>
+                            <span className="text-xs font-bold text-zinc-500">{staff.status}</span>
+                        </div>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-zinc-800">
+                            <MoreVertical className="w-4 h-4 text-zinc-400" />
+                        </Button>
+                    </div>
+                </div>
+            ))}
+        </div>
+
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Nama Personil</TableHead>
-                        <TableHead>Jabatan</TableHead>
-                        <TableHead>Divisi</TableHead>
-                        <TableHead>No. HP</TableHead>
-                        <TableHead className="text-right">Aksi</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {isLoading ? (
-                        Array.from({length: 5}).map((_, i) => (
-                            <TableRow key={i}><TableCell colSpan={5}><div className="h-10 bg-secondary/50 animate-pulse rounded-md"/></TableCell></TableRow>
-                        ))
-                    ) : roster.length === 0 ? (
-                        <TableRow><TableCell colSpan={5} className="text-center h-24">Belum ada anggota di roster.</TableCell></TableRow>
-                    ) : (
-                        roster.map((member) => (
-                        <TableRow key={member.id}>
-                            <TableCell className="font-medium">
-                                <div className="flex items-center gap-3">
-                                    <Avatar>
-                                        <AvatarImage src={member.photoUrl} alt={member.name} />
-                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div><p>{member.name}</p></div>
-                                </div>
-                            </TableCell>
-                            <TableCell><p className="text-xs font-semibold">{member.expertise}</p></TableCell>
-                            <TableCell><Badge variant="outline">{getDivisionFromExpertise(member.expertise)}</Badge></TableCell>
-                            <TableCell className="text-xs text-muted-foreground">{member.phone || "N/A"}</TableCell>
-                            <TableCell className="text-right">
-                               <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem asChild>
-                                            <Link href={`/admin/director/roster/${member.id}`}><UserRound className="w-4 h-4 mr-2"/> Lihat Detail</Link>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleOpenModal(member)}><Edit className="w-4 h-4 mr-2"/> Edit Data</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleDelete(member.id!)} className="text-destructive"><Trash2 className="w-4 h-4 mr-2"/> Hapus</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
-                        </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
-        </CardContent>
-      </Card>
-      
-      {/* MODAL TAMBAH/EDIT */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-                <DialogTitle>{editingMember ? 'Edit Data Anggota' : 'Tambah Anggota Baru'}</DialogTitle>
-                <DialogDescription>
-                    {editingMember ? `Perbarui detail untuk ${editingMember.name}.` : "Masukkan detail anggota baru ke dalam roster."}
-                </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2 max-h-[70vh] overflow-y-auto px-1">
-                    <FormField control={form.control} name="name" render={({ field }) => (
-                        <FormItem><FormLabel>Nama Lengkap</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                     <FormField control={form.control} name="expertise" render={({ field }) => (
-                        <FormItem><FormLabel>Keahlian Utama / Jabatan</FormLabel><FormControl><Input placeholder="Contoh: Keuangan, Media, IT" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
+      {/* --- FLOATING ACTION BUTTON (MOBILE) --- */}
+      <button 
+        onClick={() => setIsAssignOpen(true)}
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-[20px] shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50"
+      >
+        <UserPlus className="w-6 h-6" />
+      </button>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField control={form.control} name="phone" render={({ field }) => (
-                          <FormItem><FormLabel>No. Telepon (WhatsApp)</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
-                      )} />
-                      <FormField control={form.control} name="email" render={({ field }) => (
-                          <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
-                      )} />
+      {/* --- ASSIGNMENT MODAL (MD3 STYLE) --- */}
+      <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
+        <DialogContent className="max-w-md bg-zinc-950 border-zinc-800 p-0 overflow-hidden rounded-[32px] shadow-2xl">
+            
+            <div className="p-6 pb-2">
+                <DialogHeader>
+                    <DialogTitle className="text-2xl font-black font-headline uppercase">Draft New Staff</DialogTitle>
+                    <DialogDescription>Pilih user yang sudah mendaftar dan berikan posisi.</DialogDescription>
+                </DialogHeader>
+            </div>
+
+            <div className="p-6 space-y-6">
+                
+                {/* 1. SELECT USER (COMBOBOX) */}
+                <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Pilih Personil (Unassigned)</label>
+                    <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between h-14 rounded-2xl bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white">
+                                {selectedUser 
+                                    ? UNASSIGNED_USERS.find((u) => u.id === selectedUser)?.name 
+                                    : "Cari nama..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[350px] p-0 bg-zinc-900 border-zinc-800 text-white rounded-xl">
+                            <Command>
+                                <CommandInput placeholder="Search user..." className="h-12" />
+                                <CommandList>
+                                    <CommandEmpty>No user found.</CommandEmpty>
+                                    <CommandGroup>
+                                        {UNASSIGNED_USERS.map((user) => (
+                                            <CommandItem
+                                                key={user.id}
+                                                value={user.name}
+                                                onSelect={() => { setSelectedUser(user.id); setOpenCombobox(false); }}
+                                                className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white py-3 cursor-pointer"
+                                            >
+                                                <Check className={cn("mr-2 h-4 w-4", selectedUser === user.id ? "opacity-100" : "opacity-0")} />
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold">{user.name}</span>
+                                                    <span className="text-xs text-zinc-500">{user.email}</span>
+                                                </div>
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                </div>
+
+                {/* 2. SELECT ROLE & DIVISION */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Divisi</label>
+                        <Select>
+                            <SelectTrigger className="h-14 rounded-2xl bg-zinc-900 border-zinc-800"><SelectValue placeholder="Pilih" /></SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                {DIVISIONS.filter(d => d !== 'ALL').map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
-
-                     <div className="grid grid-cols-2 gap-4">
-                        <FormField control={form.control} name="education" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Pendidikan Terakhir</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Pilih..." /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="SMA/SMK">SMA / SMK / Sederajat</SelectItem>
-                                        <SelectItem value="Diploma">Diploma (D3 / D4)</SelectItem>
-                                        <SelectItem value="S1">Sarjana (S1)</SelectItem>
-                                        <SelectItem value="Pascasarjana">Pascasarjana</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="status" render={({ field }) => (
-                             <FormItem>
-                                <FormLabel>Status Saat Ini</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Pilih..."/></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        {["Mahasiswa Aktif", "Fresh Graduate (Belum Bekerja)", "Karyawan / Profesional", "Freelancer / Wirausaha"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                             </FormItem>
-                        )} />
+                    <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Jabatan</label>
+                        <Select>
+                            <SelectTrigger className="h-14 rounded-2xl bg-zinc-900 border-zinc-800"><SelectValue placeholder="Pilih" /></SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                <SelectItem value="HEAD">Head of Division</SelectItem>
+                                <SelectItem value="STAFF">Staff / Officer</SelectItem>
+                                <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                         <FormField control={form.control} name="division1" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Pilihan Divisi 1 (Prioritas)</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Pilih..." /></SelectTrigger></FormControl>
-                                    <SelectContent>{VOLUNTEER_DIVISIONS.map(d => <SelectItem key={d} value={d}>{d.split(':')[0]}</SelectItem>)}</SelectContent>
-                                </Select>
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="division2" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Pilihan Divisi 2 (Cadangan)</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Pilih..." /></SelectTrigger></FormControl>
-                                    <SelectContent>{VOLUNTEER_DIVISIONS.map(d => <SelectItem key={d} value={d}>{d.split(':')[0]}</SelectItem>)}</SelectContent>
-                                </Select>
-                            </FormItem>
-                        )} />
-                    </div>
+                {/* ACTION BUTTON */}
+                <Button className="w-full h-14 rounded-full text-lg font-bold bg-white text-black hover:bg-zinc-200 mt-4 shadow-xl" disabled={!selectedUser}>
+                    <Zap className="w-5 h-5 mr-2" /> KONFIRMASI POSISI
+                </Button>
 
-                    <FormField control={form.control} name="reason" render={({ field }) => (
-                        <FormItem><FormLabel>Alasan Bergabung / Motivasi</FormLabel><FormControl><Textarea placeholder="Kenapa Anda tertarik menjadi panitia BCC 2026?" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-
-                    <FormField control={form.control} name="photoUrl" render={({ field }) => (
-                        <FormItem><FormLabel>URL Foto Profil</FormLabel><FormControl><Input placeholder="https://..." {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-
-                    <DialogFooter className="pt-4 sticky bottom-0 bg-background/90 py-4">
-                        <Button type="submit" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? "Menyimpan..." : "Simpan Data"}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </Form>
+            </div>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
-
-    
