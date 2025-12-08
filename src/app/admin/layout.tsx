@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -124,7 +125,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* MAIN CONTENT: Scrollable */}
         <div className="flex-1 overflow-auto relative z-10 scroll-smooth">
-            {children}
+            <div className="p-4 md:p-6 lg:p-8">
+                {children}
+            </div>
         </div>
         
         {/* FLOATING WIDGETS */}
