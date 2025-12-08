@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation"
 import { 
   LayoutDashboard, Users, Trophy, Wallet, 
   Settings, Megaphone, ShieldAlert, LogOut, 
-  Briefcase, ChevronRight, Store, Box
+  Briefcase, ChevronRight, Store, Box,
+  ClipboardList, CircleUser, FileText,
+  Gavel, Activity, Video, BarChart2
 } from "lucide-react"
 
 import {
@@ -32,20 +34,28 @@ const data = {
     role: "Project Director",
     avatar: "/avatars/irsyad.jpg",
   },
-  navMain: [
+  navDirector: [
     { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+    { title: "Live Monitor", url: "/admin/director/monitor", icon: Activity },
     { title: "Workspace", url: "/admin/workspace", icon: Briefcase },
-    { title: "Master Roster", url: "/admin/director/roster", icon: Users },
+    { title: "Struktur Panitia", url: "/admin/director/committee", icon: Users },
+    { title: "Surat Tugas", url: "/admin/director/assignments", icon: FileText },
+    { title: "Laporan Sponsor", url: "/admin/analytics", icon: BarChart2 },
   ],
   navOperations: [
-    { title: "Match Control", url: "/admin/match-control/assignment", icon: Trophy },
-    { title: "Logistik & Aset", url: "/admin/logistics/inventory", icon: Box },
-    { title: "Keamanan (Gate)", url: "/admin/gate", icon: ShieldAlert },
-    { title: "Tenant Bazaar", url: "/admin/tenants", icon: Store },
+    { title: "Penugasan Match", url: "/admin/match-control/assignment", icon: Trophy },
+    { title: "Verifikasi Atlet (TPF)", url: "/admin/tpf", icon: Gavel },
+    { title: "Gate Control", url: "/admin/gate", icon: ShieldAlert },
+    { title: "MLO & Lineup", url: "/admin/mlo/dashboard", icon: ClipboardList },
+    { title: "Media & Streaming", url: "/admin/media", icon: Video },
   ],
   navFinance: [
-    { title: "Honorarium", url: "/admin/finance/honorarium", icon: Wallet },
-    { title: "Sponsorship", url: "/admin/business/partners", icon: Megaphone },
+    { title: "Keuangan & RAB", url: "/admin/finance", icon: Wallet },
+    { title: "Sponsorship CRM", url: "/admin/business/partners", icon: Megaphone },
+  ],
+  navSettings: [
+    { title: "Master Roster", url: "/admin/director/roster", icon: CircleUser },
+    { title: "Pengaturan Akun", url: "/admin/settings/users", icon: Settings },
   ]
 }
 
@@ -71,14 +81,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* 2. CONTENT (MENU ITEMS) */}
       <SidebarContent className="px-3 py-4 space-y-6 bg-zinc-950/50 scrollbar-none">
         
-        {/* GROUP 1: MAIN */}
-        <NavGroup label="MAIN MENU" items={data.navMain} currentPath={pathname} />
-        
-        {/* GROUP 2: OPERATIONS */}
+        <NavGroup label="DIRECTOR" items={data.navDirector} currentPath={pathname} />
         <NavGroup label="OPERATIONS" items={data.navOperations} currentPath={pathname} />
-
-        {/* GROUP 3: FINANCE */}
         <NavGroup label="FINANCE & BIZ" items={data.navFinance} currentPath={pathname} />
+        <NavGroup label="MASTER DATA" items={data.navSettings} currentPath={pathname} />
 
       </SidebarContent>
 
