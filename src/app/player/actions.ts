@@ -80,3 +80,10 @@ export async function getPlayerSession() {
       return null;
   }
 }
+
+export async function updatePlayerProfile(data: any) {
+  await new Promise(r => setTimeout(r, 1000));
+  // In a real app, you would find the user by session ID and update their data in the database.
+  console.log("Updating player profile with:", data);
+  return { success: true, message: "Profil berhasil diperbarui." };
+}
