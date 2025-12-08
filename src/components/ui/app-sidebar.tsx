@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from "react"
@@ -65,6 +66,7 @@ const data = {
   navMatch: [
     { title: "Penugasan Match", url: "/admin/match-control/assignment", icon: Trophy },
     { title: "Editor Jadwal", url: "/admin/match-control/schedule-editor", icon: CalendarDays },
+    { title: "Generate Bagan", url: "/admin/match-control/bracket", icon: Network },
     { title: "Berita Acara Hasil", url: "/admin/matches/result-sheet", icon: FileText },
     { title: "Verifikasi TPF", url: "/admin/tpf", icon: ShieldAlert },
     { title: "MLO: Dashboard", url: "/admin/mlo/dashboard", icon: Mic2 },
@@ -103,6 +105,7 @@ const data = {
   navSecretariat: [
     { title: "E-Office / Surat", url: "/admin/secretary/correspondence", icon: Mail },
     { title: "Notulensi Rapat", url: "/admin/secretary/minutes", icon: FileSignature },
+    { title: "Penugasan (E-Mandate)", url: "/admin/secretary/assignments", icon: CheckSquare },
     { title: "Generator Sertifikat", url: "/admin/secretary/cert-gen", icon: Award },
   ],
   // 9. MASTER DATA
