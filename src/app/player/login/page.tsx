@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -11,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { loginPlayerGoogle } from "../actions";
 import { useRouter } from "next/navigation";
 
-
 export default function PlayerLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -20,13 +20,13 @@ export default function PlayerLoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const res = await loginPlayerGoogle();
-    if(res.success){
-        toast({ title: "Login Berhasil!", description: "Selamat datang kembali, Juara!", className: "bg-green-600 text-white" });
-        router.push('/player/dashboard');
-        router.refresh();
+    if (res.success) {
+      toast({ title: "Login Berhasil!", description: "Selamat datang kembali, Juara!", className: "bg-green-600 text-white" });
+      router.push('/player/dashboard');
+      router.refresh();
     } else {
-        setIsLoading(false);
-        toast({ title: "Gagal", description: "Gagal login dengan Google.", variant: "destructive" });
+      setIsLoading(false);
+      toast({ title: "Gagal", description: "Gagal login dengan Google.", variant: "destructive" });
     }
   };
 
