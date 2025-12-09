@@ -346,13 +346,3 @@ export default function MeetingMinutesPage() {
     </div>
   );
 }
-Highlights Desain "Tactical Briefing":
-Action-Oriented Cards: Kartu rapat menonjolkan Progress Bar (Action Items). Ini langsung memberi tahu Sekretaris mana rapat yang "tugasnya belum selesai", bukan sekadar arsip teks mati.
-
-Indigo/Violet Theme: Menggunakan warna Indigo yang diasosiasikan dengan kebijaksanaan, strategi, dan organisasi, membedakan modul ini dari modul teknis (Merah/Kuning).
-
-Visual Categories: Kategori rapat (Pleno, Teknis, Darurat) diberi Badge warna-warni untuk memudahkan scanning cepat saat mencari notulensi tertentu.
-
-Task Checklist: Di dalam detail rapat, "Action Items" ditampilkan sebagai checklist interaktif (Quests) lengkap dengan PIC dan Deadline, menegaskan fungsi kontrol sekretariat.
-
-Clean Input Form: Modal "New Briefing" fokus pada input esensial (Judul, Kategori, Hasil), dengan tombol besar untuk menyimpan dan lanjut ke penugasan (Add Tasks).
