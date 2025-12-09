@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from "react";
@@ -6,7 +5,10 @@ import {
   Newspaper, PenTool, Eye, Calendar, 
   User, Image as ImageIcon, MoreHorizontal, 
   Search, Plus, ArrowLeft, Save, Send, 
-  BarChart3, Globe, Hash, Clock
+  BarChart3, Globe, Hash, Clock,
+  Bold, Italic, Underline, List, ListOrdered, 
+  Quote, Link as LinkIcon, Heading1, Heading2,
+  AlignLeft, AlignCenter, AlignRight, FileImage
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +18,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Toggle } from "@/components/ui/toggle";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 // --- MOCK DATA ---
@@ -232,41 +235,76 @@ export default function NewsManagementPage() {
             </div>
         </>
       ) : (
-        // --- EDITOR MODE ---
+        // --- EDITOR MODE (WYSIWYG) ---
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 animate-in slide-in-from-bottom-4 fade-in duration-300">
             
             {/* Main Editor */}
-            <Card className="lg:col-span-2 bg-zinc-950 border-zinc-800 rounded-[32px] flex flex-col overflow-hidden shadow-2xl">
-                <div className="p-4 border-b border-zinc-800 flex items-center gap-4">
+            <Card className="lg:col-span-2 bg-zinc-950 border-zinc-800 rounded-[32px] flex flex-col overflow-hidden shadow-2xl relative">
+                
+                <div className="flex items-center gap-4 p-4 border-b border-zinc-800">
                     <Button variant="ghost" size="icon" className="rounded-full hover:bg-zinc-800" onClick={() => setViewMode('GRID')}>
                         <ArrowLeft className="w-5 h-5 text-zinc-400"/>
                     </Button>
-                    <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Writing Mode</span>
+                    <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Story Editor</span>
+                </div>
+
+                {/* WYSIWYG TOOLBAR */}
+                <div className="flex items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 overflow-x-auto no-scrollbar sticky top-0 z-20">
+                    <div className="flex items-center bg-zinc-950 rounded-xl p-1 border border-zinc-800">
+                        <Toggle size="sm" className="h-9 w-9 data-[state=on]:bg-cyan-900 data-[state=on]:text-cyan-400"><Bold className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9 data-[state=on]:bg-cyan-900 data-[state=on]:text-cyan-400"><Italic className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9 data-[state=on]:bg-cyan-900 data-[state=on]:text-cyan-400"><Underline className="w-4 h-4"/></Toggle>
+                    </div>
+                    <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
+                    <div className="flex items-center bg-zinc-950 rounded-xl p-1 border border-zinc-800">
+                        <Toggle size="sm" className="h-9 w-9"><AlignLeft className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9"><AlignCenter className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9"><AlignRight className="w-4 h-4"/></Toggle>
+                    </div>
+                    <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
+                    <div className="flex items-center bg-zinc-950 rounded-xl p-1 border border-zinc-800">
+                        <Toggle size="sm" className="h-9 w-9"><Heading1 className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9"><Heading2 className="w-4 h-4"/></Toggle>
+                    </div>
+                    <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
+                    <div className="flex items-center bg-zinc-950 rounded-xl p-1 border border-zinc-800">
+                        <Toggle size="sm" className="h-9 w-9"><List className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9"><ListOrdered className="w-4 h-4"/></Toggle>
+                        <Toggle size="sm" className="h-9 w-9"><Quote className="w-4 h-4"/></Toggle>
+                    </div>
+                    <Separator orientation="vertical" className="h-6 bg-zinc-800 mx-1" />
+                    <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-zinc-800 text-zinc-400"><LinkIcon className="w-4 h-4"/></Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-zinc-800 text-zinc-400"><FileImage className="w-4 h-4"/></Button>
+                    </div>
                 </div>
                 
-                <ScrollArea className="flex-1">
-                    <div className="p-8 md:p-12 max-w-3xl mx-auto space-y-8">
+                <ScrollArea className="flex-1 bg-zinc-950">
+                    <div className="p-8 md:p-12 max-w-3xl mx-auto space-y-8 min-h-[500px]">
+                        
                         {/* Cover Image Uploader */}
                         <div className="aspect-video bg-zinc-900 border-2 border-dashed border-zinc-800 rounded-3xl flex flex-col items-center justify-center text-zinc-600 hover:text-cyan-500 hover:border-cyan-500/30 hover:bg-cyan-900/5 transition-all cursor-pointer group">
                             <ImageIcon className="w-12 h-12 mb-2 group-hover:scale-110 transition-transform"/>
                             <span className="font-bold uppercase tracking-widest text-sm">Add Cover Image</span>
                         </div>
 
-                        {/* Title */}
+                        {/* Title Input */}
                         <Textarea 
                             placeholder="Type your Headline here..." 
-                            className="text-4xl md:text-5xl font-black text-white bg-transparent border-none resize-none placeholder:text-zinc-800 focus-visible:ring-0 p-0 leading-tight min-h-[120px]"
+                            className="text-4xl md:text-5xl font-black text-white bg-transparent border-none resize-none placeholder:text-zinc-800 focus-visible:ring-0 p-0 leading-tight min-h-[100px] overflow-hidden"
                             value={editorTitle}
                             onChange={(e) => setEditorTitle(e.target.value)}
                         />
 
-                        {/* Content Body */}
-                        <Textarea 
-                            placeholder="Start telling the story..." 
-                            className="text-lg text-zinc-300 bg-transparent border-none resize-none placeholder:text-zinc-800 focus-visible:ring-0 p-0 min-h-[400px] leading-relaxed font-serif"
-                            value={editorContent}
-                            onChange={(e) => setEditorContent(e.target.value)}
-                        />
+                        {/* WYSIWYG Content Area */}
+                        <div 
+                            className="prose prose-invert prose-lg max-w-none text-zinc-300 focus:outline-none min-h-[300px]"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onInput={(e) => setEditorContent(e.currentTarget.textContent || "")}
+                        >
+                            <p className="text-zinc-500 italic">Start writing your story here...</p>
+                        </div>
                     </div>
                 </ScrollArea>
             </Card>
