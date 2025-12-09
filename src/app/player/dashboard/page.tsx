@@ -337,7 +337,7 @@ export default function PlayerPage() {
             <div>
                 <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Team Access</h2>
                 <p className="text-zinc-400 text-sm mt-3 leading-relaxed px-4">
-                  Masukkan <strong>Kode Unik</strong> yang diberikan oleh Manajer Tim/Komunitas untuk membuka formulir pendaftaran.
+                  Masukkan <strong>Kode Unik</strong> yang diberikan oleh Manajer Tim/Komunitas untuk membuka formulir.
                 </p>
             </div>
 
@@ -355,16 +355,15 @@ export default function PlayerPage() {
                 <Button 
                     onClick={handleVerifyCode} 
                     disabled={isJoining || joinCode.length < 5} 
-                    className="w-full h-14 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-lg shadow-xl transition-transform active:scale-95"
+                    className="w-full h-14 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-lg shadow-xl"
                 >
-                    {isJoining ? "VERIFYING..." : "ENTER TEAM SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
+                    {isJoining ? "VERIFYING..." : "ENTER SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
                 </Button>
             </div>
-          </div>
-        </Card>
-        
-        <p className="text-zinc-600 text-xs mt-8 font-mono">BCC 2026 • OFFICIAL REGISTRATION PORTAL</p>
-      </div>
+        </div>
+      </Card>
+      <p className="text-zinc-600 text-xs mt-8 font-mono relative z-10">BCC 2026 • OFFICIAL REGISTRATION PORTAL</p>
+    </div>
     );
   }
 
@@ -372,11 +371,12 @@ export default function PlayerPage() {
   if (!isRegistrationComplete) {
     return (
       <div className="min-h-screen bg-zinc-950 font-body py-8 px-4 md:py-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
             <div className="mb-10 text-center space-y-4">
                 <Badge variant="outline" className="border-indigo-500 text-indigo-400 px-4 py-1 tracking-widest uppercase">Joining: PB TWINTON</Badge>
                 <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight">Athlete Data</h1>
                 
+                {/* Progress Bar */}
                 <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden mt-6">
                     <div className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(currentStep/5)*100}%` }}></div>
                 </div>
@@ -397,16 +397,14 @@ export default function PlayerPage() {
             </Card>
 
             <div className="flex justify-between mt-8 px-2">
-                <Button variant="ghost" onClick={() => setCurrentStep(p => Math.max(1, p-1))} disabled={currentStep===1} className="h-14 px-8 rounded-2xl text-zinc-500 hover:text-white hover:bg-zinc-900">
-                    <ChevronLeft className="w-5 h-5 mr-2"/> BACK
-                </Button>
+                <Button variant="ghost" onClick={() => setCurrentStep(p => Math.max(1, p-1))} disabled={currentStep===1} className="h-14 px-8 rounded-2xl text-zinc-500 hover:text-white hover:bg-zinc-900 font-bold"><ChevronLeft className="w-5 h-5 mr-2"/> BACK</Button>
                 
                 {currentStep === 5 ? (
                     <Button onClick={() => setIsRegistrationComplete(true)} className="h-14 px-10 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-lg shadow-lg shadow-green-900/20">
                         SUBMIT REGISTRATION <CheckCircle2 className="ml-3 w-5 h-5"/>
                     </Button>
                 ) : (
-                    <Button onClick={() => setCurrentStep(p => Math.min(p + 1, 5))} className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-zinc-200 font-bold text-lg">
+                    <Button onClick={handleNextStep} disabled={currentStep === 1 && !Object.values(formData.agreements).every(Boolean)} className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-zinc-200 font-bold text-lg">
                         NEXT STEP <ChevronRight className="w-5 h-5 ml-2"/>
                     </Button>
                 )}
@@ -419,7 +417,6 @@ export default function PlayerPage() {
   // --- RENDER VIEW 3: DASHBOARD ---
   return (
     <div className="min-h-screen bg-zinc-950 font-body pb-24">
-        {/* Universal Navbar */}
         <div className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-4 md:px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2"><Trophy className="w-6 h-6 text-cyan-500"/><span className="font-black text-white tracking-tighter hidden md:inline text-lg">PLAYER DASHBOARD</span></div>
             <div className="flex items-center gap-4">
@@ -435,5 +432,3 @@ export default function PlayerPage() {
     </div>
   );
 }
-
-```
