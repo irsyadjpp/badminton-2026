@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 // --- MOCK DATA ---
@@ -128,6 +129,7 @@ export default function AthleteDashboard() {
   const renderCompleteProfile = () => (
     <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] p-8 max-w-4xl mx-auto space-y-8">
         <header className="text-center space-y-2">
+            <RefreshCcw className="w-10 h-10 text-indigo-500 mx-auto animate-spin-slow"/>
             <h3 className="text-3xl font-black text-white">Final Step: Complete Profile</h3>
             <p className="text-zinc-400">Data ini dibutuhkan untuk verifikasi dokumen dan pengelompokan kategori.</p>
             <div className="flex items-center justify-center gap-2 pt-2">
@@ -203,6 +205,7 @@ export default function AthleteDashboard() {
          
         {/* LEFT: PLAYER CARD (1/3) */}
         <div className="lg:col-span-1 space-y-6">
+            {/* Player Card Content */}
             <Card className="bg-gradient-to-b from-zinc-900 to-black border-zinc-800 rounded-[32px] overflow-hidden relative shadow-2xl">
                 <CardContent className="p-8 text-center relative z-10">
                     <div className="relative inline-block">
@@ -214,7 +217,6 @@ export default function AthleteDashboard() {
                             {athlete.rank}
                         </Badge>
                     </div>
-                    
                     <h2 className="text-2xl font-black text-white uppercase leading-tight mb-1">{athlete.name}</h2>
                     <p className="text-zinc-500 text-sm font-bold mb-6">Mens Singles Specialist</p>
 
@@ -363,7 +365,7 @@ export default function AthleteDashboard() {
                 </div>
                 <h2 className="text-2xl font-black uppercase mb-2">Squad Sync Successful!</h2>
                 <p className="text-zinc-400 text-sm mb-6">
-                    Kamu berhasil bergabung dengan skuad:
+                    Anda berhasil bergabung dengan:
                     <br/><strong className="text-white text-lg">{athlete.team?.name}</strong>
                 </p>
                 <Button 
@@ -378,5 +380,3 @@ export default function AthleteDashboard() {
     </div>
   );
 }
-
-```
