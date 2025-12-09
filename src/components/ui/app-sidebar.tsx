@@ -83,7 +83,7 @@ const data = {
     { title: "Dispatch Command", url: "/admin/logistics/dispatch", icon: Navigation },
     { title: "Database Volunteer", url: "/admin/hr/volunteers", icon: Database },
     { title: "Absensi & Konsumsi", url: "/admin/hr/meals", icon: Utensils },
-    { title: "Undian Doorprize", url: "/admin/raffle", icon: Gift },
+    { title: "Undian Doorprize", url: "/admin/operations/doorprize", icon: Gift },
     { title: "Pengajuan Reimbursement", url: "/admin/reimbursement/submit", icon: Upload },
     { title: "Logistik Habis Pakai", url: "/admin/logistics/consumables", icon: Layers },
   ],
