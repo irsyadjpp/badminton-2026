@@ -1,151 +1,220 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { 
+  Activity, Users, Clock, AlertTriangle, 
+  Mic2, PauseCircle, PlayCircle, Siren, 
+  Trophy, CheckCircle2, MoreHorizontal, Radio 
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AlertTriangle, MapPin, Utensils, UserCheck, Activity, BatteryCharging } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
-// Tipe Data Simulasi
-type LiveEvent = { id: number, type: 'SOS' | 'ABSENSI' | 'MEAL', user: string, message: string, time: string, location?: string };
+// --- MOCK DATA: COURTS STATUS ---
+const COURTS = [
+  { id: 1, status: "LIVE", pA: "Kevin / Marcus", pB: "Ahsan / Hendra", sA: 18, sB: 16, set: 3, time: "45:12", category: "MD OPEN" },
+  { id: 2, status: "WARMUP", pA: "Ginting", pB: "Christie", sA: 0, sB: 0, set: 1, time: "01:30", category: "MS PRO" },
+  { id: 3, status: "LIVE", pA: "Apri / Fadia", pB: "Matsuyama / Shida", sA: 21, sB: 19, set: 2, time: "22:10", category: "WD OPEN" },
+  { id: 4, status: "IDLE", pA: "-", pB: "-", sA: 0, sB: 0, set: 0, time: "00:00", category: "-" },
+  { id: 5, status: "LIVE", pA: "Fajar / Rian", pB: "Leo / Daniel", sA: 11, sB: 4, set: 1, time: "08:45", category: "MD OPEN" },
+  { id: 6, status: "CLEANING", pA: "-", pB: "-", sA: 0, sB: 0, set: 0, time: "00:00", category: "MOP REQUEST" },
+];
+
+const LIVE_LOGS = [
+  { time: "14:02", msg: "Court 2: Pertandingan dimulai.", type: "INFO" },
+  { time: "14:00", msg: "Gate 1: Antrian penonton memanjang.", type: "WARN" },
+  { time: "13:58", msg: "Medical: Cedera ringan di Court 3 tertangani.", type: "SUCCESS" },
+  { time: "13:55", msg: "Match Control: Jadwal Court 4 delay 10 menit.", type: "ERROR" },
+];
 
 export default function LiveMonitorPage() {
-  const [events, setEvents] = useState<LiveEvent[]>([]);
-  const [stats, setStats] = useState({
-    present: 45,
-    totalStaff: 60,
-    mealsRedeemed: 32,
-    mealsTotal: 70,
-    activeSOS: 0
-  });
+  const [currentTime, setCurrentTime] = useState("");
 
-  // Simulasi WebSocket / Real-time Data
+  // Realtime Clock
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Ceritanya ada data baru masuk tiap 3 detik
-      const newEvent: LiveEvent = {
-        id: Date.now(),
-        type: Math.random() > 0.8 ? 'MEAL' : 'ABSENSI',
-        user: ['Kevin Ops', 'Sarah Medis', 'Budi Logistik'][Math.floor(Math.random() * 3)],
-        message: Math.random() > 0.8 ? 'Redeemed Lunch' : 'Clocked In',
-        time: new Date().toLocaleTimeString('id-ID'),
-        location: 'Main Hall'
-      };
-      
-      setEvents(prev => [newEvent, ...prev].slice(0, 10)); // Keep last 10
-      
-      // Update Stats Randomly
-      setStats(prev => ({
-        ...prev,
-        present: Math.min(prev.present + 1, 60),
-        mealsRedeemed: Math.min(prev.mealsRedeemed + 1, 70)
-      }));
-
-    }, 3000);
-
-    return () => clearInterval(interval);
+    const timer = setInterval(() => {
+        setCurrentTime(new Date().toLocaleTimeString('id-ID', { hour12: false }));
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 font-mono">
-      {/* Header Ala Command Center */}
-      <div className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
-        <div>
-          <h1 className="text-3xl font-black text-red-600 tracking-widest uppercase flex items-center gap-3">
-            <Activity className="animate-pulse" /> LIVE OPERATIONS
-          </h1>
-          <p className="text-zinc-500 text-sm">GELORA KONI BANDUNG • DAY 1</p>
+    <div className="space-y-6 p-4 md:p-6 font-body pb-24 h-screen flex flex-col">
+      
+      {/* --- HEADER: BROADCAST STYLE --- */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 p-6 rounded-[32px] shrink-0 shadow-2xl">
+        <div className="flex items-center gap-6">
+            {/* LIVE INDICATOR */}
+            <div className="relative">
+                <div className="w-4 h-4 bg-red-600 rounded-full animate-ping absolute top-0 right-0"></div>
+                <div className="bg-red-600 text-white font-black px-4 py-2 rounded-xl flex items-center gap-2 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+                    <Radio className="w-5 h-5 animate-pulse" /> ON AIR
+                </div>
+            </div>
+            
+            <div>
+                <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-white">
+                    Live <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">Monitor</span>
+                </h1>
+                <div className="flex items-center gap-3 text-zinc-400 text-sm font-bold tracking-wide">
+                    <span>DAY 2: ELIMINATION ROUND</span>
+                    <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
+                    <span className="text-white font-mono">{currentTime} WIB</span>
+                </div>
+            </div>
         </div>
-        <div className="text-right">
-            <div className="text-2xl font-bold text-white">{new Date().toLocaleTimeString('id-ID')}</div>
-            <Badge variant="outline" className="text-green-500 border-green-500 animate-pulse">SYSTEM ONLINE</Badge>
+
+        {/* QUICK STATS (Top Right) */}
+        <div className="flex gap-4 mt-4 md:mt-0">
+            <div className="text-right">
+                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Active Matches</p>
+                <p className="text-2xl font-black text-white font-mono">4<span className="text-zinc-600">/6</span></p>
+            </div>
+            <div className="h-10 w-[1px] bg-zinc-800"></div>
+            <div className="text-right">
+                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Crowd</p>
+                <p className="text-2xl font-black text-green-500 font-mono">1.2k</p>
+            </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        {/* KOLOM KIRI: STATISTIK KRUSIAL */}
-        <div className="space-y-6">
-            {/* Kartu Absensi */}
-            <Card className="bg-zinc-900 border-zinc-800">
-                <CardHeader className="pb-2"><CardTitle className="text-zinc-400 text-xs uppercase">Kehadiran Staff</CardTitle></CardHeader>
-                <CardContent>
-                    <div className="text-4xl font-black text-white">{stats.present}<span className="text-zinc-600 text-lg">/{stats.totalStaff}</span></div>
-                    <div className="w-full bg-zinc-800 h-1 mt-2"><div className="bg-blue-600 h-1" style={{width: `${(stats.present/stats.totalStaff)*100}%`}}></div></div>
-                </CardContent>
-            </Card>
+      {/* --- MAIN CONTENT: COURT GRID & FEED --- */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-0">
+         
+         {/* LEFT: COURTS GRID (3/4 Width) */}
+         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto pr-2 scrollbar-none">
+            {COURTS.map((court) => (
+                <Card key={court.id} className={cn(
+                    "relative overflow-hidden rounded-[32px] border-2 transition-all group hover:-translate-y-1 hover:shadow-2xl",
+                    court.status === 'LIVE' ? "bg-zinc-900 border-green-500/30" : 
+                    court.status === 'WARMUP' ? "bg-zinc-900 border-yellow-500/30" : 
+                    "bg-zinc-950 border-zinc-800 opacity-70"
+                )}>
+                    {/* Status Badge Absolute */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-zinc-700 to-transparent opacity-20"></div>
+                    
+                    <CardContent className="p-6">
+                        {/* Court Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <Badge variant="outline" className="font-black text-lg border-zinc-700 text-zinc-300 bg-zinc-950 px-4 py-1 rounded-lg">
+                                C-{court.id}
+                            </Badge>
+                            
+                            <div className="flex items-center gap-2">
+                                {court.status === 'LIVE' && <span className="flex h-3 w-3 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]"></span>}
+                                <span className={cn(
+                                    "text-xs font-black uppercase tracking-widest",
+                                    court.status === 'LIVE' ? "text-green-500" : 
+                                    court.status === 'WARMUP' ? "text-yellow-500" : "text-zinc-500"
+                                )}>
+                                    {court.status}
+                                </span>
+                            </div>
+                        </div>
 
-            {/* Kartu Konsumsi */}
-            <Card className="bg-zinc-900 border-zinc-800">
-                <CardHeader className="pb-2"><CardTitle className="text-zinc-400 text-xs uppercase">Stok Makan Siang</CardTitle></CardHeader>
-                <CardContent>
-                    <div className="text-4xl font-black text-white">{stats.mealsTotal - stats.mealsRedeemed}<span className="text-zinc-600 text-lg"> left</span></div>
-                    <div className="text-xs text-orange-500 mt-1">{stats.mealsRedeemed} porsi sudah diambil</div>
-                </CardContent>
-            </Card>
+                        {/* Players & Scores */}
+                        {court.status !== 'IDLE' && court.status !== 'CLEANING' ? (
+                            <div className="space-y-4">
+                                {/* Player A */}
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1 h-8 bg-blue-500 rounded-full"></div>
+                                        <span className="font-bold text-white text-lg truncate max-w-[120px]">{court.pA}</span>
+                                    </div>
+                                    <span className="text-4xl font-black font-mono text-white">{court.sA}</span>
+                                </div>
 
-            {/* Status Darurat */}
-            <Card className={`${stats.activeSOS > 0 ? "bg-red-900/20 border-red-600 animate-pulse" : "bg-zinc-900 border-zinc-800"}`}>
-                <CardHeader className="pb-2"><CardTitle className="text-zinc-400 text-xs uppercase">Active SOS</CardTitle></CardHeader>
-                <CardContent className="flex items-center gap-3">
-                    <AlertTriangle className={`w-8 h-8 ${stats.activeSOS > 0 ? "text-red-500" : "text-zinc-700"}`} />
-                    <div className="text-2xl font-black text-white">{stats.activeSOS}</div>
-                </CardContent>
-            </Card>
-        </div>
+                                {/* Player B */}
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1 h-8 bg-red-500 rounded-full"></div>
+                                        <span className="font-bold text-white text-lg truncate max-w-[120px]">{court.pB}</span>
+                                    </div>
+                                    <span className="text-4xl font-black font-mono text-zinc-500">{court.sB}</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="h-[88px] flex flex-col items-center justify-center text-zinc-600 gap-2 border-2 border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50">
+                                {court.status === 'CLEANING' ? <Users className="w-6 h-6 animate-bounce"/> : <PauseCircle className="w-8 h-8"/>}
+                                <span className="text-xs font-bold uppercase">{court.status === 'CLEANING' ? 'Cleaning in Progress' : 'No Match Scheduled'}</span>
+                            </div>
+                        )}
 
-        {/* KOLOM TENGAH: LIVE FEED LOG (CCTV DATA) */}
-        <div className="lg:col-span-2">
-            <Card className="bg-zinc-900 border-zinc-800 h-[500px] flex flex-col">
-                <CardHeader className="border-b border-zinc-800">
-                    <CardTitle className="text-sm uppercase tracking-widest flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-blue-500" /> Incoming Data Stream
+                        {/* Footer Info */}
+                        <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-between items-center">
+                            <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 bg-zinc-950 px-3 py-1.5 rounded-full">
+                                <Trophy className="w-3 h-3" /> {court.category}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300">
+                                <Clock className="w-3 h-3 text-primary" /> {court.time}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+         </div>
+
+         {/* RIGHT: LIVE FEED & ACTIONS (1/4 Width) */}
+         <div className="flex flex-col gap-6 h-full overflow-hidden">
+            
+            {/* 1. INCIDENT LOG (Scrollable) */}
+            <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] flex-1 flex flex-col overflow-hidden">
+                <CardHeader className="p-6 pb-2 bg-zinc-950/30">
+                    <CardTitle className="text-sm font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-primary" /> Incident Log
                     </CardTitle>
                 </CardHeader>
-                <ScrollArea className="flex-grow p-4">
-                    <div className="space-y-4">
-                        {events.map((ev) => (
-                            <div key={ev.id} className="flex items-start gap-4 p-3 rounded bg-black/40 border border-zinc-800 animate-in slide-in-from-left">
-                                <div className={`mt-1 p-2 rounded-full ${ev.type === 'SOS' ? 'bg-red-900 text-red-500' : ev.type === 'MEAL' ? 'bg-orange-900 text-orange-500' : 'bg-blue-900 text-blue-500'}`}>
-                                    {ev.type === 'SOS' ? <AlertTriangle className="w-4 h-4"/> : ev.type === 'MEAL' ? <Utensils className="w-4 h-4"/> : <UserCheck className="w-4 h-4"/>}
+                <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-3">
+                        {LIVE_LOGS.map((log, i) => (
+                            <div key={i} className="flex gap-3 items-start p-3 rounded-2xl bg-zinc-950 border border-zinc-800/50">
+                                <div className="mt-1">
+                                    {log.type === 'INFO' && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                                    {log.type === 'WARN' && <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>}
+                                    {log.type === 'ERROR' && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>}
+                                    {log.type === 'SUCCESS' && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
                                 </div>
-                                <div className="flex-grow">
-                                    <div className="flex justify-between">
-                                        <span className="font-bold text-white">{ev.user}</span>
-                                        <span className="text-xs text-zinc-500 font-mono">{ev.time}</span>
-                                    </div>
-                                    <p className="text-sm text-zinc-400">{ev.message}</p>
-                                    {ev.location && <div className="flex items-center gap-1 text-xs text-zinc-600 mt-1"><MapPin className="w-3 h-3"/> {ev.location}</div>}
+                                <div>
+                                    <p className="text-xs font-mono text-zinc-500 mb-1">{log.time}</p>
+                                    <p className="text-xs font-medium text-zinc-300 leading-relaxed">{log.msg}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </ScrollArea>
             </Card>
-        </div>
 
-        {/* KOLOM KANAN: QUICK ACTIONS */}
-        <div className="space-y-4">
-            <div className="p-4 bg-zinc-800 rounded-xl">
-                <h3 className="text-xs font-bold text-zinc-400 uppercase mb-4">Broadcast Message</h3>
-                <textarea className="w-full bg-black border border-zinc-700 rounded p-2 text-sm text-white mb-2" rows={3} placeholder="Kirim notifikasi ke semua panitia..."></textarea>
-                <button className="w-full bg-white text-black font-bold py-2 rounded uppercase text-sm hover:bg-zinc-200">Kirim Push Notif</button>
-            </div>
-            
-            <div className="p-4 bg-zinc-800 rounded-xl">
-                 <h3 className="text-xs font-bold text-zinc-400 uppercase mb-4">Device Status</h3>
-                 <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-zinc-300">Server Latency</span>
-                    <span className="text-sm text-green-500 font-mono">24ms</span>
-                 </div>
-                 <div className="flex justify-between items-center">
-                    <span className="text-sm text-zinc-300">Database</span>
-                    <span className="text-sm text-green-500 font-mono">Healthy</span>
-                 </div>
-            </div>
-        </div>
+            {/* 2. EMERGENCY CONTROL (Sticky Bottom) */}
+            <Card className="bg-red-950/20 border-red-900/30 rounded-[32px] shrink-0">
+                <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-3 bg-red-500/20 rounded-xl text-red-500 animate-pulse">
+                            <Siren className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-red-500 uppercase text-sm tracking-widest">Emergency</h3>
+                            <p className="text-xs text-red-400/60">Hanya untuk kondisi darurat.</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button variant="outline" className="border-red-900/50 text-red-500 hover:bg-red-950 h-12 rounded-xl text-xs font-bold">
+                            <Mic2 className="w-4 h-4 mr-2"/> ANNOUNCE
+                        </Button>
+                        <Button className="bg-red-600 hover:bg-red-700 text-white h-12 rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+                            PAUSE ALL
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+         </div>
 
       </div>
     </div>
   );
 }
+    
