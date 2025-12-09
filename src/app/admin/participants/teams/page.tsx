@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -29,7 +30,7 @@ const TEAMS = [
     logo: "/logos/djarum.png",
     manager: "Fung Permadi",
     status: "VERIFIED", 
-    tier: "PRO",
+    tier: "PRO", 
     performance: 95, // Progress Bar
     athletes: 24,
     officials: 5,
@@ -43,7 +44,7 @@ const TEAMS = [
     logo: "/logos/jayaraya.png",
     manager: "Imelda Wiguna",
     status: "VERIFIED", 
-    tier: "PRO",
+    tier: "PRO", 
     performance: 92,
     athletes: 18,
     officials: 4,
@@ -293,24 +294,30 @@ export default function TeamManagementPage() {
                                 <p className="text-xl font-black text-white">{selectedTeam.athletes}</p>
                             </div>
                             <div className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-center">
-                                <p className="text-[10px] text-zinc-500 uppercase font-bold">Officials</p>
+                                <p className="text-[10px] text-zinc-500 uppercase font-bold">Official</p>
                                 <p className="text-xl font-black text-white">{selectedTeam.officials}</p>
                             </div>
                         </div>
 
-                        {/* Manager Info */}
+                        {/* Manager & Contact */}
                         <div className="space-y-4">
                             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
                                 <Briefcase className="w-4 h-4 text-indigo-500"/> Management
                             </h3>
-                            <div className="flex items-center justify-between p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
-                                <div>
-                                    <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Team Manager</p>
-                                    <p className="font-bold text-white text-sm">{selectedTeam.manager}</p>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
+                                    <div>
+                                        <p className="text-xs text-zinc-500 font-bold uppercase mb-1">Team Manager</p>
+                                        <p className="font-bold text-white text-sm">{selectedTeam.manager}</p>
+                                    </div>
+                                    <Button size="sm" variant="ghost" className="h-8 rounded-full text-indigo-500 hover:text-indigo-400 hover:bg-indigo-500/10">Contact</Button>
                                 </div>
-                                <div className="flex gap-2">
-                                    <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-indigo-500 hover:bg-indigo-500/10"><Phone className="w-4 h-4"/></Button>
-                                    <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-indigo-500 hover:bg-indigo-500/10"><Mail className="w-4 h-4"/></Button>
+                                <div className="flex items-center justify-between p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
+                                    <div className="flex items-center gap-3">
+                                        <Phone className="w-5 h-5 text-zinc-400"/>
+                                        <span className="font-mono text-sm text-white">{selectedTeam.contact}</span>
+                                    </div>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-zinc-400 hover:text-white"><MoreHorizontal className="w-4 h-4"/></Button>
                                 </div>
                             </div>
                         </div>
@@ -323,6 +330,7 @@ export default function TeamManagementPage() {
                             </div>
                             <Progress value={selectedTeam.performance} className="h-3 bg-zinc-900" indicatorClassName="bg-gradient-to-r from-indigo-500 to-cyan-600" />
                         </div>
+
                     </div>
 
                     {/* Footer Actions */}
@@ -352,9 +360,10 @@ export default function TeamManagementPage() {
             </div>
             
             <div className="p-8 space-y-6">
+                
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Nama Klub / Kontingen</label>
-                    <Input placeholder="Contoh: PB Jaya Raya" className="bg-zinc-900 border-zinc-800 h-14 rounded-2xl text-lg font-bold text-white focus:border-indigo-500" />
+                    <Input placeholder="Contoh: PB Jaya Raya" className="bg-zinc-900 border-zinc-800 h-14 rounded-2xl text-lg font-bold" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -386,7 +395,9 @@ export default function TeamManagementPage() {
             </div>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
-```
+
+    
