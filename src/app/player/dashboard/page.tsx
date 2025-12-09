@@ -8,8 +8,9 @@ import {
   ArrowRight, LogOut, User, Upload, FileText, 
   AlertTriangle, Instagram, History, Info, ChevronRight, 
   Camera, MessageCircle, Download, Gavel, Clock, 
-  Share2, RotateCw, AlertOctagon, Send, Hash,
-  ChevronLeft, Wallet, CheckCircle2, MapPin
+  Share2, RotateCw, AlertOctagon, Send, Paperclip, 
+  MoreVertical, CheckCheck, Smile, Plus, Hash,
+  ChevronLeft, Wallet, CheckCircle2, MapPin, Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,23 +25,18 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 // --- MOCK DATA ---
-const ATHLETE = {
+const ATHLETE_MOCK = {
   id: "ATL-8821",
   name: "Jonathan Christie",
-  team: "PB Twinton",
+  team: "PB Djarum Official",
   rank: "PRO",
   points: 8500,
   winRate: 78,
   avatar: "https://github.com/shadcn.png",
-};
-
-const PRICES = {
-  BEGINNER: 200000,
-  INTERMEDIATE: 250000,
-  ADVANCE: 300000
 };
 
 const TEAM_CHATS = [
@@ -94,17 +90,17 @@ function PlayerDashboardFull() {
                     <div className="relative mb-6">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 blur-md opacity-50"></div>
                         <Avatar className="w-32 h-32 border-4 border-zinc-950 relative">
-                            <AvatarImage src={ATHLETE.avatar} className="object-cover"/>
+                            <AvatarImage src={ATHLETE_MOCK.avatar} className="object-cover"/>
                             <AvatarFallback>AT</AvatarFallback>
                         </Avatar>
                     </div>
 
-                    <h2 className="text-3xl font-black text-white text-center uppercase leading-none mb-2">{ATHLETE.name}</h2>
-                    <p className="text-sm font-bold text-zinc-400 mb-6">{ATHLETE.team}</p>
+                    <h2 className="text-3xl font-black text-white text-center uppercase leading-none mb-2">{ATHLETE_MOCK.name}</h2>
+                    <p className="text-sm font-bold text-zinc-400 mb-6">{ATHLETE_MOCK.team}</p>
                     
                     <div className="grid grid-cols-2 gap-2 w-full mb-auto">
                         <Badge variant="secondary" className="bg-zinc-900/50 border-zinc-700 justify-center py-1.5">Mens Singles</Badge>
-                        <Badge variant="secondary" className="bg-zinc-900/50 border-zinc-700 justify-center py-1.5">ID: {ATHLETE.id}</Badge>
+                        <Badge variant="secondary" className="bg-zinc-900/50 border-zinc-700 justify-center py-1.5">ID: {ATHLETE_MOCK.id}</Badge>
                     </div>
                     
                     <div className="w-full pt-4 border-t border-white/10 flex justify-center">
@@ -258,11 +254,15 @@ function PlayerDashboardFull() {
                 {renderDigitalID()}
             </div>
             <div className="lg:col-span-2 space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Stats */}
+                </div>
                 {renderCourtCall()}
                 {renderLiveScore()}
                 {renderSquadChat()}
             </div>
         </div>
+        {/* Tabs */}
         <Tabs defaultValue="history" className="w-full">
             <TabsList className="bg-zinc-900 p-1 rounded-2xl mb-6">
                 <TabsTrigger value="history" className="rounded-xl px-6 font-bold data-[state=active]:bg-zinc-800">Match History</TabsTrigger>
@@ -310,6 +310,50 @@ function PlayerDashboardFull() {
                 </div>
             </TabsContent>
         </Tabs>
+
+        {/* Protest Modal */}
+        <Dialog open={isProtestOpen} onOpenChange={setIsProtestOpen}>
+            <DialogContent className="bg-zinc-950 border-red-900/50 text-white rounded-[32px] max-w-md p-0 overflow-hidden shadow-2xl shadow-red-900/20">
+                <div className="p-6 border-b border-red-900/30 bg-red-950/10">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-3 text-red-500 uppercase font-black tracking-tight text-xl">
+                            <div className="p-2 bg-red-500/20 rounded-lg"><Gavel className="w-6 h-6"/></div>
+                            Ajukan Protes
+                        </DialogTitle>
+                        <DialogDescription className="text-zinc-400 text-xs mt-2">
+                            Laporan ini bersifat <strong>RAHASIA</strong> dan akan langsung ditangani oleh Tim Pencari Fakta (TPF).
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
+                <div className="p-6 space-y-5">
+                    <div className="space-y-2">
+                        <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Jenis Pelanggaran</Label>
+                        <Select>
+                            <SelectTrigger className="bg-black border-zinc-800 h-12 rounded-xl text-white"><SelectValue placeholder="Pilih..." /></SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                <SelectItem value="JOKI">Pencurian Umur / Joki</SelectItem>
+                                <SelectItem value="LEVEL">Manipulasi Level (Sandbagging)</SelectItem>
+                                <SelectItem value="ETHIC">Pelanggaran Etika / Sportivitas</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Bukti (Wajib)</Label>
+                        <div className="h-28 bg-black border-2 border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center text-zinc-600 hover:text-red-500 hover:border-red-500/50 cursor-pointer transition-colors">
+                            <Upload className="w-6 h-6 mb-2"/>
+                            <span className="text-xs font-bold">Upload Foto / Video</span>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Kronologi</Label>
+                        <Textarea placeholder="Jelaskan detail kejadian..." className="bg-black border-zinc-800 min-h-[100px] rounded-xl p-3 text-sm text-white resize-none"/>
+                    </div>
+                    <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-14 rounded-2xl shadow-lg shadow-red-900/20 text-lg mt-2">
+                        KIRIM LAPORAN
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
@@ -323,8 +367,6 @@ export default function PlayerPage() {
     const [isRegistrationComplete, setIsRegistrationComplete] = useState(false); 
   
     useEffect(() => {
-        setHasJoinedTeam(false); 
-        setIsRegistrationComplete(false);
         setIsLoading(false);
     }, []);
 
@@ -350,10 +392,7 @@ export default function PlayerPage() {
 
     const handleNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
     const handlePrevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-    const updateAgreement = (key: string) => {
-        setFormData(prev => ({ ...prev, agreements: { ...prev.agreements, [key]: !prev.agreements[key as keyof typeof prev.agreements] } }));
-    };
-
+    
     if (isLoading) {
         return (
             <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
@@ -361,7 +400,7 @@ export default function PlayerPage() {
             </div>
         );
     }
-    
+  
     // --- RENDER VIEW 1: GATE (INPUT CODE) ---
     if (!hasJoinedTeam) {
         return (
@@ -383,17 +422,20 @@ export default function PlayerPage() {
                 </div>
     
                 <div className="space-y-4">
-                    <Input 
-                        placeholder="CONTOH: TWIN-2026" 
-                        className="bg-black border-zinc-700 h-16 text-center text-2xl font-mono uppercase tracking-[0.2em] text-white rounded-2xl focus:border-cyan-500 focus:ring-0 placeholder:text-zinc-800"
-                        value={joinCode}
-                        onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                        maxLength={9}
-                    />
+                    <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity"></div>
+                        <Input 
+                            placeholder="CONTOH: TWIN-2026" 
+                            className="relative bg-black border-zinc-700 h-16 text-center text-2xl font-mono uppercase tracking-[0.2em] text-white rounded-2xl focus:border-cyan-500 focus:ring-0 placeholder:text-zinc-800 transition-all"
+                            value={joinCode}
+                            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                            maxLength={9}
+                        />
+                    </div>
                     <Button 
                         onClick={handleVerifyCode} 
                         disabled={isJoining || joinCode.length < 5} 
-                        className="w-full h-14 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-lg shadow-xl"
+                        className="w-full h-14 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-lg shadow-xl transition-transform active:scale-95"
                     >
                         {isJoining ? "VERIFYING..." : "ENTER TEAM SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
                     </Button>
@@ -430,32 +472,52 @@ export default function PlayerPage() {
               <Card className="bg-zinc-900 border-zinc-800 rounded-[40px] p-8 md:p-10 min-h-[400px] shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] pointer-events-none"></div>
                   <div className="relative z-10">
-                      {/* Wizard Content Here */}
-                      <div className="text-center py-16 animate-in fade-in zoom-in duration-300">
-                          <div className="w-20 h-20 bg-zinc-800 rounded-3xl mx-auto flex items-center justify-center mb-6 animate-pulse">
-                              <FileText className="w-10 h-10 text-zinc-600"/>
+                      {currentStep === 1 && (
+                          <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
+                              <div className="bg-red-950/30 border border-red-500/30 p-5 rounded-2xl flex gap-4 text-red-200 text-sm">
+                                  <AlertTriangle className="w-6 h-6 shrink-0 text-red-500 mt-1"/>
+                                  <div>
+                                      <p className="font-bold text-red-400 mb-1">DISCLAIMER PENTING</p>
+                                      <p>Pemalsuan data (umur/skill) akan menyebabkan <strong>Tim Diskualifikasi</strong> dan <strong>Uang Pendaftaran Hangus</strong>.</p>
+                                  </div>
+                              </div>
+                              <div className="space-y-4">
+                                  {['Saya menyatakan data yang diisi adalah BENAR.', 'Saya dalam kondisi SEHAT jasmani & rohani.', 'Saya menyetujui REGULASI pertandingan.', 'Saya mengizinkan PUBLIKASI foto/video.'].map((text, i) => (
+                                      <div key={i} className="flex gap-4 items-start p-4 bg-black/40 rounded-2xl border border-zinc-800/50 hover:border-zinc-700 cursor-pointer transition-colors" onClick={() => setFormData(p => ({...p, agreements: {...p.agreements, valid: true}}))}>
+                                          <Checkbox id={`chk-${i}`} checked={formData.agreements.valid} className="mt-1 border-zinc-600 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"/>
+                                          <Label htmlFor={`chk-${i}`} className="text-zinc-300 cursor-pointer leading-relaxed">{text}</Label>
+                                      </div>
+                                  ))}
+                              </div>
                           </div>
-                          <h3 className="text-white text-2xl font-black mb-2 uppercase">Step {currentStep}: Form Placeholder</h3>
-                          <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-8">
-                              This section is a placeholder for the full form content of Step {currentStep}.
-                          </p>
-                          {currentStep === 5 && (
-                              <Button 
-                                  onClick={() => setIsRegistrationComplete(true)} 
-                                  className="h-16 px-10 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-xl shadow-[0_0_30px_rgba(22,163,74,0.4)] transition-transform hover:scale-105"
-                              >
-                                  SUBMIT & FINISH <CheckCircle2 className="ml-3 w-6 h-6"/>
-                              </Button>
-                          )}
-                      </div>
+                      )}
+                      {currentStep > 1 && (
+                          <div className="text-center py-16 animate-in fade-in zoom-in duration-300">
+                              <div className="w-20 h-20 bg-zinc-800 rounded-3xl mx-auto flex items-center justify-center mb-6 animate-pulse">
+                                  <FileText className="w-10 h-10 text-zinc-600"/>
+                              </div>
+                              <h3 className="text-white text-2xl font-black mb-2 uppercase">Step {currentStep}: Form Placeholder</h3>
+                              <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-8">
+                                  Di tahap ini, form lengkap (Skill, Biodata, TPF, Pembayaran) akan muncul sesuai desain sebelumnya.
+                              </p>
+                              {currentStep === 5 && (
+                                  <Button 
+                                      onClick={() => setIsRegistrationComplete(true)} 
+                                      className="h-16 px-10 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-xl shadow-[0_0_30px_rgba(22,163,74,0.4)] transition-transform hover:scale-105"
+                                  >
+                                      SUBMIT & FINISH <CheckCircle2 className="ml-3 w-6 h-6"/>
+                                  </Button>
+                              )}
+                          </div>
+                      )}
                   </div>
               </Card>
   
-              <div className="flex justify-between mt-12 pt-6 border-t border-zinc-800">
+              <div className="flex justify-between mt-8 px-2">
                   <Button variant="ghost" onClick={handlePrevStep} disabled={currentStep===1} className="h-14 px-8 rounded-xl text-zinc-500 hover:text-white hover:bg-zinc-900 font-bold"><ChevronLeft className="w-5 h-5 mr-2"/> BACK</Button>
                   
                   {currentStep < 5 && (
-                      <Button onClick={handleNextStep} className="h-14 px-8 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-lg">
+                      <Button onClick={handleNextStep} className="h-14 px-8 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-lg">
                           NEXT STEP <ChevronRight className="w-5 h-5 ml-2"/>
                       </Button>
                   )}
@@ -490,6 +552,4 @@ export default function PlayerPage() {
           </div>
       </div>
     );
-  }
-
-    
+}
