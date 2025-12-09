@@ -190,7 +190,7 @@ function NavGroup({ label, items, currentPath }: { label: string, items: any[], 
             </SidebarGroupLabel>
             <SidebarMenu className="space-y-1">
                 {items.map((item) => {
-                    const isActive = currentPath.startsWith(item.url);
+                    const isActive = currentPath === item.url;
                     
                     return (
                         <SidebarMenuItem key={item.title}>
