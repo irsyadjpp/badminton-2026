@@ -4,7 +4,8 @@ import { useState } from "react";
 import { 
   Trophy, Users, Shield, QrCode, 
   Activity, Calendar, MapPin, Hash, 
-  ArrowRight, CheckCircle2, Copy, LogOut
+  ArrowRight, CheckCircle2, LogOut,
+  User, Mail, Phone, Home, Crown, RefreshCcw, Upload
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,44 +13,44 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import { QRCodeSVG } from "qrcode.react";
 
 // --- MOCK DATA ---
-const ATHLETE = {
+const ATHLETE_INITIAL_DATA = {
   id: "ATL-2026-007",
   name: "Jonathan Christie",
   rank: "PRO",
   points: 8500,
   winRate: 78,
   avatar: "https://github.com/shadcn.png",
-  // Initial State: No Team
   team: null as { name: string; logo: string; role: string } | null 
 };
 
-const UPCOMING_MATCH = {
-  event: "Babak Penyisihan - MS Open",
-  opponent: "Anthony Ginting",
-  court: "Court 1 (TV)",
-  time: "Besok, 10:00 WIB"
-};
+// State untuk simulasi Onboarding
+// FALSE = User baru, belum join tim
+const HAS_JOINED_TEAM_SIMULATION = false; 
+// FALSE = Data diri (KTP, dll) belum diisi
+const IS_PROFILE_COMPLETE_SIMULATION = false; 
+
 
 export default function AthleteDashboard() {
-  const [athlete, setAthlete] = useState(ATHLETE);
+  const [athlete, setAthlete] = useState(ATHLETE_INITIAL_DATA);
   const [joinCode, setJoinCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const { toast } = useToast();
+
+  // SIMULASI STATE ONBOARDING
+  const [hasJoinedTeam, setHasJoinedTeam] = useState(HAS_JOINED_TEAM_SIMULATION);
+  const [isProfileComplete, setIsProfileComplete] = useState(IS_PROFILE_COMPLETE_SIMULATION);
+
 
   // Simulasi Join Team
   const handleJoinTeam = () => {
     if (!joinCode) return;
     setIsJoining(true);
 
-    // Mock API Call
     setTimeout(() => {
       setIsJoining(false);
       if (joinCode === "DJA-8821") {
@@ -61,53 +62,118 @@ export default function AthleteDashboard() {
             role: "Member"
           }
         }));
+        setHasJoinedTeam(true); // Pindah ke Step 2
         setShowSuccessModal(true);
       } else {
-        toast({ title: "Kode Tim Tidak Valid!", variant: "destructive" });
+        alert("Kode Tim Tidak Valid!");
       }
     }, 1500);
   };
+  
+  // Simulasi Submit Data Diri
+  const handleSubmitProfile = () => {
+    // Logic validasi form...
+    setIsProfileComplete(true); // Pindah ke Step 3 (Full Dashboard)
+  }
 
-  return (
-    <div className="space-y-8 p-4 md:p-8 font-body pb-24 max-w-5xl mx-auto">
-      
-      {/* --- HEADER --- */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-            <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="rounded-full px-3 py-1 border-cyan-500 text-cyan-500 bg-cyan-500/10 backdrop-blur-md">
-                    <Activity className="w-3 h-3 mr-2" /> ATHLETE PORTAL
-                </Badge>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black font-headline uppercase tracking-tighter text-white">
-                Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">{athlete.name.split(' ')[0]}</span>
-            </h1>
-            <p className="text-zinc-400 mt-2 text-lg">
-                Kelola profil, jadwal tanding, dan keanggotaan tim kamu di sini.
-            </p>
+  // --- RENDERING ONBOARDING STEPS ---
+  
+  // STEP 1: JOIN TEAM
+  const renderJoinTeam = () => (
+    <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] overflow-hidden relative border-dashed border-2 p-12 max-w-xl mx-auto">
+      <CardContent className="space-y-6">
+        <div className="flex items-center gap-4 text-center mx-auto max-w-md">
+            <h3 className="text-2xl font-black text-white">Squad Synchronization</h3>
         </div>
-        
-        {/* ID CARD MINI */}
-        <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center gap-3">
-            <div className="bg-white p-1 rounded-lg">
-                <QrCode className="w-8 h-8 text-black"/>
+        <p className="text-zinc-400 text-sm text-center">
+            Minta <strong>Kode Unik Komunitas</strong> dari manajer/kapten tim Anda untuk mendaftar ke kompetisi.
+        </p>
+        <div className="w-full bg-black p-6 rounded-3xl border border-zinc-800 flex flex-col gap-4">
+            <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase ml-1">Input Team Token</label>
+                <div className="relative">
+                    <Hash className="absolute left-4 top-4 w-5 h-5 text-zinc-500"/>
+                    <Input 
+                        placeholder="XXX-0000" 
+                        className="h-14 pl-12 rounded-2xl bg-zinc-900 border-zinc-700 text-white font-mono text-lg uppercase tracking-widest focus:ring-cyan-500 focus:border-cyan-500"
+                        value={joinCode}
+                        onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                        maxLength={8}
+                    />
+                </div>
             </div>
-            <div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase">Player ID</p>
-                <p className="text-sm font-mono font-bold text-white tracking-wider">{athlete.id}</p>
-            </div>
+            <Button 
+                onClick={handleJoinTeam}
+                disabled={!joinCode || isJoining}
+                className="h-14 rounded-2xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-lg shadow-lg shadow-cyan-900/20"
+            >
+                {isJoining ? "SYNCING..." : "JOIN SQUAD"}
+            </Button>
         </div>
-      </div>
+      </CardContent>
+    </Card>
+  );
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  // STEP 2: COMPLETE PROFILE
+  const renderCompleteProfile = () => (
+    <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] p-8 max-w-3xl mx-auto space-y-6">
+        <header className="text-center space-y-2">
+            <RefreshCcw className="w-10 h-10 text-indigo-500 mx-auto animate-spin-slow"/>
+            <h3 className="text-3xl font-black text-white">Final Step: Complete Profile</h3>
+            <p className="text-zinc-400">Data ini dibutuhkan untuk verifikasi dokumen dan pengelompokan kategori.</p>
+        </header>
+
+        <div className="space-y-6 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Nama Lengkap (Sesuai KTP)</label>
+                    <Input placeholder="Nama Anda" className="bg-black border-zinc-800 h-12 rounded-xl text-white" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Tanggal Lahir</label>
+                    <Input type="date" className="bg-black border-zinc-800 h-12 rounded-xl text-white" />
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Kategori Diikuti</label>
+                    <Select>
+                        <SelectTrigger className="bg-black border-zinc-800 h-12 rounded-xl text-white"><SelectValue placeholder="Pilih Kelas Pertandingan" /></SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                            <SelectItem value="MS">MS Open</SelectItem>
+                            <SelectItem value="WD">WD U-19</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-zinc-500 ml-1">No. HP / WhatsApp</label>
+                    <Input placeholder="08xx-xxxx-xxxx" className="bg-black border-zinc-800 h-12 rounded-xl text-white" />
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Upload Foto Profil Terbaru</label>
+                <div className="h-24 bg-black border-2 border-dashed border-zinc-800 rounded-xl flex items-center justify-center text-zinc-600 hover:text-cyan-500 cursor-pointer">
+                    <Upload className="w-6 h-6 mr-2"/> Tap to Upload
+                </div>
+            </div>
+
+            <Button onClick={handleSubmitProfile} className="w-full h-14 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg">
+                SUBMIT & START VERIFICATION
+            </Button>
+        </div>
+    </Card>
+  );
+
+  // STEP 3: FULL DASHBOARD (If profile complete)
+  const renderFullDashboard = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
          
-         {/* LEFT: PLAYER CARD (1/3) */}
-         <div className="lg:col-span-1 space-y-6">
-            <Card className="bg-gradient-to-b from-zinc-900 to-black border-zinc-800 rounded-[32px] overflow-hidden relative group shadow-2xl">
-                {/* Background FX */}
-                <div className="absolute inset-0 bg-[url('/images/grid-pattern.png')] opacity-10 pointer-events-none"></div>
-                <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/20 rounded-full blur-[80px]"></div>
-
+        {/* LEFT: PLAYER CARD (1/3) */}
+        <div className="lg:col-span-1 space-y-6">
+            {/* Player Card Content */}
+            <Card className="bg-gradient-to-b from-zinc-900 to-black border-zinc-800 rounded-[32px] overflow-hidden relative shadow-2xl">
                 <CardContent className="p-8 text-center relative z-10">
                     <div className="relative inline-block">
                         <Avatar className="w-32 h-32 border-4 border-zinc-900 shadow-xl mb-4">
@@ -118,7 +184,6 @@ export default function AthleteDashboard() {
                             {athlete.rank}
                         </Badge>
                     </div>
-                    
                     <h2 className="text-2xl font-black text-white uppercase leading-tight mb-1">{athlete.name}</h2>
                     <p className="text-zinc-500 text-sm font-bold mb-6">Mens Singles Specialist</p>
 
@@ -135,150 +200,121 @@ export default function AthleteDashboard() {
                     </div>
                 </CardContent>
             </Card>
+        </div>
 
-            {/* UPCOMING MATCH WIDGET */}
-            <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] p-6 relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
-                <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-red-500"/> Next Match
-                </h3>
-                <div className="space-y-1">
-                    <p className="text-lg font-bold text-white">{UPCOMING_MATCH.opponent}</p>
-                    <p className="text-xs text-zinc-400">{UPCOMING_MATCH.event}</p>
-                    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-zinc-800/50">
-                        <Badge variant="outline" className="text-[10px] border-zinc-700 text-zinc-300">{UPCOMING_MATCH.court}</Badge>
-                        <span className="text-[10px] text-red-400 font-bold animate-pulse">{UPCOMING_MATCH.time}</span>
+        {/* RIGHT: TEAM & HISTORY (2/3) */}
+        <div className="lg:col-span-2 space-y-6">
+            <Card className="bg-indigo-950/20 border-indigo-500/30 rounded-[32px] overflow-hidden relative">
+                <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-6">
+                        <div className="h-20 w-20 bg-white p-2 rounded-2xl shadow-lg transform -rotate-3">
+                            <img src={athlete.team?.logo} alt="Team Logo" className="w-full h-full object-contain"/>
+                        </div>
+                        <div>
+                            <Badge className="bg-indigo-500 hover:bg-indigo-600 text-white mb-2">MY SQUAD</Badge>
+                            <h3 className="text-3xl font-black text-white">{athlete.team?.name}</h3>
+                            <p className="text-indigo-300 text-sm font-bold flex items-center gap-2">
+                                <Shield className="w-4 h-4"/> Registered as {athlete.team?.role}
+                            </p>
+                        </div>
                     </div>
-                </div>
+                    <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 h-12 rounded-xl">
+                        <User className="w-4 h-4 mr-2"/> MANAGE PROFILE
+                    </Button>
+                </CardContent>
             </Card>
-         </div>
 
-         {/* RIGHT: TEAM & ACTIONS (2/3) */}
-         <div className="lg:col-span-2 space-y-6">
-            
-            {/* --- TEAM STATUS SECTION --- */}
-            {athlete.team ? (
-                // STATE: ALREADY IN TEAM
-                <Card className="bg-indigo-950/20 border-indigo-500/30 rounded-[32px] overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]"></div>
-                    <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-                        <div className="flex items-center gap-6">
-                            <div className="h-20 w-20 bg-white p-2 rounded-2xl shadow-lg transform -rotate-3">
-                                <img src={athlete.team.logo} alt="Team Logo" className="w-full h-full object-contain"/>
-                            </div>
-                            <div>
-                                <Badge className="bg-indigo-500 hover:bg-indigo-600 text-white mb-2">MY SQUAD</Badge>
-                                <h3 className="text-3xl font-black text-white">{athlete.team.name}</h3>
-                                <p className="text-indigo-300 text-sm font-bold flex items-center gap-2">
-                                    <Shield className="w-4 h-4"/> Registered as {athlete.team.role}
-                                </p>
-                            </div>
-                        </div>
-                        <Button variant="outline" className="border-red-500/30 text-red-500 hover:bg-red-950/30 hover:text-red-400 h-12 rounded-xl">
-                            <LogOut className="w-4 h-4 mr-2"/> LEAVE TEAM
-                        </Button>
-                    </CardContent>
-                </Card>
-            ) : (
-                // STATE: NO TEAM (JOIN VIA CODE)
-                <Card className="bg-zinc-900 border-zinc-800 rounded-[32px] overflow-hidden relative border-dashed border-2">
-                    <CardContent className="p-8">
-                        <div className="flex flex-col md:flex-row gap-8 items-center">
-                            <div className="flex-1 space-y-2 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-xs font-bold mb-2">
-                                    <Users className="w-4 h-4"/> NO TEAM AFFILIATION
-                                </div>
-                                <h3 className="text-2xl font-black text-white">Join a Community?</h3>
-                                <p className="text-zinc-400 text-sm">
-                                    Minta <strong>Kode Unik Tim</strong> (e.g., DJA-8821) kepada manajer kamu untuk masuk ke roster secara otomatis.
-                                </p>
-                            </div>
-                            
-                            <div className="w-full md:w-auto bg-black p-6 rounded-3xl border border-zinc-800 flex flex-col gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-zinc-500 uppercase ml-1">Input Team Code</label>
-                                    <div className="relative">
-                                        <Hash className="absolute left-4 top-4 w-5 h-5 text-zinc-500"/>
-                                        <Input 
-                                            placeholder="XXX-0000" 
-                                            className="h-14 pl-12 rounded-2xl bg-zinc-900 border-zinc-700 text-white font-mono text-lg uppercase tracking-widest focus:ring-cyan-500 focus:border-cyan-500"
-                                            value={joinCode}
-                                            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                                            maxLength={8}
-                                        />
-                                    </div>
-                                </div>
-                                <Button 
-                                    onClick={handleJoinTeam}
-                                    disabled={!joinCode || isJoining}
-                                    className="h-14 rounded-2xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-lg shadow-lg shadow-cyan-900/20"
-                                >
-                                    {isJoining ? "SYNCING..." : "JOIN SQUAD"}
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* --- RECENT HISTORY --- */}
             <Card className="bg-zinc-900/50 border border-zinc-800/50 rounded-[32px] flex-1">
                 <div className="p-6 border-b border-zinc-800">
                     <h3 className="text-sm font-black text-zinc-500 uppercase tracking-widest">Performance History</h3>
                 </div>
                 <ScrollArea className="h-64">
                     <div className="p-4 space-y-3">
-                        {[1,2,3].map((i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-[20px] hover:bg-zinc-800 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className={cn("w-2 h-12 rounded-full", i === 1 ? "bg-red-500" : "bg-green-500")}></div>
-                                    <div>
-                                        <p className="text-sm font-bold text-white">vs. Gideon/Sukamuljo</p>
-                                        <p className="text-xs text-zinc-500">MD Open • Round of 16</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className={cn("text-lg font-black font-mono", i === 1 ? "text-red-500" : "text-green-500")}>
-                                        {i === 1 ? "L" : "W"} 19-21
-                                    </p>
-                                    <p className="text-[10px] text-zinc-600">12 Oct 2025</p>
+                        {/* Mock History Items */}
+                        <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-[20px] hover:bg-zinc-800 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-2 h-12 rounded-full bg-green-500"></div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">vs. Gideon/Sukamuljo</p>
+                                    <p className="text-xs text-zinc-500">MD Open • Round of 16</p>
                                 </div>
                             </div>
-                        ))}
+                            <div className="text-right">
+                                <p className="text-lg font-black font-mono text-green-500">W 21-19</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-[20px] hover:bg-zinc-800 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-2 h-12 rounded-full bg-red-500"></div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">vs. Lee Chong Wei</p>
+                                    <p className="text-xs text-zinc-500">MS Open • Quarter Final</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-lg font-black font-mono text-red-500">L 15-21</p>
+                            </div>
+                        </div>
                     </div>
                 </ScrollArea>
             </Card>
+        </div>
+    </div>
+  );
 
-         </div>
+  // --- MAIN RENDER LOGIC ---
+  let mainContent;
+  if (!hasJoinedTeam) {
+    mainContent = renderJoinTeam();
+  } else if (!isProfileComplete) {
+    mainContent = renderCompleteProfile();
+  } else {
+    mainContent = renderFullDashboard();
+  }
 
+  return (
+    <div className="space-y-8 p-4 md:p-8 font-body pb-24 max-w-5xl mx-auto">
+      
+      {/* Dynamic Header */}
+      <div className="flex justify-between items-start md:items-end gap-6 shrink-0">
+        <div>
+            <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="rounded-full px-3 py-1 border-cyan-500 text-cyan-500 bg-cyan-500/10 backdrop-blur-md">
+                    <Activity className="w-3 h-3 mr-2" /> ATHLETE PORTAL
+                </Badge>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-black font-headline uppercase tracking-tighter text-white">
+                Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">{athlete.name.split(' ')[0]}</span>
+            </h1>
+        </div>
+        <Button variant="outline" className="h-12 rounded-full border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+            <LogOut className="w-4 h-4 mr-2"/> Logout
+        </Button>
       </div>
 
-      {/* --- SUCCESS MODAL --- */}
+      {mainContent}
+
+      {/* --- SUCCESS MODAL (for Joining Team) --- */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="bg-zinc-950 border-zinc-800 text-white rounded-[40px] max-w-sm p-0 overflow-hidden text-center">
             <div className="p-8 flex flex-col items-center">
                 <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 animate-bounce">
                     <CheckCircle2 className="w-12 h-12 text-green-500"/>
                 </div>
-                <h2 className="text-2xl font-black uppercase mb-2">Welcome Aboard!</h2>
+                <h2 className="text-2xl font-black uppercase mb-2">Squad Sync Successful!</h2>
                 <p className="text-zinc-400 text-sm mb-6">
-                    Kamu berhasil bergabung dengan skuad:
-                    <br/><strong className="text-white text-lg">PB Djarum Official</strong>
+                    Anda berhasil bergabung dengan:
+                    <br/><strong className="text-white text-lg">{athlete.team?.name}</strong>
                 </p>
-                <div className="bg-zinc-900 p-4 rounded-2xl w-full border border-zinc-800 mb-6">
-                    <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Your Role</p>
-                    <p className="text-cyan-400 font-bold">Registered Athlete</p>
-                </div>
                 <Button 
                     className="w-full h-14 rounded-2xl bg-white text-black font-bold hover:bg-zinc-200"
                     onClick={() => setShowSuccessModal(false)}
                 >
-                    GO TO DASHBOARD
+                    LANJUTKAN PENGISIAN DATA
                 </Button>
             </div>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
