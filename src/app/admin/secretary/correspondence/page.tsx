@@ -167,7 +167,7 @@ export default function CorrespondencePage() {
                             key={mail.id} 
                             onClick={() => setSelectedMail(mail)}
                             className={cn(
-                                "group p-4 rounded-[20px] border cursor-pointer transition-all hover:scale-[1.02]",
+                                "group relative p-4 rounded-[20px] border cursor-pointer transition-all hover:scale-[1.02]",
                                 selectedMail?.id === mail.id 
                                     ? "bg-zinc-800 border-cyan-500/50 shadow-lg" 
                                     : "bg-zinc-950 border-zinc-800 hover:border-zinc-700",
