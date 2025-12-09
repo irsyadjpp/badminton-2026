@@ -19,6 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 // Import komponen Full Dashboard yang sudah kita buat sebelumnya
 // Anggap saja kode panjang tadi kita simpan di komponen terpisah agar rapi
@@ -213,11 +215,27 @@ export default function PlayerPage() {
                     <AlertTriangle className="w-5 h-5 shrink-0 text-red-500"/>
                     <p>Data palsu = Diskualifikasi Tim & Blacklist.</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Checkbox id="agg" className="border-white"/>
-                    <Label htmlFor="agg" className="text-white">Saya menyetujui aturan BCC 2026.</Label>
+                <div className="space-y-4">
+                    {['valid', 'health', 'rules', 'media'].map((key) => (
+                        <div key={key} className="flex items-start space-x-3 p-3 hover:bg-zinc-800/50 rounded-xl transition-colors cursor-pointer" onClick={() => setFormData(prev => ({...prev, agreements: {...prev.agreements, [key]: !prev.agreements[key as keyof typeof prev.agreements]}}))}>
+                            <Checkbox checked={formData.agreements[key as keyof typeof formData.agreements]} className="mt-1 data-[state=checked]:bg-cyan-600 border-zinc-600"/>
+                            <div>
+                                <Label className="font-bold text-white cursor-pointer">
+                                    {key === 'valid' && "Validitas Data (Anti Joki/Sandbagging)"}
+                                    {key === 'health' && "Kondisi Kesehatan Fisik"}
+                                    {key === 'rules' && "Regulasi & Keputusan Wasit"}
+                                    {key === 'media' && "Hak Publikasi Dokumentasi"}
+                                </Label>
+                                <p className="text-xs text-zinc-400 mt-1">
+                                    {key === 'valid' && "Saya menyatakan data benar. Siap didiskualifikasi jika palsu."}
+                                    {key === 'health' && "Sehat jasmani rohani. Panitia tidak bertanggung jawab atas cedera berat."}
+                                    {key === 'rules' && "Mematuhi segala peraturan pertandingan BCC 2026."}
+                                    {key === 'media' && "Mengizinkan foto/video saya digunakan untuk keperluan event."}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                <Button onClick={() => setCurrentStep(2)} className="w-full h-12 bg-white text-black font-bold">NEXT: PILIH SKILL</Button>
             </div>
         </Card>
       )}
