@@ -254,10 +254,13 @@ export default function PlayerPage() {
                                         <Input className="bg-black border-zinc-800 pl-10 h-12 rounded-xl" placeholder="@username" value={formData.tpf.ig} onChange={(e) => setFormData({...formData, tpf: {...formData.tpf, ig: e.target.value}})} />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                                    <div className="h-24 bg-black border-2 border-dashed border-zinc-800 rounded-xl flex flex-col items-center justify-center text-zinc-600 hover:text-white cursor-pointer"><Upload className="w-5 h-5 mb-1"/><span className="text-[9px] font-bold uppercase px-2 text-center">FOTO KTP</span></div>
-                                    <div className="h-24 bg-black border-2 border-dashed border-zinc-800 rounded-xl flex flex-col items-center justify-center text-zinc-600 hover:text-white cursor-pointer"><Upload className="w-5 h-5 mb-1"/><span className="text-[9px] font-bold uppercase px-2 text-center">FOTO DIRI</span></div>
-                                    <div className="h-24 bg-black border-2 border-dashed border-zinc-800 rounded-xl flex flex-col items-center justify-center text-zinc-600 hover:text-white cursor-pointer"><Upload className="w-5 h-5 mb-1"/><span className="text-[9px] font-bold uppercase px-2 text-center">SS FOLLOW IG</span></div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-zinc-500 font-bold uppercase">Riwayat Prestasi</Label>
+                                    <Textarea className="bg-black border-zinc-800 min-h-[80px] rounded-xl" placeholder="Sebutkan turnamen terakhir..." value={formData.tpf.history} onChange={(e) => setFormData({...formData, tpf: {...formData.tpf, history: e.target.value}})} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 pt-2">
+                                    <div className="h-20 bg-black border-2 border-dashed border-zinc-800 rounded-xl flex flex-col items-center justify-center text-zinc-600 hover:text-white cursor-pointer"><Upload className="w-4 h-4 mb-1"/><span className="text-[9px] font-bold uppercase">Foto KTP</span></div>
+                                    <div className="h-20 bg-black border-2 border-dashed border-zinc-800 rounded-xl flex flex-col items-center justify-center text-zinc-600 hover:text-white cursor-pointer"><Upload className="w-4 h-4 mb-1"/><span className="text-[9px] font-bold uppercase">Foto Diri</span></div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -351,11 +354,11 @@ export default function PlayerPage() {
                     disabled={isJoining || joinCode.length < 5} 
                     className="w-full h-14 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-lg shadow-xl"
                 >
-                    {isJoining ? "VERIFYING..." : "ENTER TEAM SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
+                    {isJoining ? "VERIFYING..." : "ENTER SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
                 </Button>
             </div>
-          </div>
-        </Card>
+        </div>
+      </Card>
       <p className="text-zinc-600 text-xs mt-8 font-mono relative z-10">BCC 2026 • OFFICIAL REGISTRATION PORTAL</p>
     </div>
     );
@@ -386,7 +389,7 @@ export default function PlayerPage() {
                         SUBMIT REGISTRATION <CheckCircle2 className="ml-3 w-5 h-5"/>
                     </Button>
                 ) : (
-                    <Button onClick={() => setCurrentStep(p => Math.min(p + 1, 5))} disabled={currentStep === 1 && !Object.values(formData.agreements).every(Boolean)} className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-zinc-200 font-bold text-lg">
+                    <Button onClick={handleNextStep} disabled={currentStep === 1 && !Object.values(formData.agreements).every(Boolean)} className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-zinc-200 font-bold text-lg">
                         NEXT STEP <ChevronRight className="w-5 h-5 ml-2"/>
                     </Button>
                 )}
