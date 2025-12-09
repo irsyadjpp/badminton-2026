@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -327,12 +328,3 @@ export default function MLOHelpdeskPage() {
     </div>
   );
 }
-```
-
-### Highlights Desain "Participant Support Hub":
-
-1.  **Ticket System UI:** Mengadopsi tampilan aplikasi *Customer Service* (seperti Zendesk/Intercom) yang familiar namun dengan sentuhan sporty (Gelap & Aksen Neon Cyan).
-2.  **Visual Categories:** Setiap tiket memiliki ikon kategori yang jelas (Palu Hakim untuk Sengketa, Paket untuk Lost & Found) memudahkan identifikasi jenis masalah.
-3.  **Conversation Thread:** Detail tiket ditampilkan dalam format *chat bubble*, karena MLO seringkali perlu mencatat *feedback* balik ("Kami sudah cek...", "Tolong tunggu...").
-4.  **Action Oriented:** Tombol "Escalate to Referee" dan "Mark Resolved" dibuat menonjol agar MLO bisa cepat menutup kasus atau meneruskannya ke atasan sesuai SOP.
-5.  **Search & Filter:** Fitur pencarian yang kuat di sisi kiri untuk menemukan tiket lama dengan cepat.
