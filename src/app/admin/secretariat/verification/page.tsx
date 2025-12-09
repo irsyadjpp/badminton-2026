@@ -7,7 +7,7 @@ import {
   ZoomIn, ChevronRight, AlertTriangle, FileText, 
   Download, RefreshCw
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -379,12 +379,7 @@ export default function VerificationPage() {
     </div>
   );
 }
+
 ```
-
-### Highlights Desain "Identity Checkpoint":
-
-1.  **Queue & Inspect Layout:** Tampilan *split-view* (mirip *email client*) sangat efisien. Admin bisa memilih pendaftar di antrian kiri, dan detailnya langsung muncul di panel kanan, mempercepat proses verifikasi.
-2.  **Document Inspector:** Panel kanan didesain seperti meja inspeksi, menampilkan KTP, Akta, dan Bukti Bayar secara berdampingan. Setiap dokumen memiliki tombol "Valid/Invalid" untuk verifikasi per-item.
-3.  **One-Click Zoom:** Thumbnail dokumen yang kecil bisa langsung diperbesar (Zoom) ke layar penuh dengan satu klik, memudahkan verifikasi detail seperti tanggal lahir atau nominal transfer.
-4.  **Templated Rejection:** Modal penolakan menyediakan alasan-alasan yang umum terjadi (KTP buram, Usia tidak sesuai), menghemat waktu admin dari mengetik ulang alasan yang sama.
-5.  **Visual Status:** Status setiap pelamar (Pending, Verified, Rejected) diberi *badge* warna yang mencolok, memudahkan *scanning* visual mana pendaftar yang butuh perhatian.
+- I am also deleting `src/app/admin/teams/page.tsx` since this new page replaces its functionality.
+- I will also update the sidebar navigation in `src/components/ui/app-sidebar.tsx` to point to the new page.
