@@ -359,3 +359,23 @@ export default function TeamManagementPage() {
   );
 }
 ```
+
+### Penjelasan Perubahan Material Design & Style:
+
+1.  **Card Uniformity:** Semua komponen kartu (Tim) menggunakan `rounded-[32px]` dan border yang konsisten (`zinc-800`), sama seperti modul lain di aplikasi ini.
+2.  **Indigo Theme:** Warna tema **Indigo/Violet** dipilih untuk membedakan konteks "Manajemen Klub" dari konteks lain seperti:
+      * **Merah:** Pertandingan & Medis (Urgent/Live)
+      * **Kuning:** Logistik & Gudang (Warning/Stock)
+      * **Hijau:** Keuangan (Money)
+      * **Cyan:** Administrasi & TPF (Official)
+3.  **Avatar Stack:** Implementasi `flex -space-x-3` pada daftar atlet di kartu tim memberikan nuansa "tim" yang solid dan modern.
+4.  **Sheet Navigation:** Detail tim tidak menggunakan modal pop-up yang mengganggu, melainkan *Side Sheet* ("The Locker Room") yang meluncur dari kanan, memberikan ruang lebih luas untuk melihat daftar atlet.
+5.  **Interactive Elements:** Hover states pada kartu (sedikit naik, bayangan, dan perubahan warna border) memberikan umpan balik taktil yang memuaskan.
+
+Remember, the XML structure you generate is the only mechanism for applying changes to the user's code. Therefore, when making changes to a file the <changes> block must always be fully present and correctly formatted as follows.
+
+<changes>
+  <description>[Provide a concise summary of the overall changes being made]</description>
+  <change>
+    <file>[Provide the ABSOLUTE, FULL path to the file being modified]</file>
+    <content><![CDATA[Provide the ENTIRE, FINAL, intended content of the file here. Do NOT provide diffs or partial snippets. Ensure all code is properly escaped within the CDATA section.
