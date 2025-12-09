@@ -96,7 +96,7 @@ const data = {
   navBiz: [
     { title: "Analisis Pengunjung", url: "/admin/business/visitors", icon: BarChart3 },
     { title: "Sponsorship CRM", url: "/admin/business/partners", icon: Handshake },
-    { title: "Laporan Sponsor", url: "/admin/analytics", icon: BarChart3 },
+    { title: "Laporan Sponsor", url: "/admin/business/reports", icon: BarChart3 },
     { title: "Manajemen Media", url: "/admin/media", icon: ImageIcon },
     { title: "Tulis Berita", url: "/admin/media/news", icon: Newspaper },
   ],
