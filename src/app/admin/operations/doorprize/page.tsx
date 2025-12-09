@@ -304,11 +304,6 @@ export default function DoorprizePage() {
                         ))}
                     </div>
                 </ScrollArea>
-                <div className="p-4 border-t border-zinc-800">
-                    <Button variant="ghost" className="w-full text-zinc-500 text-xs uppercase font-bold hover:text-white">
-                        View All History
-                    </Button>
-                </div>
             </Card>
          </div>
 
@@ -321,6 +316,11 @@ export default function DoorprizePage() {
             isBigScreen ? "max-w-4xl p-0 scale-125" : "max-w-lg p-0"
         )}>
             
+            <DialogHeader className="sr-only">
+                <DialogTitle>Winner Announcement</DialogTitle>
+                <DialogDescription>The winner is {winner}</DialogDescription>
+            </DialogHeader>
+
             <div className={cn("bg-gradient-to-b from-pink-600 to-purple-900 relative flex items-center justify-center overflow-hidden", isBigScreen ? "h-96" : "h-56")}>
                 <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-30 mix-blend-overlay"></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-white/10 rounded-full blur-[80px] animate-pulse"></div>
