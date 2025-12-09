@@ -5,7 +5,8 @@ import {
   Users, Shield, Trophy, Search, 
   Plus, Filter, MoreHorizontal, MapPin, 
   UserPlus, Mail, Phone, Edit3, Trash2, 
-  Crown, Medal, ChevronRight
+  Crown, Medal, ChevronRight, Star,
+  Briefcase
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 // --- MOCK DATA ---
@@ -23,61 +26,88 @@ const TEAMS = [
   { 
     id: "TM-001", 
     name: "PB Djarum", 
-    origin: "Kudus, Jawa Tengah", 
+    origin: "Kudus", 
     logo: "/logos/djarum.png",
     manager: "Fung Permadi",
-    stats: { athletes: 24, officials: 5 },
-    status: "VERIFIED",
+    status: "VERIFIED", 
     tier: "PRO",
-    athletes: [
-      { name: "Kevin Sanjaya", rank: 1, img: "https://github.com/shadcn.png" },
-      { name: "Siti Fadia", rank: 5, img: "" },
-      { name: "Praveen Jordan", rank: 8, img: "" },
-      { name: "Melati Daeva", rank: 9, img: "" },
-      { name: "Dejan F.", rank: 12, img: "" },
-    ]
+    performance: 95, // Replacement for XP
+    athletes: 24,
+    officials: 5,
+    contact: "0811-xxxx-xxxx",
+    rank: 1
   },
   { 
     id: "TM-002", 
     name: "PB Jaya Raya", 
-    origin: "Jakarta Selatan", 
+    origin: "Jakarta", 
     logo: "/logos/jayaraya.png",
     manager: "Imelda Wiguna",
-    stats: { athletes: 18, officials: 4 },
-    status: "VERIFIED",
+    status: "VERIFIED", 
     tier: "PRO",
-    athletes: [
-      { name: "Hendra Setiawan", rank: 2, img: "" },
-      { name: "Marcus Gideon", rank: 3, img: "" },
-    ]
+    performance: 92,
+    athletes: 18,
+    officials: 4,
+    contact: "0812-xxxx-xxxx",
+    rank: 2
   },
   { 
     id: "TM-003", 
-    name: "SGS PLN Bandung", 
-    origin: "Bandung, Jawa Barat", 
+    name: "SGS PLN", 
+    origin: "Bandung", 
     logo: "/logos/sgs.png",
     manager: "Taufik Hidayat",
-    stats: { athletes: 12, officials: 3 },
-    status: "PENDING",
+    status: "PENDING", 
     tier: "AMATEUR",
-    athletes: [
-      { name: "Anthony Ginting", rank: 4, img: "" },
-    ]
+    performance: 75,
+    athletes: 12,
+    officials: 3,
+    contact: "0857-xxxx-xxxx",
+    rank: 5
+  },
+  { 
+    id: "TM-004", 
+    name: "Exist Jakarta", 
+    origin: "Jakarta", 
+    logo: "/logos/exist.png",
+    manager: "Alvent Yulianto",
+    status: "VERIFIED", 
+    tier: "PRO",
+    performance: 88,
+    athletes: 15,
+    officials: 4,
+    contact: "0813-xxxx-xxxx",
+    rank: 3
   },
 ];
 
-const CATEGORIES = ["ALL", "PRO CLUBS", "AMATEUR", "SCHOOLS"];
+const STATS = {
+  totalTeams: 24,
+  totalAthletes: 156,
+  pendingVerif: 3
+};
 
 export default function TeamManagementPage() {
   const [selectedTeam, setSelectedTeam] = useState<typeof TEAMS[0] | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredTeams = TEAMS.filter(t => 
-    t.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (activeFilter === 'ALL' || (activeFilter === 'PRO CLUBS' && t.tier === 'PRO'))
-  );
+  // Helper Styles (Sama seperti Volunteer tapi tema Indigo)
+  const getStatusColor = (s: string) => {
+    switch(s) {
+        case 'VERIFIED': return "text-green-500 bg-green-500/10 border-green-500/20";
+        case 'PENDING': return "text-yellow-500 bg-yellow-500/10 border-yellow-500/20 animate-pulse";
+        default: return "text-zinc-500 bg-zinc-500/10 border-zinc-500/20";
+    }
+  };
+
+  const getTierBadge = (tier: string) => {
+    switch(tier) {
+        case 'PRO': return "bg-indigo-500/20 text-indigo-400 border-indigo-500/30";
+        case 'AMATEUR': return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
+        default: return "bg-zinc-800 text-zinc-400 border-zinc-700";
+    }
+  };
 
   return (
     <div className="space-y-8 p-4 md:p-8 font-body pb-24 h-[calc(100vh-64px)] flex flex-col">
@@ -94,194 +124,216 @@ export default function TeamManagementPage() {
                 Squad <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-600">Roster</span>
             </h1>
             <p className="text-zinc-400 mt-2 max-w-xl text-lg">
-                Manajemen kontingen, klub, dan validasi atlet.
+                Manajemen klub, kontingen, dan validasi atlet.
             </p>
         </div>
 
         <Button 
             onClick={() => setIsAddOpen(true)}
-            className="h-14 rounded-full px-8 bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-transform active:scale-95"
+            className="h-14 rounded-full px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-transform active:scale-95"
         >
-            <Plus className="mr-2 w-5 h-5"/> REGISTER SQUAD
+            <Plus className="mr-2 w-5 h-5"/> REGISTER TEAM
         </Button>
       </div>
 
-      {/* --- FILTER & SEARCH BAR --- */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-zinc-900/50 p-2 rounded-[24px] border border-zinc-800/50 backdrop-blur-sm shrink-0">
-         <div className="flex gap-2 overflow-x-auto w-full md:w-auto p-1 no-scrollbar">
-            {CATEGORIES.map((cat) => (
-                <button
-                    key={cat}
-                    onClick={() => setActiveFilter(cat)}
-                    className={cn(
-                        "px-6 h-10 rounded-full text-sm font-bold transition-all whitespace-nowrap border border-transparent",
-                        activeFilter === cat 
-                            ? "bg-zinc-800 text-white border-zinc-700 shadow-md" 
-                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
-                    )}
-                >
-                    {cat}
-                </button>
-            ))}
-         </div>
-
-         <div className="relative w-full md:w-80">
-            <Search className="absolute left-4 top-3 w-5 h-5 text-zinc-500" />
-            <input 
-                type="text" 
-                placeholder="Find club or manager..." 
-                className="w-full bg-zinc-950 text-white font-bold placeholder:text-zinc-600 pl-12 pr-4 h-12 rounded-full border border-zinc-800 focus:outline-none focus:border-indigo-500 transition-colors"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-         </div>
+      {/* --- STATS CARDS (BENTO STYLE) --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
+         <Card className="bg-zinc-900 border-zinc-800 rounded-[28px] p-1 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-[40px] group-hover:bg-indigo-500/20 transition-all"></div>
+            <CardContent className="p-5 flex items-center gap-4 relative z-10">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-zinc-400">
+                    <Shield className="w-6 h-6"/>
+                </div>
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registered Clubs</p>
+                    <p className="text-3xl font-black text-white">{STATS.totalTeams}</p>
+                </div>
+            </CardContent>
+         </Card>
+         <Card className="bg-zinc-900 border-zinc-800 rounded-[28px] p-1 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-[40px] group-hover:bg-cyan-500/20 transition-all"></div>
+            <CardContent className="p-5 flex items-center gap-4 relative z-10">
+                <div className="h-12 w-12 rounded-2xl bg-cyan-900/20 flex items-center justify-center text-cyan-500">
+                    <Users className="w-6 h-6"/>
+                </div>
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Total Athletes</p>
+                    <p className="text-3xl font-black text-white">{STATS.totalAthletes}</p>
+                </div>
+            </CardContent>
+         </Card>
+         <Card className="bg-zinc-900 border-zinc-800 rounded-[28px] p-1 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 rounded-full blur-[40px] group-hover:bg-yellow-500/20 transition-all"></div>
+            <CardContent className="p-5 flex items-center gap-4 relative z-10">
+                <div className="h-12 w-12 rounded-2xl bg-yellow-900/20 flex items-center justify-center text-yellow-500">
+                    <Crown className="w-6 h-6 fill-yellow-500"/>
+                </div>
+                <div>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Pending Verif</p>
+                    <p className="text-3xl font-black text-white">{STATS.pendingVerif}</p>
+                </div>
+            </CardContent>
+         </Card>
       </div>
 
-      {/* --- ROSTER GRID --- */}
-      <ScrollArea className="flex-1 -mx-4 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
-            {filteredTeams.map((team) => (
-                <div 
-                    key={team.id}
-                    onClick={() => setSelectedTeam(team)}
-                    className="group relative bg-zinc-900 border border-zinc-800 rounded-[32px] p-6 cursor-pointer hover:border-indigo-500/50 transition-all hover:-translate-y-1 hover:shadow-2xl overflow-hidden"
-                >
-                    {/* Background Pattern */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-500/10 to-transparent rounded-bl-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all"></div>
+      {/* --- ROSTER GRID (ADAPTED FROM VOLUNTEER PAGE) --- */}
+      <div className="flex-1 bg-zinc-900/50 border border-zinc-800/50 rounded-[40px] p-2 backdrop-blur-sm flex flex-col min-h-0">
+        <Tabs defaultValue="all" className="w-full h-full flex flex-col">
+            
+            <div className="flex flex-col md:flex-row items-center justify-between px-4 py-4 gap-4 shrink-0">
+                <TabsList className="bg-zinc-950 p-1 rounded-full h-14 border border-zinc-800 w-full md:w-auto">
+                    <TabsTrigger value="all" className="rounded-full h-12 px-8 font-bold text-sm data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+                        ALL CLUBS
+                    </TabsTrigger>
+                    <TabsTrigger value="pending" className="rounded-full h-12 px-8 font-bold text-sm data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                        PENDING
+                    </TabsTrigger>
+                </TabsList>
 
-                    {/* Header */}
-                    <div className="flex justify-between items-start mb-6 relative z-10">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-16 w-16 border-2 border-zinc-700 bg-white p-1 shadow-lg">
-                                <AvatarImage src={team.logo} className="object-contain" />
-                                <AvatarFallback className="bg-zinc-800 font-black text-zinc-500 text-xl">{team.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h3 className="text-xl font-black text-white leading-none mb-1 group-hover:text-indigo-400 transition-colors">
-                                    {team.name}
-                                </h3>
-                                <div className="flex items-center gap-1 text-xs text-zinc-500 font-medium">
-                                    <MapPin className="w-3 h-3"/> {team.origin}
+                <div className="relative w-full md:w-72">
+                    <Search className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500" />
+                    <Input 
+                        placeholder="Cari klub..." 
+                        className="h-12 bg-zinc-950 border-zinc-800 rounded-full pl-10 text-white focus:ring-indigo-500"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            <TabsContent value="all" className="flex-1 overflow-hidden mt-0">
+                <ScrollArea className="h-full px-4 pb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {TEAMS.map((team) => (
+                            <div 
+                                key={team.id} 
+                                onClick={() => setSelectedTeam(team)}
+                                className="group bg-zinc-900 border border-zinc-800 rounded-[32px] p-6 hover:border-indigo-500/50 transition-all cursor-pointer relative overflow-hidden"
+                            >
+                                {/* Performance Bar (Pengganti XP Bar) */}
+                                <div className="absolute top-0 left-0 right-0 h-1 bg-zinc-800">
+                                    <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500" style={{ width: `${team.performance}%` }}></div>
+                                </div>
+
+                                <div className="flex justify-between items-start mb-4 mt-2">
+                                    <Badge variant="outline" className={cn("text-[9px] font-black uppercase border", getStatusColor(team.status))}>
+                                        {team.status}
+                                    </Badge>
+                                    <div className="flex items-center gap-1 text-yellow-500 text-xs font-bold">
+                                        <Crown className="w-3 h-3 fill-yellow-500"/> Rank #{team.rank}
+                                    </div>
+                                </div>
+
+                                <div className="text-center mb-6">
+                                    <Avatar className="w-20 h-20 mx-auto border-4 border-zinc-800 group-hover:border-indigo-500 transition-colors shadow-xl bg-white p-1">
+                                        <AvatarImage src={team.logo} className="object-contain"/>
+                                        <AvatarFallback className="bg-zinc-800 text-xl font-bold text-zinc-500">{team.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <h3 className="mt-3 text-lg font-black text-white leading-tight">{team.name}</h3>
+                                    <p className="text-xs text-zinc-500 font-bold mt-1 flex items-center justify-center gap-1">
+                                        <MapPin className="w-3 h-3"/> {team.origin}
+                                    </p>
+                                </div>
+
+                                <div className="flex justify-center gap-2">
+                                    <Badge variant="outline" className={cn("text-[10px] font-bold border", getTierBadge(team.tier))}>
+                                        {team.tier} CLUB
+                                    </Badge>
+                                    <Badge variant="outline" className="text-[10px] font-bold border-zinc-700 text-zinc-400">
+                                        {team.athletes} Athletes
+                                    </Badge>
                                 </div>
                             </div>
-                        </div>
-                        <Badge className={cn("text-[10px] font-black border-none px-3 py-1", team.status === 'VERIFIED' ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500")}>
-                            {team.status}
-                        </Badge>
+                        ))}
                     </div>
+                </ScrollArea>
+            </TabsContent>
+        </Tabs>
+      </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-center group-hover:border-indigo-500/20 transition-colors">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold">Athletes</p>
-                            <p className="text-2xl font-black text-white">{team.stats.athletes}</p>
-                        </div>
-                        <div className="bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-center group-hover:border-indigo-500/20 transition-colors">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold">Officials</p>
-                            <p className="text-2xl font-black text-zinc-400">{team.stats.officials}</p>
-                        </div>
-                    </div>
-
-                    {/* Key Players (Avatars) */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex -space-x-3">
-                            {team.athletes.slice(0, 4).map((p, i) => (
-                                <Avatar key={i} className="w-10 h-10 border-2 border-zinc-900 transition-transform group-hover:translate-x-1">
-                                    <AvatarImage src={p.img} />
-                                    <AvatarFallback className="bg-zinc-800 text-[9px] font-bold text-zinc-400">{p.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                            ))}
-                            {team.stats.athletes > 4 && (
-                                <div className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-400 z-10 transition-transform group-hover:translate-x-1">
-                                    +{team.stats.athletes - 4}
-                                </div>
-                            )}
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[10px] text-zinc-500 font-bold uppercase">Manager</p>
-                            <p className="text-sm font-bold text-white">{team.manager}</p>
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-      </ScrollArea>
-
-      {/* --- TEAM DETAIL SHEET (THE LOCKER ROOM) --- */}
+      {/* --- DETAIL SHEET (LOCKER ROOM STYLE) --- */}
       <Sheet open={!!selectedTeam} onOpenChange={() => setSelectedTeam(null)}>
-        <SheetContent className="w-full sm:max-w-xl bg-zinc-950 border-l border-zinc-800 p-0 overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-md bg-zinc-950 border-l border-zinc-800 p-0 overflow-y-auto">
             {selectedTeam && (
                 <div className="flex flex-col h-full">
                     
-                    {/* Cover Header */}
-                    <div className="h-48 bg-gradient-to-b from-indigo-900/50 to-zinc-900 relative p-8 flex flex-col justify-end">
-                        <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-10 mix-blend-overlay"></div>
-                        <div className="relative z-10 flex items-end gap-4">
-                            <Avatar className="h-24 w-24 border-4 border-zinc-900 bg-white p-1 shadow-2xl">
-                                <AvatarImage src={selectedTeam.logo} className="object-contain"/>
-                                <AvatarFallback className="text-2xl font-black text-black">{selectedTeam.name.charAt(0)}</AvatarFallback>
+                    {/* Header: Cover Image Style */}
+                    <div className="h-48 bg-gradient-to-b from-indigo-900/50 to-zinc-900 relative">
+                        <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-20 mix-blend-overlay"></div>
+                        <div className="absolute -bottom-12 left-8">
+                            <Avatar className="w-24 h-24 border-4 border-zinc-900 shadow-2xl bg-white p-1">
+                                <AvatarImage src={selectedTeam.logo} className="object-contain" />
+                                <AvatarFallback className="bg-zinc-800 text-2xl font-black text-zinc-500">{selectedTeam.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <div className="mb-2">
-                                <Badge className="mb-2 bg-indigo-500 hover:bg-indigo-600 text-white border-none font-bold">
-                                    {selectedTeam.tier} CLUB
-                                </Badge>
-                                <h2 className="text-3xl font-black text-white uppercase leading-none">{selectedTeam.name}</h2>
-                                <p className="text-zinc-400 text-xs font-medium mt-1 flex items-center gap-1">
-                                    <MapPin className="w-3 h-3"/> {selectedTeam.origin}
-                                </p>
-                            </div>
+                        </div>
+                        <div className="absolute bottom-4 right-8">
+                            <Badge className="bg-white text-black font-black hover:bg-zinc-200">{selectedTeam.id}</Badge>
                         </div>
                     </div>
 
-                    <div className="flex-1 p-8 space-y-8">
+                    <div className="pt-16 px-8 pb-8 space-y-8 flex-1">
                         
-                        {/* Manager Contact */}
-                        <div className="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex justify-between items-center">
-                            <div>
-                                <p className="text-xs text-zinc-500 font-bold uppercase">Team Manager</p>
-                                <p className="text-white font-bold">{selectedTeam.manager}</p>
+                        <div>
+                            <h2 className="text-3xl font-black text-white uppercase leading-none mb-1">{selectedTeam.name}</h2>
+                            <p className="text-indigo-500 font-bold text-sm tracking-widest uppercase">{selectedTeam.tier} CLUB</p>
+                        </div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-center">
+                                <p className="text-[10px] text-zinc-500 uppercase font-bold">Rank</p>
+                                <p className="text-xl font-black text-yellow-500 flex items-center justify-center gap-1">
+                                    #{selectedTeam.rank}
+                                </p>
                             </div>
-                            <div className="flex gap-2">
-                                <Button size="icon" variant="outline" className="rounded-full border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"><Phone className="w-4 h-4"/></Button>
-                                <Button size="icon" variant="outline" className="rounded-full border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"><Mail className="w-4 h-4"/></Button>
+                            <div className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-center">
+                                <p className="text-[10px] text-zinc-500 uppercase font-bold">Athletes</p>
+                                <p className="text-xl font-black text-white">{selectedTeam.athletes}</p>
+                            </div>
+                            <div className="bg-zinc-900 p-3 rounded-2xl border border-zinc-800 text-center">
+                                <p className="text-[10px] text-zinc-500 uppercase font-bold">Official</p>
+                                <p className="text-xl font-black text-white">{selectedTeam.officials}</p>
                             </div>
                         </div>
 
-                        {/* Athletes List */}
-                        <div>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-sm font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                                    <Users className="w-4 h-4 text-indigo-500"/> Registered Athletes
-                                </h3>
-                                <Button size="sm" variant="ghost" className="text-indigo-400 hover:text-white text-xs font-bold hover:bg-indigo-500/10 rounded-full">
-                                    <Plus className="w-3 h-3 mr-1"/> Add Player
-                                </Button>
+                        {/* Manager Info */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                                <Briefcase className="w-4 h-4 text-indigo-500"/> Management
+                            </h3>
+                            <div className="flex items-center justify-between p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
+                                <div>
+                                    <p className="text-xs text-zinc-500 uppercase font-bold mb-1">Team Manager</p>
+                                    <p className="font-bold text-white text-sm">{selectedTeam.manager}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-indigo-500 hover:bg-indigo-500/10"><Phone className="w-4 h-4"/></Button>
+                                    <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-indigo-500 hover:bg-indigo-500/10"><Mail className="w-4 h-4"/></Button>
+                                </div>
                             </div>
-                            
-                            <div className="space-y-3">
-                                {selectedTeam.athletes.map((athlete, idx) => (
-                                    <div key={idx} className="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors group/item">
-                                        <div className="relative">
-                                            <Avatar className="h-12 w-12 border border-zinc-700">
-                                                <AvatarImage src={athlete.img} />
-                                                <AvatarFallback className="bg-zinc-800 font-bold text-zinc-500">{athlete.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            {athlete.rank <= 3 && (
-                                                <div className="absolute -top-1 -right-1 bg-yellow-500 text-black text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-zinc-900 shadow-lg">
-                                                    #{athlete.rank}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-white text-sm group-hover/item:text-indigo-400 transition-colors">{athlete.name}</h4>
-                                            <div className="flex gap-2 mt-1">
-                                                <Badge variant="secondary" className="text-[9px] px-1.5 h-5 bg-zinc-950 text-zinc-400 border border-zinc-800">Mens Singles</Badge>
-                                                <Badge variant="secondary" className="text-[9px] px-1.5 h-5 bg-zinc-950 text-zinc-400 border border-zinc-800">U-19</Badge>
-                                            </div>
-                                        </div>
-                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-full"><MoreHorizontal className="w-4 h-4"/></Button>
-                                    </div>
+                        </div>
+
+                        {/* Performance Bar */}
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase">
+                                <span>Club Performance</span>
+                                <span>{selectedTeam.performance}% Win Rate</span>
+                            </div>
+                            <Progress value={selectedTeam.performance} className="h-3 bg-zinc-900" indicatorClassName="bg-gradient-to-r from-indigo-500 to-cyan-600" />
+                        </div>
+
+                        {/* Quick Athletes Preview */}
+                        <div>
+                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Key Players</h3>
+                            <div className="flex -space-x-3">
+                                {[1,2,3,4,5].map(i => (
+                                    <Avatar key={i} className="w-10 h-10 border-2 border-zinc-900 bg-zinc-800">
+                                        <AvatarFallback className="text-xs font-bold text-zinc-500">P{i}</AvatarFallback>
+                                    </Avatar>
                                 ))}
+                                <div className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-900 flex items-center justify-center text-xs font-bold text-zinc-400">
+                                    +{selectedTeam.athletes - 5}
+                                </div>
                             </div>
                         </div>
 
@@ -289,11 +341,11 @@ export default function TeamManagementPage() {
 
                     {/* Footer Actions */}
                     <div className="p-6 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-md grid grid-cols-2 gap-4">
-                        <Button variant="outline" className="h-14 rounded-2xl border-zinc-700 text-zinc-300 hover:text-white font-bold hover:bg-zinc-800">
+                        <Button variant="outline" className="h-14 rounded-2xl border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 font-bold">
                             <Edit3 className="w-4 h-4 mr-2"/> EDIT PROFILE
                         </Button>
                         <Button className="h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-900/20">
-                            MANAGE ENTRIES
+                            MANAGE SQUAD
                         </Button>
                     </div>
                 </div>
@@ -307,7 +359,7 @@ export default function TeamManagementPage() {
             <div className="p-8 border-b border-zinc-800 bg-indigo-950/20">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-black font-headline uppercase flex items-center gap-2 text-indigo-500">
-                        <Crown className="w-6 h-6"/> Register Club
+                        <Shield className="w-6 h-6"/> Register Club
                     </DialogTitle>
                     <DialogDescription>Daftarkan kontingen atau klub baru.</DialogDescription>
                 </DialogHeader>
@@ -317,7 +369,7 @@ export default function TeamManagementPage() {
                 
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Nama Klub / Kontingen</label>
-                    <Input placeholder="Contoh: PB Jaya Raya" className="bg-zinc-900 border-zinc-800 h-14 rounded-2xl text-lg font-bold text-white focus:border-indigo-500" />
+                    <Input placeholder="Contoh: PB Jaya Raya" className="bg-zinc-900 border-zinc-800 h-14 rounded-2xl text-lg font-bold" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -343,11 +395,6 @@ export default function TeamManagementPage() {
                     <Input placeholder="Nama Lengkap" className="bg-zinc-900 border-zinc-800 h-14 rounded-2xl" />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase text-zinc-500 ml-1">Kontak (HP/WA)</label>
-                    <Input placeholder="08xx-xxxx-xxxx" className="bg-zinc-900 border-zinc-800 h-14 rounded-2xl font-mono" />
-                </div>
-
                 <Button className="w-full h-16 rounded-full font-black text-lg bg-indigo-600 hover:bg-indigo-700 text-white mt-4 shadow-xl shadow-indigo-900/20">
                     CREATE SQUAD
                 </Button>
@@ -359,23 +406,3 @@ export default function TeamManagementPage() {
   );
 }
 ```
-
-### Penjelasan Perubahan Material Design & Style:
-
-1.  **Card Uniformity:** Semua komponen kartu (Tim) menggunakan `rounded-[32px]` dan border yang konsisten (`zinc-800`), sama seperti modul lain di aplikasi ini.
-2.  **Indigo Theme:** Warna tema **Indigo/Violet** dipilih untuk membedakan konteks "Manajemen Klub" dari konteks lain seperti:
-      * **Merah:** Pertandingan & Medis (Urgent/Live)
-      * **Kuning:** Logistik & Gudang (Warning/Stock)
-      * **Hijau:** Keuangan (Money)
-      * **Cyan:** Administrasi & TPF (Official)
-3.  **Avatar Stack:** Implementasi `flex -space-x-3` pada daftar atlet di kartu tim memberikan nuansa "tim" yang solid dan modern.
-4.  **Sheet Navigation:** Detail tim tidak menggunakan modal pop-up yang mengganggu, melainkan *Side Sheet* ("The Locker Room") yang meluncur dari kanan, memberikan ruang lebih luas untuk melihat daftar atlet.
-5.  **Interactive Elements:** Hover states pada kartu (sedikit naik, bayangan, dan perubahan warna border) memberikan umpan balik taktil yang memuaskan.
-
-Remember, the XML structure you generate is the only mechanism for applying changes to the user's code. Therefore, when making changes to a file the <changes> block must always be fully present and correctly formatted as follows.
-
-<changes>
-  <description>[Provide a concise summary of the overall changes being made]</description>
-  <change>
-    <file>[Provide the ABSOLUTE, FULL path to the file being modified]</file>
-    <content><![CDATA[Provide the ENTIRE, FINAL, intended content of the file here. Do NOT provide diffs or partial snippets. Ensure all code is properly escaped within the CDATA section.
