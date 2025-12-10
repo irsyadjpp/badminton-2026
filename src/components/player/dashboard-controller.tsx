@@ -36,7 +36,7 @@ const PRICES = {
 };
 
 export function PlayerDashboardController() {
-  // === STATE DEVELOPMENT ===
+  const [isMounted, setIsMounted] = useState(false);
   const [hasJoinedTeam, setHasJoinedTeam] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
@@ -48,6 +48,11 @@ export function PlayerDashboardController() {
     agreements: { valid: false, health: false, rules: false, media: false },
     skillLevel: "BEGINNER"
   });
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   // HANDLERS
   const handleVerifyCode = () => {
@@ -66,18 +71,27 @@ export function PlayerDashboardController() {
 
   const handleNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
   const handlePrevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  
+  // Development Toggle Button
+  const renderDevToggle = () => (
+    <div className="absolute top-4 right-4 z-20 space-x-2">
+      <Button size="sm" variant="outline" onClick={() => setHasJoinedTeam(!hasJoinedTeam)}>Toggle Join</Button>
+      <Button size="sm" variant="outline" onClick={() => setIsProfileComplete(!isProfileComplete)}>Toggle Profile</Button>
+    </div>
+  );
+  
+  if (!isMounted) {
+    return null; // Render nothing on the server
+  }
+
 
   // --- RENDER VIEW 1: GATE (INPUT CODE) ---
   if (!hasJoinedTeam) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 font-body relative overflow-hidden">
+        {renderDevToggle()}
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-        {/* Development Toggle Button */}
-        <div className="absolute top-4 right-4 z-20">
-          <Button onClick={() => setHasJoinedTeam(true)}>Dev: Skip to Wizard</Button>
-        </div>
 
         <Card className="w-full max-w-lg bg-zinc-900/80 backdrop-blur-xl border-zinc-800 rounded-[40px] p-8 md:p-12 border-dashed border-2 relative overflow-hidden shadow-2xl">
           <div className="text-center space-y-8 relative z-10">
@@ -123,10 +137,7 @@ export function PlayerDashboardController() {
   if (!isProfileComplete) {
     return (
       <div className="min-h-screen bg-zinc-950 font-body py-8 px-4 md:py-12">
-          {/* Development Toggle Button */}
-          <div className="absolute top-4 right-4 z-20">
-            <Button onClick={() => setIsProfileComplete(true)}>Dev: Skip to Dashboard</Button>
-          </div>
+        {renderDevToggle()}
         <div className="max-w-3xl mx-auto">
             <div className="mb-10 text-center space-y-4">
                 <Badge variant="outline" className="border-indigo-500 text-indigo-400 px-4 py-1 tracking-widest uppercase">Joining: PB TWINTON</Badge>
@@ -207,6 +218,7 @@ export function PlayerDashboardController() {
   // --- RENDER VIEW 3: FULL DASHBOARD ---
   return (
     <div className="min-h-screen bg-zinc-950 font-body pb-24">
+        {renderDevToggle()}
         <div className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-4 md:px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
                 <div className="bg-cyan-500/20 p-2 rounded-lg"><Trophy className="w-5 h-5 text-cyan-500"/></div>
