@@ -1,15 +1,16 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { 
-  Trophy, Users, Shield, QrCode, Activity, Calendar, 
-  ArrowRight, LogOut, User, Upload, FileText, 
-  AlertTriangle, Instagram, History, Info, ChevronRight, 
-  Camera, MessageCircle, Download, Gavel, Clock, 
-  Share2, RotateCw, AlertOctagon, Send, Paperclip, 
-  MoreVertical, CheckCheck, Smile, Plus
+import {
+  Trophy, Users, Shield, QrCode, Activity, Calendar,
+  ArrowRight, LogOut, User, Upload, FileText,
+  AlertTriangle, Instagram, History, Info, ChevronRight,
+  Camera, MessageCircle, Download, Gavel, Clock,
+  Share2, RotateCw, AlertOctagon, Send, Paperclip,
+  MoreHorizontal, CheckCheck, Smile, Plus, Heart,
+  Wallet, Banknote, CreditCard, Sparkles, UserRound, Footprints, Save
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,20 +20,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 // --- CONSTANTS & MOCK DATA ---
-const PRICES = {
-  BEGINNER: 200000,
-  INTERMEDIATE: 250000,
-  ADVANCE: 300000
-};
-
 const ATHLETE_MOCK = {
   id: "ATL-8821",
   name: "Jonathan Christie",
@@ -50,7 +41,7 @@ const TEAM_CHATS = [
 ];
 
 const SCHEDULE = {
-  status: "CALLING", 
+  status: "CALLING",
   court: "Court 1 (TV)",
   match: "MS Round of 16",
   opponent: "Lee Zii Jia",
@@ -254,21 +245,18 @@ export default function PlayerDashboardFull() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
                 {renderDigitalID()}
-            </div>
-            <div className="lg:col-span-2 space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Stats */}
-                </div>
-                {renderCourtCall()}
-                {renderLiveScore()}
                 {renderSquadChat()}
             </div>
+            <div className="lg:col-span-2 space-y-6">
+                {renderCourtCall()}
+                {renderLiveScore()}
+            </div>
         </div>
-        {/* Tabs */}
+        
         <Tabs defaultValue="history" className="w-full">
             <TabsList className="bg-zinc-900 p-1 rounded-2xl mb-6">
                 <TabsTrigger value="history" className="rounded-xl px-6 font-bold data-[state=active]:bg-zinc-800">Match History</TabsTrigger>
@@ -316,8 +304,6 @@ export default function PlayerDashboardFull() {
                 </div>
             </TabsContent>
         </Tabs>
-
-        {/* Protest Modal */}
         <Dialog open={isProtestOpen} onOpenChange={setIsProtestOpen}>
             <DialogContent className="bg-zinc-950 border-red-900/50 text-white rounded-[32px] max-w-md p-0 overflow-hidden shadow-2xl shadow-red-900/20">
                 <div className="p-6 border-b border-red-900/30 bg-red-950/10">
@@ -363,5 +349,3 @@ export default function PlayerDashboardFull() {
     </div>
   );
 }
-
-    
