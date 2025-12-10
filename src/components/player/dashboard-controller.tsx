@@ -191,6 +191,21 @@ function WizardStepDocuments({ formData, setFormData }: any) {
     }
   };
 
+  const FileInput = ({ name, label, icon }: { name: string, label: string, icon: React.ReactNode }) => (
+    <div className="space-y-2">
+      <Label className="font-bold flex items-center gap-2 text-zinc-300">{icon} {label}</Label>
+      <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
+        <Input 
+          name={name} 
+          type="file" 
+          accept="image/jpeg,image/png" 
+          onChange={handleFileChange} 
+          className="text-xs file:text-cyan-400 file:font-bold file:mr-4 file:bg-cyan-950/50 file:border-none file:px-3 file:py-1 file:rounded-full file:cursor-pointer"
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
       <div className="text-center mb-4">
@@ -200,74 +215,132 @@ function WizardStepDocuments({ formData, setFormData }: any) {
         </p>
       </div>
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label className="font-bold">1. Foto KTP</Label>
-          <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
-            <div className="p-3 bg-zinc-800 rounded-lg text-zinc-400"><FileText className="w-5 h-5" /></div>
-            <Input name="ktp" type="file" accept="image/jpeg,image/png" onChange={handleFileChange} className="text-xs file:text-cyan-400 file:font-bold file:mr-4"/>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label className="font-bold">2. Foto Selfie</Label>
-          <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
-            <div className="p-3 bg-zinc-800 rounded-lg text-zinc-400"><Camera className="w-5 h-5" /></div>
-            <Input name="selfie" type="file" accept="image/jpeg,image/png" onChange={handleFileChange} className="text-xs file:text-cyan-400 file:font-bold file:mr-4"/>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label className="font-bold">3. Screenshot Bukti Follow <a href="https://instagram.com/bccbandung.id" target="_blank" className="text-cyan-400 underline">@bccbandung.id</a></Label>
-          <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
-            <div className="p-3 bg-zinc-800 rounded-lg text-zinc-400"><Instagram className="w-5 h-5" /></div>
-            <Input name="followProof" type="file" accept="image/jpeg,image/png" onChange={handleFileChange} className="text-xs file:text-cyan-400 file:font-bold file:mr-4"/>
-          </div>
-        </div>
+        <FileInput name="ktp" label="Foto KTP" icon={<FileText className="w-5 h-5" />} />
+        <FileInput name="selfie" label="Foto Selfie" icon={<Camera className="w-5 h-5" />} />
+        <FileInput name="followProof" label="Screenshot Bukti Follow IG @bccbandung.id" icon={<Instagram className="w-5 h-5" />} />
       </div>
     </div>
   );
 }
 
 
-function WizardStepPayment({ formData }: any) {
+function WizardStepPayment({ formData, setSelectedPaymentMethod }: any) {
   const finalPrice = PRICES[formData.skillLevel as keyof typeof PRICES];
+  const [showTransferInfo, setShowTransferInfo] = useState(false);
+
+  const handleSelectMethod = (method: 'QRIS' | 'TRANSFER') => {
+      setSelectedPaymentMethod(method);
+      if (method === 'TRANSFER') {
+          setShowTransferInfo(true);
+      } else {
+          setShowTransferInfo(false);
+      }
+  };
+
   return (
     <div className="text-center py-8 animate-in fade-in zoom-in duration-300">
-        <div className="w-24 h-24 bg-green-950/50 rounded-full mx-auto flex items-center justify-center mb-6 border-4 border-green-500/20">
-            <Wallet className="w-12 h-12 text-green-500" />
-        </div>
-        <h3 className="text-white text-2xl font-black mb-2 uppercase">Step 5: Pembayaran</h3>
-        <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-8">
-            Pilih metode pembayaran untuk biaya registrasi sebesar:
+      <div className="w-24 h-24 bg-green-950/50 rounded-full mx-auto flex items-center justify-center mb-6 border-4 border-green-500/20">
+        <Wallet className="w-12 h-12 text-green-500" />
+      </div>
+      <h3 className="text-white text-2xl font-black mb-2 uppercase">Step 5: Pembayaran</h3>
+      <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-8">
+        Pilih metode pembayaran untuk biaya registrasi sebesar:
+      </p>
+      <div className="bg-black/40 p-5 rounded-3xl border border-zinc-800 inline-block mb-8 shadow-inner">
+        <p className="font-mono text-5xl font-bold text-green-400">
+          Rp {finalPrice.toLocaleString('id-ID')}
         </p>
-        <div className="bg-black/40 p-5 rounded-3xl border border-zinc-800 inline-block mb-8 shadow-inner">
-            <p className="font-mono text-5xl font-bold text-green-400">Rp {finalPrice.toLocaleString('id-ID')}</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
-             <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant="outline" className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
-                        <QrCode className="w-6 h-6 mr-3"/> Bayar via QRIS
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-white text-black rounded-3xl max-w-xs">
-                    <DialogHeader className="text-center">
-                        <DialogTitle className="font-headline text-xl">Scan QRIS untuk Pembayaran</DialogTitle>
-                        <DialogDescription>Gunakan aplikasi Bank atau E-Wallet Anda.</DialogDescription>
-                    </DialogHeader>
-                    <div className="p-4 bg-zinc-100 rounded-2xl">
-                        <div className="bg-white p-2 rounded-lg aspect-square flex items-center justify-center">
-                           <QrCode className="w-full h-full text-black"/>
-                        </div>
-                    </div>
-                     <div className="text-center space-y-1">
-                        <p className="text-xs text-zinc-500">Total Pembayaran</p>
-                        <p className="text-2xl font-bold font-mono">Rp {finalPrice.toLocaleString('id-ID')}</p>
-                     </div>
-                </DialogContent>
-            </Dialog>
-            <Button variant="outline" className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
-                <Banknote className="w-6 h-6 mr-3"/> Transfer Bank
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
+              onClick={() => handleSelectMethod('QRIS')}
+            >
+              <QrCode className="w-6 h-6 mr-3" /> Bayar via QRIS
             </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white text-black rounded-3xl max-w-xs">
+            <DialogHeader className="text-center">
+              <DialogTitle className="font-headline text-xl">Scan QRIS untuk Pembayaran</DialogTitle>
+              <DialogDescription>Gunakan aplikasi Bank atau E-Wallet Anda.</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-zinc-100 rounded-2xl">
+              <div className="bg-white p-2 rounded-lg aspect-square flex items-center justify-center">
+                <QrCode className="w-full h-full text-black" />
+              </div>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs text-zinc-500">Total Pembayaran</p>
+              <p className="text-2xl font-bold font-mono">Rp {finalPrice.toLocaleString('id-ID')}</p>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Button
+          variant="outline"
+          className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
+          onClick={() => handleSelectMethod('TRANSFER')}
+        >
+          <Banknote className="w-6 h-6 mr-3" /> Transfer Bank
+        </Button>
+      </div>
+      {showTransferInfo && (
+        <div className="mt-6 p-4 bg-blue-950/20 border border-blue-500/30 rounded-2xl text-left text-sm animate-in fade-in">
+          <p className="font-bold text-blue-400 mb-2">Silakan transfer ke rekening berikut:</p>
+          <p><strong className="text-white">Bank:</strong> Bank BJB</p>
+          <p><strong className="text-white">No. Rekening:</strong> 0123 4567 8900</p>
+          <p><strong className="text-white">Atas Nama:</strong> Panitia BCC 2026</p>
+          <p className="mt-3 text-xs text-blue-200/70">
+            PENTING: Jangan lupa upload bukti transfer di langkah berikutnya.
+          </p>
         </div>
+      )}
+    </div>
+  );
+}
+
+function WizardStepUploadProof({ formData, setFormData }: any) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      setFormData((prev: any) => ({
+        ...prev,
+        documents: { ...prev.documents, [name]: files[0] }
+      }));
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
+      <div className="text-center mb-4">
+        <h3 className="text-white text-xl font-black mb-1 uppercase tracking-widest">Upload Bukti Bayar</h3>
+        <p className="text-zinc-500 text-sm max-w-sm mx-auto">
+          Upload screenshot atau foto bukti transfer Anda.
+        </p>
+      </div>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="font-bold flex items-center gap-2 text-zinc-300">
+            <Upload className="w-5 h-5"/> File Bukti Transfer
+          </Label>
+          <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
+            <Input 
+              name="paymentProof" 
+              type="file" 
+              accept="image/jpeg,image/png" 
+              onChange={handleFileChange} 
+              className="text-xs file:text-cyan-400 file:font-bold file:mr-4 file:bg-cyan-950/50 file:border-none file:px-3 file:py-1 file:rounded-full file:cursor-pointer"
+            />
+          </div>
+          {formData.documents.paymentProof && (
+             <div className="text-green-500 text-xs flex items-center gap-2 p-2">
+                <CheckCircle2 className="w-4 h-4"/> File {formData.documents.paymentProof.name} siap diupload.
+             </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -281,11 +354,18 @@ export function PlayerDashboardController() {
   const [joinCode, setJoinCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'QRIS' | 'TRANSFER' | null>(null);
+
   const [formData, setFormData] = useState({
     agreements: { valid: false, health: false, rules: false, media: false },
     skillLevel: "BEGINNER",
     profile: {},
-    documents: {},
+    documents: {
+        ktp: null,
+        selfie: null,
+        followProof: null,
+        paymentProof: null,
+    },
   });
   
   useEffect(() => {
@@ -306,7 +386,7 @@ export function PlayerDashboardController() {
     }, 1000);
   };
 
-  const handleNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 6));
+  const handleNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 7));
   const handlePrevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
   
   const allAgreed = Object.values(formData.agreements).every(Boolean);
@@ -372,6 +452,7 @@ export function PlayerDashboardController() {
 
   // --- RENDER VIEW 2: WIZARD FORM ---
   if (!isProfileComplete) {
+    const totalSteps = 7;
     return (
       <div className="min-h-screen bg-zinc-950 font-body py-8 px-4 md:py-12">
         <div className="max-w-3xl mx-auto">
@@ -380,7 +461,7 @@ export function PlayerDashboardController() {
                 <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight">Athlete Data</h1>
                 
                 <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden mt-6">
-                    <div className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(currentStep/6)*100}%` }}></div>
+                    <div className="h-full bg-gradient-to-r from-cyan-500 to-indigo-600 transition-all duration-500 ease-out" style={{ width: `${(currentStep/totalSteps)*100}%` }}></div>
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-2 px-1">
                     <span>Agreement</span>
@@ -388,6 +469,7 @@ export function PlayerDashboardController() {
                     <span>Bio</span>
                     <span>Docs</span>
                     <span>Pay</span>
+                    <span>Upload</span>
                     <span>Submit</span>
                 </div>
             </div>
@@ -399,8 +481,9 @@ export function PlayerDashboardController() {
                     {currentStep === 2 && <WizardStepSkillLevel formData={formData} setFormData={setFormData} />}
                     {currentStep === 3 && <WizardStepProfile formData={formData} setFormData={setFormData} />}
                     {currentStep === 4 && <WizardStepDocuments formData={formData} setFormData={setFormData} />}
-                    {currentStep === 5 && <WizardStepPayment formData={formData} />}
-                    {currentStep === 6 && (
+                    {currentStep === 5 && <WizardStepPayment formData={formData} setSelectedPaymentMethod={setSelectedPaymentMethod} />}
+                    {currentStep === 6 && <WizardStepUploadProof formData={formData} setFormData={setFormData} />}
+                    {currentStep === 7 && (
                         <div className="text-center py-16 animate-in fade-in zoom-in duration-300">
                             <div className="w-20 h-20 bg-zinc-800 rounded-3xl mx-auto flex items-center justify-center mb-6 animate-pulse">
                                 <FileText className="w-10 h-10 text-zinc-600" />
@@ -429,8 +512,12 @@ export function PlayerDashboardController() {
                     <Save className="w-4 h-4 mr-2"/> SAVE DRAFT
                 </Button>
                 
-                {currentStep < 6 && (
-                    <Button onClick={handleNextStep} disabled={!allAgreed && currentStep === 1} className="h-14 px-6 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-lg disabled:bg-zinc-800 disabled:text-zinc-500">
+                {currentStep < totalSteps && (
+                    <Button 
+                        onClick={handleNextStep} 
+                        disabled={!allAgreed && currentStep === 1} 
+                        className="h-14 px-6 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-lg disabled:bg-zinc-800 disabled:text-zinc-500"
+                    >
                         NEXT STEP <ChevronRight className="w-5 h-5 ml-2"/>
                     </Button>
                 )}
@@ -469,3 +556,5 @@ export function PlayerDashboardController() {
     </div>
   );
 }
+
+    
