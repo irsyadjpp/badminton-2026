@@ -10,7 +10,7 @@ import {
   Camera, MessageCircle, Download, Gavel, Clock, 
   Share2, RotateCw, AlertOctagon, Send, Hash,
   ChevronLeft, Wallet, CheckCircle2, Instagram, Phone, Mail,
-  Check, Loader2
+  Check, Loader2, Paperclip, Plus
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -371,12 +371,14 @@ export default function PlayerPage() {
     useEffect(() => {
         setIsClient(true);
     }, []);
-    
-    // STATE DEVELOPMENT
+
     const [hasJoinedTeam, setHasJoinedTeam] = useState(false); 
     const [isRegistrationComplete, setIsRegistrationComplete] = useState(false); 
   
-    // Wizard States
+    useEffect(() => {
+        setHasJoinedTeam(false);
+    }, []);
+
     const [joinCode, setJoinCode] = useState("");
     const [isJoining, setIsJoining] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
@@ -387,15 +389,15 @@ export default function PlayerPage() {
         category: "GANDA", // GANDA or BEREGU
         skillLevel: "BEGINNER",
         player: {
-        fullName: "",
-        nickname: "",
-        jerseyName: "",
-        nik: "",
-        dob: "",
-        gender: "Laki-laki",
-        wa: "",
-        club: "",
-        youtube: "",
+          fullName: "",
+          nickname: "",
+          jerseyName: "",
+          nik: "",
+          dob: "",
+          gender: "Laki-laki",
+          wa: "",
+          club: "",
+          youtube: "",
         },
         manager: { name: "", wa: "", email: "" },
         paymentFile: null as string | null // Simulasi file
@@ -403,7 +405,6 @@ export default function PlayerPage() {
 
     const totalPrice = PRICES[formData.skillLevel as keyof typeof PRICES];
 
-    // HANDLERS
     const handleVerifyCode = () => {
         if (!joinCode) return;
         setIsJoining(true);
@@ -433,9 +434,8 @@ export default function PlayerPage() {
         if ((field === 'nik' || field === 'wa') && !/^\d*$/.test(value)) return; 
         setFormData(prev => ({ ...prev, player: { ...prev.player, [field]: value } }));
     };
-
-      // --- WIZARD RENDERER ---
-  const renderWizardContent = () => {
+    
+    const renderWizardContent = () => {
     switch (currentStep) {
         // STEP 1: DISCLAIMER (MANDATORY CHECKBOXES)
         case 1:
@@ -691,16 +691,7 @@ export default function PlayerPage() {
     }
   };
 
-
-  if (!isClient) {
-    return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-white animate-spin" />
-        </div>
-    );
-  }
-  
-    // --- RENDER VIEW 1: GATE (INPUT CODE) ---
+  // --- RENDER VIEW 1: GATE (INPUT CODE) ---
   if (!hasJoinedTeam) {
     return (
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 font-body relative overflow-hidden">
@@ -733,7 +724,7 @@ export default function PlayerPage() {
                     disabled={isJoining || joinCode.length < 5} 
                     className="w-full h-14 rounded-2xl bg-white hover:bg-zinc-200 text-black font-black text-lg shadow-xl"
                 >
-                    {isJoining ? "VERIFYING..." : "ENTER TEAM SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
+                    {isJoining ? "VERIFYING..." : "ENTER SQUAD"} <ArrowRight className="ml-2 w-5 h-5"/>
                 </Button>
             </div>
           </div>
@@ -759,15 +750,10 @@ export default function PlayerPage() {
                 <p className="text-zinc-500 text-xs uppercase tracking-widest">Step {currentStep} of 5</p>
             </div>
 
-            <Card className="bg-zinc-900 border-zinc-800 rounded-[40px] p-8 md:p-10 min-h-[400px] shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] pointer-events-none"></div>
-                <div className="relative z-10">
-                    {renderWizardContent()}
-                </div>
-            </Card>
+            {renderWizardContent()}
 
             <div className="flex justify-between mt-12 pt-6 border-t border-zinc-800">
-                <Button variant="ghost" onClick={handlePrevStep} disabled={currentStep===1} className="h-14 px-8 rounded-2xl text-zinc-500 hover:text-white hover:bg-zinc-900 font-bold"><ChevronLeft className="w-5 h-5 mr-2"/> BACK</Button>
+                <Button variant="ghost" onClick={() => setCurrentStep(p => Math.max(1, p-1))} disabled={currentStep===1} className="h-14 px-8 rounded-2xl text-zinc-500 hover:text-white hover:bg-zinc-900 font-bold"><ChevronLeft className="w-5 h-5 mr-2"/> BACK</Button>
                 
                 {currentStep === 5 ? (
                     <Button 
@@ -779,7 +765,7 @@ export default function PlayerPage() {
                     </Button>
                 ) : (
                     <Button 
-                        onClick={handleNextStep} 
+                        onClick={() => setCurrentStep(p => Math.min(p + 1, 5))} 
                         disabled={currentStep === 1 && !Object.values(formData.agreements).every(Boolean)} // Step 1 Lock
                         className="h-14 px-10 rounded-2xl bg-white text-black hover:bg-zinc-200 font-bold text-lg"
                     >
@@ -799,10 +785,7 @@ export default function PlayerPage() {
         <div className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-4 md:px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-2"><Trophy className="w-6 h-6 text-cyan-500"/><span className="font-black text-white tracking-tighter hidden md:inline text-lg">PLAYER DASHBOARD</span></div>
             <div className="flex items-center gap-4">
-                <div className="text-right hidden md:block">
-                    <p className="text-xs font-bold text-white">{formData.player.fullName || "Guest"}</p>
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{teamName}</p>
-                </div>
+                <div className="text-right hidden md:block"><p className="text-xs font-bold text-white">{formData.player.fullName || "Guest"}</p><p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{teamName}</p></div>
                 <Avatar className="h-10 w-10 border-2 border-zinc-800 ring-2 ring-black"><AvatarImage src={ATHLETE_MOCK.avatar} /><AvatarFallback>PL</AvatarFallback></Avatar>
                 <div className="h-8 w-[1px] bg-zinc-800 mx-2"></div>
                 <Link href="/" passHref><Button variant="ghost" size="icon" className="text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl"><LogOut className="w-5 h-5"/></Button></Link>
@@ -814,5 +797,3 @@ export default function PlayerPage() {
     </div>
   );
 }
-
-    
