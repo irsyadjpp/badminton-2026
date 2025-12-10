@@ -10,8 +10,7 @@ import {
   Camera, MessageCircle, Download, Gavel, Clock, 
   Share2, RotateCw, AlertOctagon, Send, Paperclip, 
   MoreHorizontal, CheckCheck, Smile, Plus, Hash, ChevronLeft, CheckCircle2,
-  Heart, Wallet, Banknote, CreditCard, Sparkles, UserRound, Footprints,
-  Save
+  Heart, Wallet, Banknote, CreditCard, Sparkles, UserRound, Footprints, Save
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +38,17 @@ const PRICES = {
   INTERMEDIATE: 250000,
   ADVANCE: 300000
 };
+
+const ATHLETE_MOCK = {
+    id: "ATL-8821",
+    name: "Jonathan Christie",
+    team: "PB Djarum Official",
+    rank: "PRO",
+    points: 8500,
+    winRate: 78,
+    avatar: "https://github.com/shadcn.png",
+};
+
 
 // --- SUB-COMPONENTS for WIZARD ---
 
