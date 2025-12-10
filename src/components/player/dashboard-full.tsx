@@ -10,7 +10,8 @@ import {
   Camera, MessageCircle, Download, Gavel, Clock,
   Share2, RotateCw, AlertOctagon, Send, Paperclip,
   MoreHorizontal, CheckCheck, Smile, Plus, Heart,
-  Wallet, Banknote, CreditCard, Sparkles, UserRound, Footprints, Save
+  Wallet, Banknote, CreditCard, Sparkles, UserRound, Footprints, Save,
+  RotateCw as RotateCwIcon
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 // --- CONSTANTS & MOCK DATA ---
@@ -320,14 +322,11 @@ export default function PlayerDashboardFull() {
                 <div className="p-6 space-y-5">
                     <div className="space-y-2">
                         <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Jenis Pelanggaran</Label>
-                        <Select>
-                            <SelectTrigger className="bg-black border-zinc-800 h-12 rounded-xl text-white"><SelectValue placeholder="Pilih..." /></SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                                <SelectItem value="JOKI">Pencurian Umur / Joki</SelectItem>
-                                <SelectItem value="LEVEL">Manipulasi Level (Sandbagging)</SelectItem>
-                                <SelectItem value="ETHIC">Pelanggaran Etika / Sportivitas</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <select className="w-full bg-black border border-zinc-800 h-12 rounded-xl px-3 text-white">
+                            <option>Pencurian Umur / Joki</option>
+                            <option>Manipulasi Level (Sandbagging)</option>
+                            <option>Pelanggaran Etika / Sportivitas</option>
+                        </select>
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Bukti (Wajib)</Label>
@@ -338,7 +337,7 @@ export default function PlayerDashboardFull() {
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Kronologi</Label>
-                        <Textarea placeholder="Jelaskan detail kejadian..." className="bg-black border-zinc-800 min-h-[100px] rounded-xl p-3 text-sm text-white resize-none"/>
+                        <textarea placeholder="Jelaskan detail kejadian..." className="bg-black border-zinc-800 min-h-[100px] rounded-xl p-3 text-sm text-white resize-none w-full"/>
                     </div>
                     <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-14 rounded-2xl shadow-lg shadow-red-900/20 text-lg mt-2">
                         KIRIM LAPORAN
