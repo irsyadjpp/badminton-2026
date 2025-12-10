@@ -35,6 +35,71 @@ const PRICES = {
   ADVANCE: 300000
 };
 
+// --- SUB-COMPONENTS for WIZARD ---
+
+function WizardStepAgreement({ formData, setFormData }: any) {
+    const agreements = [
+        { id: 'valid', text: 'Saya menyatakan data yang diisi adalah BENAR.' },
+        { id: 'health', text: 'Saya dalam kondisi SEHAT jasmani & rohani.' },
+        { id: 'rules', text: 'Saya menyetujui REGULASI pertandingan.' },
+        { id: 'media', text: 'Saya mengizinkan PUBLIKASI foto/video.' },
+    ];
+
+    const handleAgreementClick = (id: keyof typeof formData.agreements) => {
+        setFormData((prev: any) => ({
+            ...prev,
+            agreements: {
+                ...prev.agreements,
+                [id]: !prev.agreements[id]
+            }
+        }));
+    };
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
+            <div className="bg-red-950/30 border border-red-500/30 p-5 rounded-2xl flex gap-4 text-red-200 text-sm">
+                <AlertTriangle className="w-6 h-6 shrink-0 text-red-500 mt-1"/>
+                <div>
+                    <p className="font-bold text-red-400 mb-1">DISCLAIMER PENTING</p>
+                    <p>Pemalsuan data (umur/skill) akan menyebabkan <strong>Tim Diskualifikasi</strong> dan <strong>Uang Pendaftaran Hangus</strong>.</p>
+                </div>
+            </div>
+            <div className="space-y-4">
+                {agreements.map((item) => (
+                    <div 
+                        key={item.id} 
+                        className="flex gap-4 items-start p-4 bg-black/40 rounded-2xl border border-zinc-800/50 hover:border-zinc-700 cursor-pointer transition-colors"
+                        onClick={() => handleAgreementClick(item.id as any)}
+                    >
+                        <Checkbox 
+                            id={`chk-${item.id}`} 
+                            checked={formData.agreements[item.id]}
+                            className="mt-1 border-zinc-600 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                        />
+                        <Label htmlFor={`chk-${item.id}`} className="text-zinc-300 cursor-pointer leading-relaxed">{item.text}</Label>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
+function FormPlaceholder({ step }: { step: number }) {
+  return (
+    <div className="text-center py-16 animate-in fade-in zoom-in duration-300">
+      <div className="w-20 h-20 bg-zinc-800 rounded-3xl mx-auto flex items-center justify-center mb-6 animate-pulse">
+        <FileText className="w-10 h-10 text-zinc-600" />
+      </div>
+      <h3 className="text-white text-2xl font-black mb-2 uppercase">Step {step}: Form Placeholder</h3>
+      <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-8">
+        Di tahap ini, form lengkap (Skill, Biodata, TPF, Pembayaran) akan muncul sesuai desain sebelumnya.
+      </p>
+    </div>
+  );
+}
+
+
 export function PlayerDashboardController() {
   const [isMounted, setIsMounted] = useState(false);
   const [hasJoinedTeam, setHasJoinedTeam] = useState(false);
@@ -52,7 +117,6 @@ export function PlayerDashboardController() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
 
   // HANDLERS
   const handleVerifyCode = () => {
@@ -72,18 +136,22 @@ export function PlayerDashboardController() {
   const handleNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
   const handlePrevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
   
-  // Development Toggle Button
+  const allAgreed = Object.values(formData.agreements).every(Boolean);
+  
   const renderDevToggle = () => (
-    <div className="absolute top-4 right-4 z-20 space-x-2">
-      <Button size="sm" variant="outline" onClick={() => setHasJoinedTeam(!hasJoinedTeam)}>Toggle Join</Button>
-      <Button size="sm" variant="outline" onClick={() => setIsProfileComplete(!isProfileComplete)}>Toggle Profile</Button>
+    <div className="absolute top-4 right-4 z-50 space-x-2">
+      <Button size="sm" variant="outline" onClick={() => setHasJoinedTeam(prev => !prev)}>Dev: Toggle Join</Button>
+      <Button size="sm" variant="outline" onClick={() => setIsProfileComplete(prev => !prev)}>Dev: Toggle Profile</Button>
     </div>
   );
   
   if (!isMounted) {
-    return null; // Render nothing on the server
+    return (
+        <div className="fixed inset-0 bg-zinc-950 flex items-center justify-center">
+            <div className="w-10 h-10 border-4 border-zinc-800 border-t-zinc-400 rounded-full animate-spin"></div>
+        </div>
+    );
   }
-
 
   // --- RENDER VIEW 1: GATE (INPUT CODE) ---
   if (!hasJoinedTeam) {
@@ -158,42 +226,25 @@ export function PlayerDashboardController() {
             <Card className="bg-zinc-900 border-zinc-800 rounded-[40px] p-8 md:p-10 min-h-[400px] shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[100px] pointer-events-none"></div>
                 <div className="relative z-10">
-                    {currentStep === 1 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300">
-                            <div className="bg-red-950/30 border border-red-500/30 p-5 rounded-2xl flex gap-4 text-red-200 text-sm">
-                                <AlertTriangle className="w-6 h-6 shrink-0 text-red-500 mt-1"/>
-                                <div>
-                                    <p className="font-bold text-red-400 mb-1">DISCLAIMER PENTING</p>
-                                    <p>Pemalsuan data (umur/skill) akan menyebabkan <strong>Tim Diskualifikasi</strong> dan <strong>Uang Pendaftaran Hangus</strong>.</p>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                {['Saya menyatakan data yang diisi adalah BENAR.', 'Saya dalam kondisi SEHAT jasmani & rohani.', 'Saya menyetujui REGULASI pertandingan.', 'Saya mengizinkan PUBLIKASI foto/video.'].map((text, i) => (
-                                    <div key={i} className="flex gap-4 items-start p-4 bg-black/40 rounded-2xl border border-zinc-800/50 hover:border-zinc-700 cursor-pointer transition-colors" onClick={() => setFormData(p => ({...p, agreements: {...p.agreements, valid: true}}))}>
-                                        <Checkbox id={`chk-${i}`} checked={formData.agreements.valid} className="mt-1 border-zinc-600 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"/>
-                                        <Label htmlFor={`chk-${i}`} className="text-zinc-300 cursor-pointer leading-relaxed">{text}</Label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {currentStep > 1 && (
+                    {currentStep === 1 && <WizardStepAgreement formData={formData} setFormData={setFormData} />}
+                    {currentStep === 2 && <FormPlaceholder step={2} />}
+                    {currentStep === 3 && <FormPlaceholder step={3} />}
+                    {currentStep === 4 && <FormPlaceholder step={4} />}
+                    {currentStep === 5 && (
                         <div className="text-center py-16 animate-in fade-in zoom-in duration-300">
                             <div className="w-20 h-20 bg-zinc-800 rounded-3xl mx-auto flex items-center justify-center mb-6 animate-pulse">
                                 <FileText className="w-10 h-10 text-zinc-600"/>
                             </div>
-                            <h3 className="text-white text-2xl font-black mb-2 uppercase">Step {currentStep}: Form Placeholder</h3>
+                            <h3 className="text-white text-2xl font-black mb-2 uppercase">Step {currentStep}: Payment</h3>
                             <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-8">
-                                Di tahap ini, form lengkap (Skill, Biodata, TPF, Pembayaran) akan muncul sesuai desain sebelumnya.
+                                Selesaikan pendaftaran dengan membayar biaya registrasi sesuai kategori yang Anda pilih.
                             </p>
-                            {currentStep === 5 && (
-                                <Button 
-                                    onClick={() => setIsProfileComplete(true)} 
-                                    className="h-16 px-10 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-xl shadow-[0_0_30px_rgba(22,163,74,0.4)] transition-transform hover:scale-105"
-                                >
-                                    SUBMIT & FINISH <CheckCircle2 className="ml-3 w-6 h-6"/>
-                                </Button>
-                            )}
+                            <Button 
+                                onClick={() => setIsProfileComplete(true)} 
+                                className="h-16 px-10 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black text-xl shadow-[0_0_30px_rgba(22,163,74,0.4)] transition-transform hover:scale-105"
+                            >
+                                SUBMIT & FINISH <CheckCircle2 className="ml-3 w-6 h-6"/>
+                            </Button>
                         </div>
                     )}
                 </div>
@@ -205,7 +256,7 @@ export function PlayerDashboardController() {
                 </Button>
                 
                 {currentStep < 5 && (
-                    <Button onClick={handleNextStep} className="h-14 px-8 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-lg">
+                    <Button onClick={handleNextStep} disabled={!allAgreed && currentStep === 1} className="h-14 px-8 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-lg shadow-lg disabled:bg-zinc-800 disabled:text-zinc-500">
                         NEXT STEP <ChevronRight className="w-5 h-5 ml-2"/>
                     </Button>
                 )}
