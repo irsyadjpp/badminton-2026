@@ -40,13 +40,6 @@ export function PlayerDashboardController() {
   const [hasJoinedTeam, setHasJoinedTeam] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
-  // -- Simulasi Alur Cepat untuk Development --
-  useEffect(() => {
-    // Set `hasJoinedTeam` true & `isProfileComplete` true untuk melihat "Dashboard Full"
-    setHasJoinedTeam(true);
-    setIsProfileComplete(true);
-  }, []);
-
   // Wizard States
   const [joinCode, setJoinCode] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -80,6 +73,11 @@ export function PlayerDashboardController() {
       <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 font-body relative overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+        {/* Development Toggle Button */}
+        <div className="absolute top-4 right-4 z-20">
+          <Button onClick={() => setHasJoinedTeam(true)}>Dev: Skip to Wizard</Button>
+        </div>
 
         <Card className="w-full max-w-lg bg-zinc-900/80 backdrop-blur-xl border-zinc-800 rounded-[40px] p-8 md:p-12 border-dashed border-2 relative overflow-hidden shadow-2xl">
           <div className="text-center space-y-8 relative z-10">
@@ -125,6 +123,10 @@ export function PlayerDashboardController() {
   if (!isProfileComplete) {
     return (
       <div className="min-h-screen bg-zinc-950 font-body py-8 px-4 md:py-12">
+          {/* Development Toggle Button */}
+          <div className="absolute top-4 right-4 z-20">
+            <Button onClick={() => setIsProfileComplete(true)}>Dev: Skip to Dashboard</Button>
+          </div>
         <div className="max-w-3xl mx-auto">
             <div className="mb-10 text-center space-y-4">
                 <Badge variant="outline" className="border-indigo-500 text-indigo-400 px-4 py-1 tracking-widest uppercase">Joining: PB TWINTON</Badge>
