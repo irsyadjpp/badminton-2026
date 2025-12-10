@@ -5,7 +5,7 @@ import {
   Wallet, TrendingUp, TrendingDown, PieChart, 
   ArrowUpRight, ArrowDownLeft, FileText, 
   AlertCircle, DollarSign, CreditCard, Download, 
-  CheckCircle2, Clock, XCircle 
+  CheckCircle2, Clock, XCircle, QrCode, Banknote
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 // --- MOCK DATA ---
@@ -62,6 +63,73 @@ export default function FinanceDashboard() {
             </Button>
         </div>
       </div>
+      
+        {/* ROW BARU: SPONSORSHIP & POS */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            
+            {/* SPONSORSHIP TRACKER (3 Cols) */}
+            <Card className="lg:col-span-3 bg-zinc-900 border-zinc-800 rounded-[32px]">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardTitle className="text-sm font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-emerald-500"/> Sponsorship Pipeline
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="hover:bg-transparent border-zinc-800"><TableHead>Sponsor</TableHead><TableHead>Package</TableHead><TableHead>Commitment</TableHead><TableHead>Paid</TableHead><TableHead>Status</TableHead></TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow className="border-zinc-800 hover:bg-zinc-800/50">
+                                <TableCell className="font-bold text-white">Bank BJB</TableCell>
+                                <TableCell>Platinum</TableCell>
+                                <TableCell>Rp 250.000.000</TableCell>
+                                <TableCell className="text-emerald-400 font-mono">Rp 150.000.000</TableCell>
+                                <TableCell><Badge variant="outline" className="text-yellow-500 border-yellow-500">Term 2 Pending</Badge></TableCell>
+                            </TableRow>
+                             <TableRow className="border-zinc-800 hover:bg-zinc-800/50">
+                                <TableCell className="font-bold text-white">Yonex</TableCell>
+                                <TableCell>Gold (Barter)</TableCell>
+                                <TableCell>Rp 100.000.000</TableCell>
+                                <TableCell className="text-emerald-400 font-mono">Rp 100.000.000</TableCell>
+                                <TableCell><Badge variant="outline" className="text-green-500 border-green-500">Settled</Badge></TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            {/* POS / KASIR MINI (1 Col) */}
+            <Card className="bg-gradient-to-b from-indigo-900 to-zinc-900 border-indigo-500/30 rounded-[32px] flex flex-col">
+                <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                        <QrCode className="w-5 h-5"/> Quick POS
+                    </CardTitle>
+                    <CardDescription className="text-indigo-200">Terima pembayaran tunai/QRIS.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1">
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-indigo-300 uppercase">Perihal</label>
+                        <select className="w-full bg-black/30 border border-indigo-500/30 rounded-xl h-10 px-3 text-white text-sm">
+                            <option>Denda Shuttlecock</option>
+                            <option>Denda WO</option>
+                            <option>Sewa Raket</option>
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-indigo-300 uppercase">Nominal</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-indigo-400 text-sm font-bold">Rp</span>
+                            <input type="number" className="w-full bg-black/30 border border-indigo-500/30 rounded-xl h-10 pl-10 text-white font-mono font-bold" />
+                        </div>
+                    </div>
+                    <Button className="w-full bg-white text-indigo-900 hover:bg-indigo-100 font-bold mt-auto">
+                        <Banknote className="w-4 h-4 mr-2"/> TERIMA UANG
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+
 
       {/* --- HERO: CASH POSITION --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -71,7 +139,7 @@ export default function FinanceDashboard() {
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] group-hover:bg-emerald-500/20 transition-all"></div>
             
             <CardContent className="p-8 md:p-10 relative z-10 flex flex-col justify-between h-full">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start mb-8">
                     <div>
                         <p className="text-zinc-500 font-bold uppercase text-xs tracking-[0.2em] mb-2">Total Net Balance</p>
                         <h2 className="text-5xl md:text-6xl font-black text-white tracking-tight font-mono">

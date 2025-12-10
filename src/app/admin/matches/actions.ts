@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from "next/cache";
@@ -41,4 +42,33 @@ export async function deleteMatch(id: string) {
   matchesDB = matchesDB.filter(m => m.id !== id);
   revalidatePath('/admin/matches');
   return { success: true };
+}
+
+export async function submitMatchResult(matchId: string, shuttlecockUsed: number, scoreData: any) {
+  // 1. Ambil data Match & Kategori
+  // const match = await db.matches.find(matchId);
+  const category = "MD OPEN"; // Mock fetch
+  
+  // 2. Logic Kuota
+  const isBeginner = category.includes("BEGINNER") || category.includes("PEMULA");
+  const freeQuota = isBeginner ? 1 : 3;
+  const pricePerPcs = 28000;
+  
+  // 3. Logic Billing
+  if (shuttlecockUsed > freeQuota) {
+    const billAmount = (shuttlecockUsed - freeQuota) * pricePerPcs;
+    
+    // MOCK: Save to Billing Collection
+    console.log(`[SYSTEM] Creating Invoice for Match ${matchId}`);
+    console.log(`[BILLING] Item: Extra Shuttlecock (${shuttlecockUsed - freeQuota} pcs)`);
+    console.log(`[BILLING] Total: Rp ${billAmount}`);
+    
+    // await db.billings.create({ matchId, amount: billAmount, type: 'SHUTTLECOCK', status: 'UNPAID' });
+  }
+
+  // 4. Update Score
+  // await db.matches.update(matchId, { status: 'COMPLETED', result: scoreData });
+  
+  revalidatePath('/admin/match-control/results');
+  return { success: true, billed: shuttlecockUsed > freeQuota };
 }

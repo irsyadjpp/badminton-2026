@@ -1,10 +1,12 @@
+
 'use client';
 
 import { useState } from "react";
 import { 
   FileCheck, FileWarning, CheckCircle2, XCircle, 
   Search, Filter, Eye, Gavel, UserCheck, 
-  Calendar, Clock, ShieldAlert, Award
+  Calendar, Clock, ShieldAlert, Award,
+  Minus, Plus, Receipt 
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 // --- MOCK DATA ---
@@ -78,6 +81,20 @@ const RESULTS = [
 export default function ResultVerificationPage() {
   const [selectedResult, setSelectedResult] = useState<typeof RESULTS[0] | null>(null);
   const [activeTab, setActiveTab] = useState("PENDING");
+  const [shuttlecockCount, setShuttlecockCount] = useState(3); // Default 3 (misal)
+  
+  // LOGIC HITUNG BIAYA (Simulation)
+  const calculateCost = (category: string, count: number) => {
+    const isBeginner = category.includes("BEGINNER") || category.includes("PEMULA");
+    const quota = isBeginner ? 1 : 3;
+    const pricePerPcs = 28000;
+    
+    if (count <= quota) return 0;
+    return (count - quota) * pricePerPcs;
+  };
+
+  const currentFine = selectedResult ? calculateCost(selectedResult.category, shuttlecockCount) : 0;
+
 
   const filteredResults = activeTab === 'ALL' 
     ? RESULTS 
@@ -315,15 +332,59 @@ export default function ResultVerificationPage() {
 
                     </div>
 
-                    {/* Footer Actions */}
+                    {/* --- MODIFIKASI: BAGIAN LOGISTIK & APPROVAL --- */}
                     {selectedResult.status === 'PENDING' && (
-                        <div className="p-6 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-md sticky bottom-0">
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-md sticky bottom-0">
+                            
+                            {/* 1. INPUT SHUTTLECOCK */}
+                            <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+                                <div>
+                                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Shuttlecock Used</p>
+                                    <p className="text-[10px] text-zinc-600">Quota: {selectedResult.category.includes('PEMULA') ? '1 (Beginner)' : '3 (Pro)'}</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center bg-zinc-900 rounded-lg border border-zinc-800">
+                                        <Button 
+                                            variant="ghost" size="icon" className="h-10 w-10 text-zinc-400 hover:text-white"
+                                            onClick={() => setShuttlecockCount(Math.max(1, shuttlecockCount - 1))}
+                                        >
+                                            <Minus className="w-4 h-4"/>
+                                        </Button>
+                                        <span className="w-8 text-center font-mono font-bold text-white">{shuttlecockCount}</span>
+                                        <Button 
+                                            variant="ghost" size="icon" className="h-10 w-10 text-zinc-400 hover:text-white"
+                                            onClick={() => setShuttlecockCount(shuttlecockCount + 1)}
+                                        >
+                                            <Plus className="w-4 h-4"/>
+                                        </Button>
+                                    </div>
+                                    
+                                    {/* Indikator Biaya Tambahan */}
+                                    {currentFine > 0 && (
+                                        <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500 animate-pulse">
+                                            <Receipt className="w-4 h-4"/>
+                                            <div className="text-right">
+                                                <p className="text-[9px] font-bold uppercase">Overlimit Charge</p>
+                                                <p className="font-mono font-black text-sm">Rp {currentFine.toLocaleString()}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 2. TOMBOL AKSI */}
+                            <div className="p-6 grid grid-cols-2 gap-4">
                                 <Button variant="outline" className="h-14 rounded-2xl border-red-900/50 text-red-500 hover:bg-red-950 font-bold hover:text-white">
                                     RAISE DISPUTE
                                 </Button>
-                                <Button className="h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-900/20 text-lg">
-                                    VERIFY RESULT <CheckCircle2 className="ml-2 w-5 h-5"/>
+                                <Button 
+                                    className="h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-900/20 text-lg"
+                                    onClick={() => {
+                                        // Panggil Server Action submitScore disini dengan data shuttlecockCount
+                                        alert(`Score Verified! Tagihan Kok: Rp ${currentFine}`);
+                                    }}
+                                >
+                                    VERIFY & BILL <CheckCircle2 className="ml-2 w-5 h-5"/>
                                 </Button>
                             </div>
                         </div>
@@ -336,5 +397,3 @@ export default function ResultVerificationPage() {
     </div>
   );
 }
-
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -41,15 +42,45 @@ export default function GateCheckInPage() {
     setIsScanning(true);
     setTimeout(() => {
         setIsScanning(false);
-        // Simulasi Hasil Random
-        const isSuccess = Math.random() > 0.3;
-        setScanResult({
-            valid: isSuccess,
-            name: isSuccess ? "Marcus Gideon" : "Ticket Expired",
-            role: isSuccess ? "ATHLETE" : "UNKNOWN",
-            id: "T-9999",
-            zone: isSuccess ? "ALL ACCESS" : "NO ACCESS"
-        });
+        
+        // --- LOGIC BARU: SIMULASI HASIL ---
+        const randomScenario = Math.random();
+        
+        let resultData;
+
+        if (randomScenario > 0.7) {
+            // SCENARIO 1: SUCCESS
+            resultData = {
+                valid: true,
+                name: "Kevin Sanjaya",
+                role: "ATHLETE",
+                id: "T-8821",
+                zone: "ALL ACCESS",
+                message: "ACCESS GRANTED"
+            };
+        } else if (randomScenario > 0.4) {
+             // SCENARIO 2: BLOCKED (UNPAID BILL)
+             resultData = {
+                valid: false,
+                name: "Taufik Hidayat (Kw)",
+                role: "ATHLETE",
+                id: "T-1029",
+                zone: "BLOCKED",
+                reason: "UNPAID_BILL", // Flag khusus
+                message: "LUNASI TAGIHAN DULU"
+            };
+        } else {
+             // SCENARIO 3: INVALID
+             resultData = {
+                valid: false,
+                name: "Unknown Ticket",
+                role: "UNKNOWN",
+                id: "???",
+                zone: "NO ACCESS",
+                message: "ACCESS DENIED"
+            };
+        }
+        setScanResult(resultData);
     }, 1500);
   };
 
@@ -238,25 +269,40 @@ export default function GateCheckInPage() {
             {scanResult && (
                 <div className={cn(
                     "w-full bg-zinc-950 border-4 rounded-[40px] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300",
-                    scanResult.valid ? "border-green-500 shadow-[0_0_50px_rgba(34,197,94,0.4)]" : "border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)]"
+                    scanResult.valid ? "border-green-500 shadow-[0_0_50px_rgba(34,197,94,0.4)]" :
+                    scanResult.reason === 'UNPAID_BILL' ? "border-yellow-500 shadow-[0_0_50px_rgba(234,179,8,0.4)]" : "border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)]"
                 )}>
                     {/* Visual Status Header */}
                     <div className={cn(
                         "h-32 flex flex-col items-center justify-center relative overflow-hidden",
-                        scanResult.valid ? "bg-green-600" : "bg-red-600"
+                        scanResult.valid ? "bg-green-600" : 
+                        scanResult.reason === 'UNPAID_BILL' ? "bg-yellow-600" : "bg-red-600"
                     )}>
                         <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-30 mix-blend-overlay"></div>
-                        {scanResult.valid ? (
+                        
+                        {/* ICON KHUSUS TAGIHAN */}
+                        {scanResult.reason === 'UNPAID_BILL' ? (
+                             <ShieldAlert className="w-16 h-16 text-white mb-2 drop-shadow-md animate-pulse" />
+                        ) : scanResult.valid ? (
                             <CheckCircle2 className="w-16 h-16 text-white mb-2 drop-shadow-md animate-bounce" />
                         ) : (
                             <XCircle className="w-16 h-16 text-white mb-2 drop-shadow-md animate-shake" />
                         )}
+
                         <h2 className="text-2xl font-black text-white uppercase tracking-widest drop-shadow-md">
-                            {scanResult.valid ? "ACCESS GRANTED" : "ACCESS DENIED"}
+                            {scanResult.message}
                         </h2>
                     </div>
 
                     <div className="p-8 space-y-6 bg-zinc-900 text-center">
+                        {scanResult.reason === 'UNPAID_BILL' && (
+                             <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl mb-4">
+                                <p className="text-red-500 font-bold uppercase text-xs">Total Tagihan Tertunggak</p>
+                                <p className="text-3xl font-black text-white font-mono">Rp 56.000</p>
+                                <p className="text-zinc-500 text-[10px] mt-1">Shuttlecock Overlimit (Match M-04)</p>
+                             </div>
+                        )}
+
                         <div className="space-y-1">
                             <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Ticket Holder</p>
                             <h3 className="text-2xl font-black text-white">{scanResult.name}</h3>

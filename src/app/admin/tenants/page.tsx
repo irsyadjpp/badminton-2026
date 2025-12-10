@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -8,8 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Store, MapPin, CheckCircle, AlertCircle } from "lucide-react";
 
 const TENANTS = [
-  { id: "B01", name: "Es Teh Solo", owner: "Ibu Ani", category: "F&B", slot: "A-01", status: "PAID" },
-  { id: "B02", name: "Jersey Murah Bandung", owner: "Kang Ujang", category: "APPAREL", slot: "B-03", status: "UNPAID" },
+  { id: "B01", name: "Es Teh Solo", owner: "Ibu Ani", category: "F&B", slot: "A-01", location: "Lobi Utara (Kiri)", status: "PAID" },
+  { id: "B02", name: "Jersey Murah", owner: "Kang Ujang", category: "APPAREL", slot: "B-03", location: "Koridor Tribun", status: "UNPAID" },
 ];
 
 export default function TenantPage() {
@@ -49,7 +50,14 @@ export default function TenantPage() {
              <CardContent className="p-0">
                 <Table>
                    <TableHeader>
-                      <TableRow><TableHead>Tenant</TableHead><TableHead>Lapak</TableHead><TableHead>Kategori</TableHead><TableHead>Status Sewa</TableHead><TableHead className="text-right">Aksi</TableHead></TableRow>
+                      <TableRow>
+                        <TableHead>Tenant</TableHead>
+                        <TableHead>Lapak</TableHead>
+                        <TableHead>Lokasi</TableHead>
+                        <TableHead>Kategori</TableHead>
+                        <TableHead>Status Sewa</TableHead>
+                        <TableHead className="text-right">Aksi</TableHead>
+                      </TableRow>
                    </TableHeader>
                    <TableBody>
                       {tenants.map((t) => (
@@ -59,6 +67,11 @@ export default function TenantPage() {
                                <div className="text-xs text-muted-foreground">{t.owner}</div>
                             </TableCell>
                             <TableCell><Badge variant="outline">{t.slot}</Badge></TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2 text-sm text-zinc-400">
+                                    <MapPin className="w-3 h-3"/> {t.location}
+                                </div>
+                            </TableCell>
                             <TableCell>{t.category}</TableCell>
                             <TableCell>
                                {t.status === 'PAID' ? 

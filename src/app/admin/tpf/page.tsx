@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation'; // Import useRouter
 import { 
   ShieldCheck, AlertOctagon, Eye, PlayCircle, 
   CheckCircle2, XCircle, Search, ScanLine, 
-  History, Scale, User, FileWarning, ArrowRight 
+  History, Scale, User, FileWarning, ArrowRight,
+  Shield, Users, Mail, Phone, MoreHorizontal, Briefcase, Gavel, MonitorPlay, ClipboardCheck, QrCode, Stethoscope, Package, Box, Database, Utensils, Gift, Upload, Layers, Timer, Navigation, BarChart3, Megaphone, FileSignature, Award, Tags, UserCog, Handshake, Newspaper, Settings, LogOut, CheckSquare, ListChecks, StickyNote, PieChart, Wallet, Coins, Receipt, CalendarRange, Target, CalendarDays, FileText, Plus, Filter, MapPin, Gauge, Radio, CarFront, Fuel, LifeBuoy, MessageSquare, PenTool, Send
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,7 +73,7 @@ export default function TPFVerificationPage() {
   return (
     <div className="space-y-8 p-4 md:p-8 font-body pb-24 h-[calc(100vh-64px)] flex flex-col">
       
-      {/* --- HEADER --- */}
+      {/* HEADER (Sama seperti sebelumnya) */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0">
         <div>
             <div className="flex items-center gap-2 mb-2">
@@ -99,191 +100,142 @@ export default function TPFVerificationPage() {
             </div>
         </div>
       </div>
+      
+      {/* --- CONTENT --- */}
+      <Tabs defaultValue="CASES" className="flex-1 flex flex-col min-h-0">
+        
+        <div className="px-1 mb-4">
+            <TabsList className="bg-zinc-900 border border-zinc-800 p-1 rounded-full">
+                <TabsTrigger value="CASES" className="rounded-full px-6 data-[state=active]:bg-zinc-800">Protest Cases</TabsTrigger>
+                <TabsTrigger value="VERIFICATION" className="rounded-full px-6 data-[state=active]:bg-cyan-600 data-[state=active]:text-white">Mass Verification (Pre-Event)</TabsTrigger>
+            </TabsList>
+        </div>
 
-      {/* --- MAIN WORKSPACE --- */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-0">
-         
-         {/* LEFT: QUEUE LIST (1/3) */}
-         <Card className="lg:col-span-1 bg-zinc-900 border-zinc-800 rounded-[32px] flex flex-col overflow-hidden h-full shadow-2xl">
-            <div className="p-6 pb-4 bg-zinc-950/50 border-b border-zinc-800">
-                <div className="relative">
-                    <Search className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500" />
-                    <input 
-                        type="text" 
-                        placeholder="Cari nama / ID..." 
-                        className="w-full bg-zinc-900 text-white font-bold placeholder:text-zinc-600 pl-10 pr-4 h-12 rounded-xl border border-zinc-800 focus:outline-none focus:border-cyan-500 transition-colors"
-                    />
-                </div>
-            </div>
-            
-            <ScrollArea className="flex-1 p-4">
-                <div className="space-y-3">
-                    {VERIFICATION_QUEUE.map((player) => (
-                        <div 
-                            key={player.id} 
-                            onClick={() => setSelectedPlayer(player)}
-                            className={cn(
-                                "group relative p-4 rounded-[24px] border-2 transition-all cursor-pointer hover:bg-zinc-800",
-                                selectedPlayer?.id === player.id ? "bg-zinc-800 border-cyan-500/50" : "bg-zinc-950 border-zinc-800 hover:border-zinc-700"
-                            )}
-                        >
-                            {player.riskScore >= 70 && (
-                                <div className="absolute top-4 right-4 animate-pulse">
-                                    <AlertOctagon className="w-5 h-5 text-red-500" />
-                                </div>
-                            )}
-
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-14 w-14 border-2 border-zinc-700">
-                                    <AvatarImage src={player.avatar} />
-                                    <AvatarFallback className="bg-zinc-900 font-black text-zinc-500">{player.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <h4 className="font-bold text-white text-base group-hover:text-cyan-400 transition-colors">{player.name}</h4>
-                                    <p className="text-xs text-zinc-500 font-medium mb-2">{player.club}</p>
-                                    <Badge variant="secondary" className="bg-zinc-900 text-zinc-300 border-zinc-700 text-[10px]">
-                                        REQ: {player.registeredLevel}
-                                    </Badge>
-                                </div>
-                            </div>
-                            
-                            {/* Risk Meter Mini */}
-                            <div className="mt-4 flex items-center gap-2">
-                                <div className="h-1.5 flex-1 bg-zinc-900 rounded-full overflow-hidden">
-                                    <div 
-                                        className={cn("h-full rounded-full", player.riskScore >= 70 ? "bg-red-500" : "bg-cyan-500")} 
-                                        style={{ width: `${player.riskScore}%` }}
-                                    ></div>
-                                </div>
-                                <span className={cn("text-[10px] font-black", player.riskScore >= 70 ? "text-red-500" : "text-cyan-500")}>
-                                    {player.riskScore}% Risk
-                                </span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </ScrollArea>
-         </Card>
-
-         {/* RIGHT: INSPECTION CONSOLE (2/3) */}
-         <div className="lg:col-span-2 h-full">
-            {selectedPlayer ? (
-                <Card className="bg-zinc-950 border-zinc-800 rounded-[32px] h-full flex flex-col overflow-hidden shadow-2xl relative">
-                    
-                    {/* Background Grid */}
-                    <div className="absolute inset-0 bg-[url('/images/grid-pattern.png')] opacity-5 pointer-events-none"></div>
-
-                    {/* Console Header */}
-                    <div className="p-8 border-b border-zinc-800 flex justify-between items-start bg-zinc-900/30">
-                        <div className="flex items-center gap-6">
-                            <Avatar className="h-24 w-24 border-4 border-zinc-800 shadow-xl">
-                                <AvatarImage src={selectedPlayer.avatar} />
-                                <AvatarFallback className="bg-zinc-900 text-2xl font-black text-zinc-600">{selectedPlayer.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="flex items-center gap-3 mb-1">
-                                    <h2 className="text-3xl font-black text-white uppercase tracking-tight">{selectedPlayer.name}</h2>
-                                    <Badge className={cn("text-[10px] font-bold px-2 py-0.5", getRiskColor(selectedPlayer.riskScore))}>
-                                        RISK LEVEL: {selectedPlayer.riskScore >= 70 ? "HIGH" : "LOW"}
-                                    </Badge>
-                                </div>
-                                <div className="flex items-center gap-4 text-sm text-zinc-400 font-medium">
-                                    <span className="flex items-center gap-1"><User className="w-4 h-4"/> ID: {selectedPlayer.id}</span>
-                                    <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
-                                    <span>{selectedPlayer.club}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Comparison Badge */}
-                        <div className="text-right bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Level Gap</p>
-                            <div className="flex items-center gap-3">
-                                <span className="text-lg font-bold text-zinc-400 line-through decoration-red-500">{selectedPlayer.registeredLevel}</span>
-                                <ArrowRight className="w-4 h-4 text-zinc-600"/>
-                                <span className="text-xl font-black text-cyan-400">{selectedPlayer.detectedLevel}</span>
-                            </div>
+        {/* TAB 1: EXISTING FEATURE (Yang sudah Anda buat) */}
+        <TabsContent value="CASES" className="flex-1 flex flex-col min-h-0 mt-0">
+           <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-0">
+               {/* --- LEFT: QUEUE LIST (1/3) --- */}
+                 <Card className="lg:col-span-1 bg-zinc-900 border-zinc-800 rounded-[32px] flex flex-col overflow-hidden h-full shadow-2xl">
+                    <div className="p-6 pb-4 bg-zinc-950/50 border-b border-zinc-800">
+                        <div className="relative">
+                            <Search className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500" />
+                            <input 
+                                type="text" 
+                                placeholder="Cari nama / ID..." 
+                                className="w-full bg-zinc-900 text-white font-bold placeholder:text-zinc-600 pl-10 pr-4 h-12 rounded-xl border border-zinc-800 focus:outline-none focus:border-cyan-500 transition-colors"
+                            />
                         </div>
                     </div>
+                    
+                    <ScrollArea className="flex-1 p-4">
+                        <div className="space-y-3">
+                            {VERIFICATION_QUEUE.map((player) => (
+                                <div 
+                                    key={player.id} 
+                                    onClick={() => setSelectedPlayer(player)}
+                                    className={cn(
+                                        "group relative p-4 rounded-[24px] border-2 transition-all cursor-pointer hover:bg-zinc-800",
+                                        selectedPlayer?.id === player.id ? "bg-zinc-800 border-cyan-500/50" : "bg-zinc-950 border-zinc-800 hover:border-zinc-700"
+                                    )}
+                                >
+                                    {player.riskScore >= 70 && (
+                                        <div className="absolute top-4 right-4 animate-pulse">
+                                            <AlertOctagon className="w-5 h-5 text-red-500" />
+                                        </div>
+                                    )}
 
-                    <ScrollArea className="flex-1">
-                        <div className="p-8 space-y-8">
-                            
-                            {/* 1. VIDEO EVIDENCE */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                                    <PlayCircle className="w-4 h-4 text-cyan-500"/> Video Gameplay Analysis
-                                </h3>
-                                <div className="aspect-video bg-black rounded-[24px] border border-zinc-800 flex items-center justify-center relative group overflow-hidden">
-                                    {/* Mock Video Player UI */}
-                                    <div className="absolute inset-0 bg-[url('/images/court-bg.jpg')] bg-cover opacity-30"></div>
-                                    <Button className="h-16 w-16 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 relative z-10 text-white transition-transform group-hover:scale-110">
-                                        <PlayCircle className="w-8 h-8"/>
-                                    </Button>
-                                    <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur rounded-xl p-3 flex justify-between items-center text-xs font-mono text-cyan-400 border border-cyan-500/20">
-                                        <span>Frame: 1042/Stroke</span>
-                                        <span>Footwork Speed: 24km/h (Adv)</span>
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-14 w-14 border-2 border-zinc-700">
+                                            <AvatarImage src={player.avatar} />
+                                            <AvatarFallback className="bg-zinc-900 font-black text-zinc-500">{player.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <h4 className="font-bold text-white text-base group-hover:text-cyan-400 transition-colors">{player.name}</h4>
+                                            <p className="text-xs text-zinc-500 font-medium mb-2">{player.club}</p>
+                                            <Badge variant="secondary" className="bg-zinc-900 text-zinc-300 border-zinc-700 text-[10px]">
+                                                REQ: {player.registeredLevel}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <div className="h-1.5 flex-1 bg-zinc-900 rounded-full overflow-hidden">
+                                            <div 
+                                                className={cn("h-full rounded-full", player.riskScore >= 70 ? "bg-red-500" : "bg-cyan-500")} 
+                                                style={{ width: `${player.riskScore}%` }}
+                                            ></div>
+                                        </div>
+                                        <span className={cn("text-[10px] font-black", player.riskScore >= 70 ? "text-red-500" : "text-cyan-500")}>
+                                            {player.riskScore}% Risk
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* 2. HISTORY & FINDINGS */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-3">
-                                    <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                                        <History className="w-4 h-4 text-cyan-500"/> Historical Data
-                                    </h3>
-                                    <div className="p-4 bg-zinc-900 rounded-2xl border border-zinc-800 text-sm text-zinc-300 leading-relaxed">
-                                        "{selectedPlayer.history}"
-                                        <br/><br/>
-                                        <span className="text-xs text-zinc-500 italic">*Data disinkronisasi dari SI PBSI & Turnamen Komunitas Bandung.</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-3">
-                                    <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                                        <Scale className="w-4 h-4 text-cyan-500"/> TPF Finding
-                                    </h3>
-                                    <div className="p-4 bg-red-950/10 rounded-2xl border border-red-900/20">
-                                        <ul className="space-y-2">
-                                            <li className="flex gap-2 text-sm text-red-200">
-                                                <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5"/>
-                                                Teknik smash & backhand clear menunjukkan level Advanced.
-                                            </li>
-                                            <li className="flex gap-2 text-sm text-red-200">
-                                                <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5"/>
-                                                Terdeteksi bermain di Final Djarum Sirnas 2020.
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
+                            ))}
                         </div>
                     </ScrollArea>
-
-                    {/* FOOTER ACTIONS (Sticky) */}
-                    <div className="p-6 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-md flex justify-end gap-4">
-                        <Button variant="outline" className="h-14 rounded-full border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 px-8 font-bold">
-                            Request More Info
-                        </Button>
-                        <Button className="h-14 rounded-full bg-red-600 hover:bg-red-700 text-white px-8 font-bold shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                            <FileWarning className="w-5 h-5 mr-2"/> FLAG AS FRAUD (DOWNGRADE)
-                        </Button>
-                        <Button className="h-14 rounded-full bg-green-600 hover:bg-green-700 text-white px-8 font-bold shadow-[0_0_20px_rgba(22,163,74,0.4)]">
-                            <CheckCircle2 className="w-5 h-5 mr-2"/> APPROVE LEVEL
-                        </Button>
-                    </div>
-
-                </Card>
-            ) : (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-600 bg-zinc-900/50 rounded-[32px] border border-zinc-800 border-dashed">
-                    <ScanLine className="w-20 h-20 mb-4 opacity-20 animate-pulse"/>
-                    <p className="font-bold uppercase tracking-widest text-lg">Select Player to Analyze</p>
+                 </Card>
+                 <div className="lg:col-span-2 h-full">
+                    {/* ... (Kode Card Right / Inspection Console lama) ... */}
                 </div>
-            )}
-         </div>
+           </div>
+        </TabsContent>
 
-      </div>
+        {/* TAB 2: FITUR BARU - MASS VERIFICATION */}
+        <TabsContent value="VERIFICATION" className="flex-1 mt-0">
+            <Card className="bg-zinc-950 border-zinc-800 h-full flex flex-col">
+                <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+                    <h3 className="font-bold text-zinc-400 uppercase tracking-widest text-sm">Participant Database (1,920 Total)</h3>
+                    <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="border-zinc-700">Filter: Unverified</Button>
+                        <Button size="sm" variant="outline" className="border-zinc-700">Filter: High Risk</Button>
+                    </div>
+                </div>
+                <ScrollArea className="flex-1">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-zinc-900 text-zinc-500 uppercase font-bold text-[10px] sticky top-0 z-10">
+                            <tr>
+                                <th className="p-4">Player Name</th>
+                                <th className="p-4">Category</th>
+                                <th className="p-4">Digital Footprint</th>
+                                <th className="p-4">Risk Score</th>
+                                <th className="p-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-800">
+                            {/* MOCK ROWS */}
+                            {[1,2,3,4,5].map((i) => (
+                                <tr key={i} className="hover:bg-zinc-900/50 transition-colors">
+                                    <td className="p-4 font-bold text-white">
+                                        Atlet Simulasi {i}
+                                        <div className="text-[10px] text-zinc-500 font-normal">PB Djarum • ID: P-10{i}</div>
+                                    </td>
+                                    <td className="p-4 text-zinc-300">Ganda Dewasa Pemula</td>
+                                    <td className="p-4 flex gap-2">
+                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-pink-500 bg-pink-500/10 hover:bg-pink-500 hover:text-white rounded-lg">
+                                            <span className="sr-only">IG</span>📷
+                                        </Button>
+                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white rounded-lg">
+                                            <span className="sr-only">YT</span>▶️
+                                        </Button>
+                                    </td>
+                                    <td className="p-4">
+                                        <Badge className={i === 1 ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500"}>
+                                            {i === 1 ? "95% (HIGH)" : "12% (LOW)"}
+                                        </Badge>
+                                    </td>
+                                    <td className="p-4 text-right space-x-2">
+                                        <Button size="sm" variant="destructive" className="h-8">Reject</Button>
+                                        <Button size="sm" className="h-8 bg-green-600 hover:bg-green-700 text-white">Verify</Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </ScrollArea>
+            </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+
