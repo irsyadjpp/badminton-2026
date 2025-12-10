@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -183,6 +184,10 @@ export default function DigitalMandatePage() {
       {/* --- CREATE MANDATE MODAL --- */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="bg-zinc-950 border-zinc-800 text-white rounded-[40px] max-w-4xl p-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Issue New Mandate</DialogTitle>
+            <DialogDescription>Create a new digital mandate for a division or personnel.</DialogDescription>
+          </DialogHeader>
             <div className="grid grid-cols-1 lg:grid-cols-2 h-[600px]">
                 
                 {/* LEFT: FORM INPUT */}

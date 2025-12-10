@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
@@ -272,6 +272,10 @@ export default function GateCheckInPage() {
                     scanResult.valid ? "border-green-500 shadow-[0_0_50px_rgba(34,197,94,0.4)]" :
                     scanResult.reason === 'UNPAID_BILL' ? "border-yellow-500 shadow-[0_0_50px_rgba(234,179,8,0.4)]" : "border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)]"
                 )}>
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>Scan Result: {scanResult.message}</DialogTitle>
+                        <DialogDescription>Details for ticket {scanResult.id}.</DialogDescription>
+                    </DialogHeader>
                     {/* Visual Status Header */}
                     <div className={cn(
                         "h-32 flex flex-col items-center justify-center relative overflow-hidden",

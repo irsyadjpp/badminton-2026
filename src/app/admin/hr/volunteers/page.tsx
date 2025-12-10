@@ -353,14 +353,12 @@ export default function VolunteerPage() {
       {/* --- RECRUIT MODAL --- */}
       <Dialog open={isRecruitOpen} onOpenChange={setIsRecruitOpen}>
         <DialogContent className="bg-zinc-950 border-zinc-800 text-white rounded-[40px] max-w-lg p-0 overflow-hidden shadow-2xl">
-            <div className="p-8 border-b border-zinc-800 bg-rose-950/20">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-black font-headline uppercase flex items-center gap-2 text-rose-500">
-                        <UserPlus className="w-6 h-6"/> Recruit Crew
-                    </DialogTitle>
-                    <DialogDescription>Tambahkan volunteer baru ke database.</DialogDescription>
-                </DialogHeader>
-            </div>
+            <DialogHeader className="p-8 border-b border-zinc-800 bg-rose-950/20">
+                <DialogTitle className="text-2xl font-black font-headline uppercase flex items-center gap-2 text-rose-500">
+                    <UserPlus className="w-6 h-6"/> Recruit Crew
+                </DialogTitle>
+                <DialogDescription>Tambahkan volunteer baru ke database.</DialogDescription>
+            </DialogHeader>
             
             <div className="p-8 space-y-6">
                 

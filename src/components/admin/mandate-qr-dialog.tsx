@@ -9,7 +9,7 @@ import { Download, Share2 } from "lucide-react";
 interface MandateQRDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  mandateData: { id: string; no: string; type: string };
+  mandateData: { id: string; no: string; title: string };
 }
 
 export function MandateQRDialog({ isOpen, onClose, mandateData }: MandateQRDialogProps) {
@@ -20,19 +20,10 @@ export function MandateQRDialog({ isOpen, onClose, mandateData }: MandateQRDialo
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-white text-black max-w-sm rounded-[32px] p-0 overflow-hidden border-none">
         
-        {/* FIX: Add a visually-hidden DialogHeader for accessibility */}
-        <DialogHeader className="sr-only">
-          <DialogTitle>Digital Mandate QR Code</DialogTitle>
-          <DialogDescription>
-            QR Code for mandate {mandateData.no}. Scan to verify.
-          </DialogDescription>
+        <DialogHeader className="bg-zinc-950 p-8 text-center text-white">
+          <DialogTitle className="font-black font-headline uppercase tracking-widest text-lg">DIGITAL MANDATE</DialogTitle>
+          <DialogDescription className="text-xs text-zinc-400 mt-1">{mandateData.no}</DialogDescription>
         </DialogHeader>
-
-        {/* Visual Header */}
-        <div className="bg-zinc-950 p-8 text-center text-white">
-            <h3 className="font-black font-headline uppercase tracking-widest text-lg">DIGITAL MANDATE</h3>
-            <p className="text-xs text-zinc-400 mt-1">{mandateData.no}</p>
-        </div>
 
         {/* QR Area */}
         <div className="p-8 flex flex-col items-center justify-center space-y-6 bg-white">
@@ -41,7 +32,7 @@ export function MandateQRDialog({ isOpen, onClose, mandateData }: MandateQRDialo
             </div>
             
             <div className="text-center space-y-1">
-                <p className="font-bold text-xl uppercase">{mandateData.type}</p>
+                <p className="font-bold text-xl uppercase">{mandateData.title}</p>
                 <p className="text-xs text-zinc-500 px-4">
                     Tunjukkan QR ini kepada petugas keamanan atau pihak berwenang untuk validasi tugas.
                 </p>
