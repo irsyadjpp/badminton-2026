@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -191,7 +191,6 @@ function WizardStepDocuments({ formData, setFormData }: any) {
         </p>
       </div>
       <div className="space-y-4">
-        {/* KTP */}
         <div className="space-y-2">
           <Label className="font-bold">1. Foto KTP</Label>
           <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
@@ -199,7 +198,6 @@ function WizardStepDocuments({ formData, setFormData }: any) {
             <Input name="ktp" type="file" accept="image/jpeg,image/png" onChange={handleFileChange} className="text-xs file:text-cyan-400 file:font-bold file:mr-4"/>
           </div>
         </div>
-        {/* Selfie */}
         <div className="space-y-2">
           <Label className="font-bold">2. Foto Selfie</Label>
           <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
@@ -207,7 +205,6 @@ function WizardStepDocuments({ formData, setFormData }: any) {
             <Input name="selfie" type="file" accept="image/jpeg,image/png" onChange={handleFileChange} className="text-xs file:text-cyan-400 file:font-bold file:mr-4"/>
           </div>
         </div>
-        {/* Follow IG */}
         <div className="space-y-2">
           <Label className="font-bold">3. Screenshot Bukti Follow <a href="https://instagram.com/bccbandung.id" target="_blank" className="text-cyan-400 underline">@bccbandung.id</a></Label>
           <div className="flex items-center gap-3 bg-black/40 border border-zinc-800 p-3 rounded-2xl">
@@ -236,11 +233,30 @@ function WizardStepPayment({ formData }: any) {
             <p className="font-mono text-5xl font-bold text-green-400">Rp {finalPrice.toLocaleString('id-ID')}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+             <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="outline" className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
+                        <QrCode className="w-6 h-6 mr-3"/> Bayar via QRIS
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white text-black rounded-3xl max-w-xs">
+                    <DialogHeader className="text-center">
+                        <DialogTitle className="font-headline text-xl">Scan QRIS untuk Pembayaran</DialogTitle>
+                        <DialogDescription>Gunakan aplikasi Bank atau E-Wallet Anda.</DialogDescription>
+                    </DialogHeader>
+                    <div className="p-4 bg-zinc-100 rounded-2xl">
+                        <div className="bg-white p-2 rounded-lg aspect-square flex items-center justify-center">
+                           <QrCode className="w-full h-full text-black"/>
+                        </div>
+                    </div>
+                     <div className="text-center space-y-1">
+                        <p className="text-xs text-zinc-500">Total Pembayaran</p>
+                        <p className="text-2xl font-bold font-mono">Rp {finalPrice.toLocaleString('id-ID')}</p>
+                     </div>
+                </DialogContent>
+            </Dialog>
             <Button variant="outline" className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
                 <Banknote className="w-6 h-6 mr-3"/> Transfer Bank
-            </Button>
-            <Button variant="outline" className="h-16 rounded-2xl text-lg font-bold bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
-                <CreditCard className="w-6 h-6 mr-3"/> Kartu Kredit
             </Button>
         </div>
     </div>
@@ -273,7 +289,7 @@ export function PlayerDashboardController() {
     setIsJoining(true);
     setTimeout(() => {
       setIsJoining(false);
-      if (joinCode === "TWIN-2026") {
+      if (joinCode.toUpperCase() === "TWIN-2026") {
         setHasJoinedTeam(true);
       } else {
         alert("Kode Salah! Coba: TWIN-2026");
@@ -441,4 +457,3 @@ export function PlayerDashboardController() {
   );
 }
 
-    
